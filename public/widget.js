@@ -186,13 +186,13 @@
 
   function createMount() {
     let mount = document.getElementById(mountId);
-    const nativeReviews = document.querySelector('#widget_avaliacoes');
 
     if (mount) {
       placeMount(mount);
       return mount;
     }
 
+    const nativeReviews = document.querySelector('#widget_avaliacoes');
     mount = document.createElement('div');
     mount.id = mountId;
 
@@ -210,6 +210,27 @@
     if (nativeReviews && mount.previousElementSibling !== nativeReviews) {
       nativeReviews.insertAdjacentElement('afterend', mount);
     }
+  }
+
+  function waitForNativeReviews() {
+    return new Promise((resolve) => {
+      if (document.querySelector('#widget_avaliacoes')) {
+        resolve(true);
+        return;
+      }
+
+      let tries = 0;
+      const interval = setInterval(() => {
+        tries += 1;
+        if (document.querySelector('#widget_avaliacoes')) {
+          clearInterval(interval);
+          resolve(true);
+        } else if (tries >= 16) {
+          clearInterval(interval);
+          resolve(false);
+        }
+      }, 250);
+    });
   }
 
   function render(mount, reviews, settings) {
@@ -254,11 +275,12 @@
 
   async function load() {
     ensureStyle();
-    const mount = createMount();
     try {
       const response = await fetch(`${baseUrl}/api/reviews`, { cache: 'no-store' });
       const data = await response.json();
       const settings = { ...defaultSettings, ...(data.settings || {}) };
+      await waitForNativeReviews();
+      const mount = createMount();
       render(mount, data.reviews || [], settings);
       setTimeout(() => placeMount(mount), 800);
       setTimeout(() => placeMount(mount), 2500);
