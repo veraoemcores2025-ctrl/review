@@ -236,9 +236,12 @@
       nativeReviews.style.display = 'none';
     }
 
+    const main = document.querySelector('main.page_home');
     const newsletter = document.querySelector('footer .news');
     const footer = document.querySelector('footer');
-    if (newsletter && mount.nextElementSibling !== newsletter) {
+    if (main && main.nextElementSibling !== mount) {
+      main.insertAdjacentElement('afterend', mount);
+    } else if (newsletter && mount.nextElementSibling !== newsletter) {
       newsletter.insertAdjacentElement('beforebegin', mount);
     } else if (footer && mount.nextElementSibling !== footer) {
       footer.insertAdjacentElement('beforebegin', mount);
@@ -249,7 +252,7 @@
 
   function waitForPageAnchor() {
     return new Promise((resolve) => {
-      if (document.querySelector('footer')) {
+      if (document.querySelector('main.page_home') || document.querySelector('footer')) {
         resolve(true);
         return;
       }
@@ -257,7 +260,7 @@
       let tries = 0;
       const interval = setInterval(() => {
         tries += 1;
-        if (document.querySelector('footer')) {
+        if (document.querySelector('main.page_home') || document.querySelector('footer')) {
           clearInterval(interval);
           resolve(true);
         } else if (tries >= 16) {
