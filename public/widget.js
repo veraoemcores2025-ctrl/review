@@ -220,14 +220,22 @@
 
   function createNativeMount() {
     const nativeReviews = document.querySelector('#widget_avaliacoes');
-    if (!nativeReviews) return createMount();
+    if (nativeReviews) nativeReviews.style.display = 'none';
 
-    const looseMount = document.getElementById(mountId);
-    if (looseMount && looseMount !== nativeReviews) looseMount.remove();
+    let mount = document.getElementById(mountId);
+    if (!mount) {
+      mount = document.createElement('div');
+      mount.id = mountId;
+    }
 
-    nativeReviews.style.display = 'block';
-    nativeReviews.innerHTML = '';
-    return nativeReviews;
+    const footer = document.querySelector('footer');
+    if (footer && mount.nextElementSibling !== footer) {
+      footer.insertAdjacentElement('beforebegin', mount);
+    } else if (!mount.parentElement) {
+      document.body.appendChild(mount);
+    }
+
+    return mount;
   }
 
   function placeMount(mount) {
