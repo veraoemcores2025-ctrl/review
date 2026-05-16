@@ -41,7 +41,20 @@
         --vr-bg: #fff7f7;
         font-family: inherit;
         background: linear-gradient(180deg, #fff 0%, var(--vr-bg) 100%);
+        clear: both;
+        isolation: isolate;
+        margin-top: 56px;
         padding: 48px 14px;
+        position: relative;
+        z-index: 2;
+      }
+
+      #verao-reviews-widget {
+        clear: both;
+        display: block;
+        float: none;
+        position: relative;
+        width: 100%;
       }
 
       .vr-widget__inner {
