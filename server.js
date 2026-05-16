@@ -16,6 +16,8 @@ const AUTH_SECRET = process.env.AUTH_SECRET || 'troque-este-segredo-antes-de-hos
 const RUNTIME_DIR = process.env.VERCEL ? '/tmp/verao-reviews' : __dirname;
 const DATA_DIR = process.env.VERCEL ? path.join(RUNTIME_DIR, 'data') : path.join(__dirname, 'data');
 const UPLOAD_DIR = process.env.VERCEL ? path.join(RUNTIME_DIR, 'uploads') : path.join(__dirname, 'public', 'uploads');
+const BUNDLED_DB_FILE = path.join(__dirname, 'data', 'reviews.json');
+const BUNDLED_UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
 const DB_FILE = path.join(DATA_DIR, 'reviews.json');
 const DEFAULT_SETTINGS = {
   title: 'Clientes usando Verão em Cores',
@@ -32,7 +34,10 @@ await mkdir(DATA_DIR, { recursive: true });
 await mkdir(UPLOAD_DIR, { recursive: true });
 
 if (!existsSync(DB_FILE)) {
-  await writeFile(DB_FILE, JSON.stringify({ reviews: [], settings: DEFAULT_SETTINGS }, null, 2));
+  const initialDb = process.env.VERCEL && existsSync(BUNDLED_DB_FILE)
+    ? await readFile(BUNDLED_DB_FILE, 'utf8')
+    : JSON.stringify({ reviews: [], settings: DEFAULT_SETTINGS }, null, 2);
+  await writeFile(DB_FILE, initialDb);
 }
 
 const storage = multer.diskStorage({
@@ -68,7 +73,14 @@ app.use((req, res, next) => {
   if (req.path === '/admin.html' && !isAuthed(req)) return res.redirect('/login.html');
   next();
 });
+app.get('/widget.js', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(path.join(__dirname, 'public', 'widget.js'));
+});
 app.use('/uploads', express.static(UPLOAD_DIR));
+app.use('/uploads', express.static(BUNDLED_UPLOAD_DIR));
 app.use(express.static(path.join(__dirname, 'public')));
 
 async function readDb() {
