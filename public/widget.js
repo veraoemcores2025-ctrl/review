@@ -189,9 +189,7 @@
     const nativeReviews = document.querySelector('#widget_avaliacoes');
 
     if (mount) {
-      if (nativeReviews && mount.previousElementSibling !== nativeReviews) {
-        nativeReviews.insertAdjacentElement('afterend', mount);
-      }
+      placeMount(mount);
       return mount;
     }
 
@@ -207,7 +205,16 @@
     return mount;
   }
 
+  function placeMount(mount) {
+    const nativeReviews = document.querySelector('#widget_avaliacoes');
+    if (nativeReviews && mount.previousElementSibling !== nativeReviews) {
+      nativeReviews.insertAdjacentElement('afterend', mount);
+    }
+  }
+
   function render(mount, reviews, settings) {
+    placeMount(mount);
+
     if (!reviews.length) {
       mount.innerHTML = '';
       return;
@@ -253,6 +260,8 @@
       const data = await response.json();
       const settings = { ...defaultSettings, ...(data.settings || {}) };
       render(mount, data.reviews || [], settings);
+      setTimeout(() => placeMount(mount), 800);
+      setTimeout(() => placeMount(mount), 2500);
     } catch (error) {
       console.warn('[Verão Reviews] Não foi possível carregar avaliações.', error);
     }
