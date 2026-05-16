@@ -197,59 +197,48 @@
     document.head.appendChild(style);
   }
 
-  function createMount() {
+  function createMount(settings = defaultSettings) {
     let mount = document.getElementById(mountId);
 
     if (mount) {
-      placeMount(mount);
+      placeMount(mount, settings);
       return mount;
     }
 
-    const nativeReviews = document.querySelector('#widget_avaliacoes');
     mount = document.createElement('div');
     mount.id = mountId;
-
-    if (nativeReviews) {
-      nativeReviews.insertAdjacentElement('afterend', mount);
-    } else {
-      document.body.appendChild(mount);
-    }
+    document.body.appendChild(mount);
+    placeMount(mount, settings);
 
     return mount;
   }
 
   function createNativeMount() {
-    const nativeReviews = document.querySelector('#widget_avaliacoes');
-    if (nativeReviews) nativeReviews.style.display = 'none';
+    return createMount({ ...defaultSettings, hideNativeHomeReviews: true });
+  }
 
-    let mount = document.getElementById(mountId);
-    if (!mount) {
-      mount = document.createElement('div');
-      mount.id = mountId;
+  function placeMount(mount, settings = defaultSettings) {
+    if (!mount) return;
+
+    const nativeReviews = document.querySelector('#widget_avaliacoes');
+    if (settings.hideNativeHomeReviews && nativeReviews) {
+      nativeReviews.style.display = 'none';
     }
 
+    const newsletter = document.querySelector('footer .news');
     const footer = document.querySelector('footer');
-    if (footer && mount.nextElementSibling !== footer) {
+    if (newsletter && mount.nextElementSibling !== newsletter) {
+      newsletter.insertAdjacentElement('beforebegin', mount);
+    } else if (footer && mount.nextElementSibling !== footer) {
       footer.insertAdjacentElement('beforebegin', mount);
     } else if (!mount.parentElement) {
       document.body.appendChild(mount);
     }
-
-    return mount;
   }
 
-  function placeMount(mount) {
-    if (mount && mount.id === 'widget_avaliacoes') return;
-
-    const nativeReviews = document.querySelector('#widget_avaliacoes');
-    if (nativeReviews && mount.previousElementSibling !== nativeReviews) {
-      nativeReviews.insertAdjacentElement('afterend', mount);
-    }
-  }
-
-  function waitForNativeReviews() {
+  function waitForPageAnchor() {
     return new Promise((resolve) => {
-      if (document.querySelector('#widget_avaliacoes')) {
+      if (document.querySelector('footer')) {
         resolve(true);
         return;
       }
@@ -257,7 +246,7 @@
       let tries = 0;
       const interval = setInterval(() => {
         tries += 1;
-        if (document.querySelector('#widget_avaliacoes')) {
+        if (document.querySelector('footer')) {
           clearInterval(interval);
           resolve(true);
         } else if (tries >= 16) {
@@ -269,7 +258,7 @@
   }
 
   function render(mount, reviews, settings) {
-    placeMount(mount);
+    placeMount(mount, settings);
 
     if (!reviews.length) {
       mount.innerHTML = '';
@@ -309,11 +298,11 @@
       const response = await fetch(`${baseUrl}/api/reviews`, { cache: 'no-store' });
       const data = await response.json();
       const settings = { ...defaultSettings, ...(data.settings || {}) };
-      await waitForNativeReviews();
-      const mount = settings.hideNativeHomeReviews ? createNativeMount() : createMount();
+      await waitForPageAnchor();
+      const mount = settings.hideNativeHomeReviews ? createNativeMount() : createMount(settings);
       render(mount, data.reviews || [], settings);
-      setTimeout(() => placeMount(mount), 800);
-      setTimeout(() => placeMount(mount), 2500);
+      setTimeout(() => placeMount(mount, settings), 800);
+      setTimeout(() => placeMount(mount, settings), 2500);
     } catch (error) {
       console.warn('[Verão Reviews] Não foi possível carregar avaliações.', error);
     }
