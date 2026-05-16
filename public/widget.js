@@ -126,7 +126,8 @@
       .vr-widget__grid {
         display: grid;
         gap: 18px;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(230px, 282px));
+        justify-content: center;
       }
 
       .vr-card {
