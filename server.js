@@ -90,7 +90,14 @@ app.use('/uploads', express.static(BUNDLED_UPLOAD_DIR));
 app.use(express.static(path.join(__dirname, 'public')));
 
 async function readDb() {
-  const db = JSON.parse(await readFile(DB_FILE, 'utf8'));
+  let db = JSON.parse(await readFile(DB_FILE, 'utf8'));
+  if (process.env.VERCEL && !db.reviews?.length && existsSync(BUNDLED_DB_FILE)) {
+    const bundledDb = JSON.parse(await readFile(BUNDLED_DB_FILE, 'utf8'));
+    if (bundledDb.reviews?.length) {
+      db = bundledDb;
+      await writeFile(DB_FILE, JSON.stringify(db, null, 2));
+    }
+  }
   db.reviews ||= [];
   db.settings = { ...DEFAULT_SETTINGS, ...(db.settings || {}) };
   return db;
