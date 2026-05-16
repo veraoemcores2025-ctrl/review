@@ -2,6 +2,7 @@
   const currentScript = document.currentScript;
   const baseUrl = currentScript ? new URL(currentScript.src).origin : window.location.origin;
   const mountId = 'verao-reviews-widget';
+  const safeMountId = 'verao-reviews-widget-safe';
   const existingStyleId = 'verao-reviews-widget-style';
   const defaultSettings = {
     title: 'Clientes usando Verão em Cores',
@@ -55,7 +56,8 @@
         z-index: auto !important;
       }
 
-      #verao-reviews-widget {
+      #verao-reviews-widget,
+      #verao-reviews-widget-safe {
         clear: both !important;
         display: block !important;
         float: none !important;
@@ -66,6 +68,10 @@
         visibility: visible !important;
         width: 100% !important;
         z-index: auto !important;
+      }
+
+      #verao-reviews-widget:empty {
+        display: none !important;
       }
 
       .vr-widget__inner {
@@ -208,8 +214,13 @@
     document.head.appendChild(style);
   }
 
+  function removeLegacyMounts() {
+    document.querySelectorAll(`#${mountId}`).forEach((item) => item.remove());
+  }
+
   function createMount(settings = defaultSettings) {
-    let mount = document.getElementById(mountId);
+    removeLegacyMounts();
+    let mount = document.getElementById(safeMountId);
 
     if (mount) {
       placeMount(mount, settings);
@@ -217,7 +228,7 @@
     }
 
     mount = document.createElement('div');
-    mount.id = mountId;
+    mount.id = safeMountId;
     document.body.appendChild(mount);
     placeMount(mount, settings);
 
