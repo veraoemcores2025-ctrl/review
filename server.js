@@ -38,6 +38,12 @@ if (!existsSync(DB_FILE)) {
     ? await readFile(BUNDLED_DB_FILE, 'utf8')
     : JSON.stringify({ reviews: [], settings: DEFAULT_SETTINGS }, null, 2);
   await writeFile(DB_FILE, initialDb);
+} else if (process.env.VERCEL && existsSync(BUNDLED_DB_FILE)) {
+  const runtimeDb = JSON.parse(await readFile(DB_FILE, 'utf8'));
+  const bundledDb = JSON.parse(await readFile(BUNDLED_DB_FILE, 'utf8'));
+  if (!runtimeDb.reviews?.length && bundledDb.reviews?.length) {
+    await writeFile(DB_FILE, JSON.stringify(bundledDb, null, 2));
+  }
 }
 
 const storage = multer.diskStorage({
