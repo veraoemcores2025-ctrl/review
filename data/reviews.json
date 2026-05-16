@@ -1,0 +1,15 @@
+{
+  "reviews": [
+    {
+      "id": "fd3e7d1b-57d6-45d7-b77e-9439b694cf54",
+      "customerName": "Ju Lopes",
+      "productName": "Conjunto Biquíni Tropical Vibes",
+      "rating": 5,
+      "comment": "Amei o caimento, ficou lindo no corpo.",
+      "verifiedLabel": "cliente verificada",
+      "imagePath": "/uploads/1778872788560-b9b8b306-918f-45a3-92b1-b32a1b9e0c6e.webp",
+      "active": true,
+      "createdAt": "2026-05-15T19:19:48.574Z"
+    }
+  ]
+}
