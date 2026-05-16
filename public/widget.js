@@ -56,6 +56,11 @@
         z-index: auto !important;
       }
 
+      .vr-widget,
+      .vr-widget * {
+        box-sizing: border-box !important;
+      }
+
       #verao-reviews-widget,
       #verao-reviews-widget-safe {
         clear: both !important;
@@ -75,11 +80,19 @@
       }
 
       .vr-widget__inner {
+        clear: both !important;
+        display: block !important;
+        float: none !important;
         margin: 0 auto;
         max-width: 1180px;
+        position: static !important;
+        width: 100% !important;
       }
 
       .vr-widget__head {
+        clear: both !important;
+        display: block !important;
+        float: none !important;
         margin: 0 auto 24px;
         max-width: 760px;
         opacity: 1 !important;
@@ -88,6 +101,7 @@
         top: auto !important;
         transform: none !important;
         visibility: visible !important;
+        width: 100% !important;
         z-index: auto !important;
       }
 
@@ -124,10 +138,16 @@
       }
 
       .vr-widget__grid {
-        display: grid;
+        clear: both !important;
+        display: grid !important;
+        float: none !important;
         gap: 18px;
         grid-template-columns: repeat(auto-fit, minmax(230px, 282px));
-        justify-content: center;
+        justify-content: center !important;
+        margin: 0 auto !important;
+        max-width: 1180px !important;
+        position: static !important;
+        width: 100% !important;
       }
 
       .vr-card {
@@ -135,7 +155,12 @@
         border: 1px solid var(--vr-line);
         border-radius: 14px;
         box-shadow: 0 14px 34px rgba(176, 86, 91, .12);
+        float: none !important;
+        max-width: 282px !important;
+        min-width: 0 !important;
         overflow: hidden;
+        position: static !important;
+        width: 100% !important;
       }
 
       .vr-card__image {
@@ -214,16 +239,11 @@
         }
 
         .vr-widget__grid {
-          display: flex;
-          gap: 12px;
-          overflow-x: auto;
-          padding-bottom: 10px;
-          scroll-snap-type: x mandatory;
+          grid-template-columns: minmax(0, min(100%, 300px));
         }
 
         .vr-card {
-          min-width: 74%;
-          scroll-snap-align: start;
+          max-width: 300px !important;
         }
       }
     `;
