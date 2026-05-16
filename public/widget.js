@@ -218,7 +218,21 @@
     return mount;
   }
 
+  function createNativeMount() {
+    const nativeReviews = document.querySelector('#widget_avaliacoes');
+    if (!nativeReviews) return createMount();
+
+    const looseMount = document.getElementById(mountId);
+    if (looseMount && looseMount !== nativeReviews) looseMount.remove();
+
+    nativeReviews.style.display = 'block';
+    nativeReviews.innerHTML = '';
+    return nativeReviews;
+  }
+
   function placeMount(mount) {
+    if (mount && mount.id === 'widget_avaliacoes') return;
+
     const nativeReviews = document.querySelector('#widget_avaliacoes');
     if (nativeReviews && mount.previousElementSibling !== nativeReviews) {
       nativeReviews.insertAdjacentElement('afterend', mount);
@@ -252,11 +266,6 @@
     if (!reviews.length) {
       mount.innerHTML = '';
       return;
-    }
-
-    if (settings.hideNativeHomeReviews) {
-      const nativeReviews = document.querySelector('#widget_avaliacoes');
-      if (nativeReviews) nativeReviews.style.display = 'none';
     }
 
     const cards = reviews.slice(0, settings.maxReviews).map((review) => `
@@ -293,7 +302,7 @@
       const data = await response.json();
       const settings = { ...defaultSettings, ...(data.settings || {}) };
       await waitForNativeReviews();
-      const mount = createMount();
+      const mount = settings.hideNativeHomeReviews ? createNativeMount() : createMount();
       render(mount, data.reviews || [], settings);
       setTimeout(() => placeMount(mount), 800);
       setTimeout(() => placeMount(mount), 2500);
