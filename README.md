@@ -1,6 +1,6 @@
-# Verão Reviews
+# Verao Reviews
 
-Painel simples para cadastrar avaliações com fotos e exibir um widget na wBuy.
+Painel simples para cadastrar avaliacoes com fotos e exibir um widget na wBuy.
 
 ## Rodar localmente
 
@@ -15,13 +15,13 @@ Abra:
 http://localhost:4173/admin.html
 ```
 
-Senha padrão local:
+Senha padrao local:
 
 ```text
 verao123
 ```
 
-Para hospedar, defina uma senha própria:
+Para hospedar, defina uma senha propria:
 
 ```bash
 ADMIN_PASSWORD="sua-senha-forte" npm start
@@ -29,51 +29,59 @@ ADMIN_PASSWORD="sua-senha-forte" npm start
 
 ## Instalar o widget na wBuy
 
-Quando a plataforma estiver hospedada em um domínio público, coloque este código em:
+Quando a plataforma estiver hospedada em um dominio publico, coloque este codigo em:
 
 ```text
-wBuy > Configurações > Scripts por página > Novo
-Posição: Fim do Body
-Página: Página principal
+wBuy > Configuracoes > Scripts por pagina > Novo
+Posicao: Fim do Body
+Pagina: Pagina principal
 ```
 
-Código:
+Codigo:
 
 ```html
 <div id="verao-reviews-widget"></div>
-<script src="https://SEU-DOMINIO/widget.js" async></script>
+<script src="https://SEU-DOMINIO/widget.js" defer></script>
 ```
 
-Troque `https://SEU-DOMINIO` pelo domínio onde este app estiver hospedado.
+Troque `https://SEU-DOMINIO` pelo dominio onde este app estiver hospedado.
 
 ## Como usar
 
 1. Abra o painel.
-2. Cadastre nome da cliente, produto, nota, comentário e foto.
+2. Cadastre nome da cliente, produto, nota, comentario e foto.
 3. Marque "Mostrar na loja".
 4. Salve.
 
-O widget puxa automaticamente as avaliações ativas.
+O widget puxa automaticamente as avaliacoes ativas.
 
-No painel também dá para configurar título, subtítulo, cor principal, link do botão, quantidade de avaliações e se o bloco nativo de avaliações da home deve ser escondido.
+No painel tambem da para configurar titulo, subtitulo, cor principal, link do botao, quantidade de avaliacoes e se o bloco nativo de avaliacoes da home deve ser escondido.
 
-## Deploy na Vercel
+## Supabase
 
-Este projeto já tem `vercel.json`.
+Rode o arquivo `supabase.sql` no SQL Editor do Supabase para criar as tabelas e o bucket de fotos.
 
-No painel da Vercel, configure as variáveis:
+No painel da Vercel, configure as variaveis:
 
 ```text
 ADMIN_PASSWORD=sua-senha-forte
 AUTH_SECRET=um-segredo-grande-aleatorio
+SUPABASE_URL=https://jztilgywniqypucyzshy.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
+SUPABASE_BUCKET=review-photos
 ```
 
-Observação: a Vercel não mantém uploads e JSON local de forma permanente. Para produção, conecte um banco/storage como Supabase ou Vercel Blob. Do jeito atual, serve para testar o painel e o widget online.
+Sem as variaveis do Supabase o app continua usando o JSON local, mas na Vercel esse armazenamento nao e permanente.
+
+## Deploy na Vercel
+
+Este projeto ja tem `vercel.json`. Depois de configurar o Supabase e as variaveis de ambiente, basta publicar o projeto pela Vercel.
 
 ## Arquivos principais
 
 - `server.js`: API, upload e armazenamento.
 - `public/admin.html`: painel de cadastro.
 - `public/widget.js`: widget que aparece na loja.
-- `data/reviews.json`: banco simples em JSON.
-- `public/uploads/`: fotos enviadas.
+- `data/reviews.json`: fallback local em JSON.
+- `public/uploads/`: fallback local das fotos.
+- `supabase.sql`: estrutura do banco e bucket no Supabase.

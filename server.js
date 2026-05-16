@@ -1,8 +1,9 @@
 import express from 'express';
 import multer from 'multer';
+import { createClient } from '@supabase/supabase-js';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -13,6 +14,9 @@ const app = express();
 const PORT = process.env.PORT || 4173;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'verao123';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'troque-este-segredo-antes-de-hospedar';
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_BUCKET = process.env.SUPABASE_BUCKET || 'review-photos';
 const RUNTIME_DIR = process.env.VERCEL ? '/tmp/verao-reviews' : __dirname;
 const DATA_DIR = process.env.VERCEL ? path.join(RUNTIME_DIR, 'data') : path.join(__dirname, 'data');
 const UPLOAD_DIR = process.env.VERCEL ? path.join(RUNTIME_DIR, 'uploads') : path.join(__dirname, 'public', 'uploads');
@@ -29,6 +33,11 @@ const DEFAULT_SETTINGS = {
   maxReviews: 8,
   hideNativeHomeReviews: false
 };
+const supabase = SUPABASE_URL && SUPABASE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  })
+  : null;
 
 await mkdir(DATA_DIR, { recursive: true });
 await mkdir(UPLOAD_DIR, { recursive: true });
@@ -90,6 +99,22 @@ app.use('/uploads', express.static(BUNDLED_UPLOAD_DIR));
 app.use(express.static(path.join(__dirname, 'public')));
 
 async function readDb() {
+  if (supabase) {
+    const [{ data: reviews, error: reviewsError }, { data: settings, error: settingsError }] = await Promise.all([
+      supabase.from('reviews').select('*').order('created_at', { ascending: false }),
+      supabase.from('review_settings').select('*').eq('id', 1).maybeSingle()
+    ]);
+
+    if (!reviewsError && !settingsError) {
+      return {
+        reviews: (reviews || []).map(dbReviewToApp),
+        settings: { ...DEFAULT_SETTINGS, ...dbSettingsToApp(settings) }
+      };
+    }
+
+    console.warn('[Verão Reviews] Falha ao ler Supabase, usando arquivo local.', reviewsError || settingsError);
+  }
+
   let db = JSON.parse(await readFile(DB_FILE, 'utf8'));
   if (process.env.VERCEL && !db.reviews?.length && existsSync(BUNDLED_DB_FILE)) {
     const bundledDb = JSON.parse(await readFile(BUNDLED_DB_FILE, 'utf8'));
@@ -104,12 +129,95 @@ async function readDb() {
 }
 
 async function writeDb(db) {
+  if (supabase) {
+    const settings = db.settings || DEFAULT_SETTINGS;
+    const { error: settingsError } = await supabase
+      .from('review_settings')
+      .upsert(appSettingsToDb(settings), { onConflict: 'id' });
+
+    if (settingsError) {
+      console.warn('[Verão Reviews] Falha ao salvar configurações no Supabase, usando arquivo local.', settingsError);
+    } else {
+      const rows = (db.reviews || []).map(appReviewToDb);
+      if (rows.length) {
+        const { error: deleteError } = await supabase.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        const { error: insertError } = await supabase.from('reviews').insert(rows);
+        if (!deleteError && !insertError) return;
+        console.warn('[Verão Reviews] Falha ao salvar avaliações no Supabase, usando arquivo local.', deleteError || insertError);
+      } else {
+        const { error: deleteError } = await supabase.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        if (!deleteError) return;
+        console.warn('[Verão Reviews] Falha ao limpar avaliações no Supabase, usando arquivo local.', deleteError);
+      }
+    }
+  }
+
   const tmp = `${DB_FILE}.tmp`;
   await writeFile(tmp, JSON.stringify(db, null, 2));
   await rename(tmp, DB_FILE);
 }
 
+function dbReviewToApp(review) {
+  return {
+    id: review.id,
+    customerName: review.customer_name,
+    productName: review.product_name,
+    rating: review.rating,
+    comment: review.comment,
+    verifiedLabel: review.verified_label,
+    imagePath: review.image_url,
+    active: review.active,
+    createdAt: review.created_at
+  };
+}
+
+function appReviewToDb(review) {
+  return {
+    id: review.id,
+    customer_name: review.customerName,
+    product_name: review.productName,
+    rating: review.rating,
+    comment: review.comment,
+    verified_label: review.verifiedLabel,
+    image_url: review.imagePath,
+    active: review.active,
+    created_at: review.createdAt
+  };
+}
+
+function dbSettingsToApp(settings) {
+  if (!settings) return {};
+  return {
+    title: settings.title,
+    kicker: settings.kicker,
+    subtitle: settings.subtitle,
+    buttonText: settings.button_text,
+    buttonUrl: settings.button_url,
+    brandColor: settings.brand_color,
+    maxReviews: settings.max_reviews,
+    hideNativeHomeReviews: settings.hide_native_home_reviews
+  };
+}
+
+function appSettingsToDb(settings) {
+  return {
+    id: 1,
+    title: settings.title,
+    kicker: settings.kicker,
+    subtitle: settings.subtitle,
+    button_text: settings.buttonText,
+    button_url: settings.buttonUrl,
+    brand_color: settings.brandColor,
+    max_reviews: settings.maxReviews,
+    hide_native_home_reviews: settings.hideNativeHomeReviews
+  };
+}
+
 function publicReview(review, req) {
+  if (/^https?:\/\//i.test(String(review.imagePath || ''))) {
+    return { ...review, imageUrl: review.imagePath };
+  }
+
   const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
   const proto = process.env.VERCEL ? 'https' : (forwardedProto || req.protocol);
   const origin = `${proto}://${req.get('host')}`;
@@ -117,6 +225,34 @@ function publicReview(review, req) {
     ...review,
     imageUrl: review.imagePath ? `${origin}${review.imagePath}` : ''
   };
+}
+
+async function uploadReviewImage(file) {
+  if (!file) return '';
+
+  if (!supabase) {
+    return `/uploads/${file.filename}`;
+  }
+
+  const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+  const storagePath = `reviews/${Date.now()}-${randomUUID()}${ext}`;
+  const buffer = await readFile(file.path);
+  const { error } = await supabase.storage
+    .from(SUPABASE_BUCKET)
+    .upload(storagePath, buffer, {
+      contentType: file.mimetype,
+      upsert: false
+    });
+
+  if (error) {
+    console.warn('[Verão Reviews] Falha ao enviar foto ao Supabase Storage, usando arquivo local.', error);
+    return `/uploads/${file.filename}`;
+  }
+
+  await unlink(file.path).catch(() => {});
+
+  const { data } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(storagePath);
+  return data.publicUrl;
 }
 
 function limitText(value, max) {
@@ -240,6 +376,7 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
 
 app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req, res) => {
   const db = await readDb();
+  const imagePath = await uploadReviewImage(req.file);
   const review = {
     id: randomUUID(),
     customerName: limitText(req.body.customerName, 80),
@@ -247,7 +384,7 @@ app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req,
     rating: Math.max(1, Math.min(5, Number(req.body.rating || 5))),
     comment: limitText(req.body.comment, 500),
     verifiedLabel: limitText(req.body.verifiedLabel || 'cliente verificada', 80),
-    imagePath: req.file ? `/uploads/${req.file.filename}` : '',
+    imagePath,
     active: req.body.active !== 'off',
     createdAt: new Date().toISOString()
   };
