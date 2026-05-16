@@ -284,12 +284,9 @@
     }
 
     const main = document.querySelector('main.page_home');
-    const newsletter = document.querySelector('footer .news');
     const footer = document.querySelector('footer');
     if (main && main.nextElementSibling !== mount) {
       main.insertAdjacentElement('afterend', mount);
-    } else if (newsletter && mount.nextElementSibling !== newsletter) {
-      newsletter.insertAdjacentElement('beforebegin', mount);
     } else if (footer && mount.nextElementSibling !== footer) {
       footer.insertAdjacentElement('beforebegin', mount);
     } else if (!mount.parentElement) {
