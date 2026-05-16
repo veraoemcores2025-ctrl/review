@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Entrar | Verão Reviews</title>
+    <link rel="stylesheet" href="/admin.css">
+  </head>
+  <body>
+    <main class="login-shell">
+      <section class="login-card">
+        <p class="eyebrow">Verão Reviews</p>
+        <h1>Entrar no painel</h1>
+        <p class="sub">Use a senha do painel para cadastrar e moderar avaliações.</p>
+
+        <form id="loginForm" class="login-form">
+          <label>
+            Senha
+            <input name="password" type="password" required autofocus placeholder="Digite a senha">
+          </label>
+          <button class="button" type="submit">Entrar</button>
+          <p id="loginMessage" class="message" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const form = document.querySelector('#loginForm');
+      const message = document.querySelector('#loginMessage');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        message.textContent = 'Entrando...';
+        const response = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: form.password.value })
+        });
+
+        if (!response.ok) {
+          message.textContent = 'Senha incorreta.';
+          return;
+        }
+
+        window.location.href = '/admin.html';
+      });
+    </script>
+  </body>
+</html>

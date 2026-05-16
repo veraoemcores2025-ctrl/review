@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Painel | Verão Reviews</title>
+    <link rel="stylesheet" href="/admin.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Verão Reviews</p>
+          <h1>Avaliações</h1>
+        </div>
+        <div class="top-actions">
+          <a class="ghost" href="/">Instalação</a>
+          <button class="ghost" id="logoutButton" type="button">Sair</button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Configuração do widget</h2>
+          <button class="ghost" id="saveSettingsButton" form="settingsForm" type="submit">Salvar configuração</button>
+        </div>
+        <form id="settingsForm" class="form">
+          <label>
+            Título
+            <input name="title" required>
+          </label>
+
+          <label>
+            Chamada pequena
+            <input name="kicker" required>
+          </label>
+
+          <label class="wide">
+            Subtítulo
+            <input name="subtitle" required>
+          </label>
+
+          <label>
+            Texto do botão
+            <input name="buttonText" required>
+          </label>
+
+          <label>
+            Link do botão
+            <input name="buttonUrl" required>
+          </label>
+
+          <label>
+            Cor principal
+            <input name="brandColor" type="color" value="#b0565b">
+          </label>
+
+          <label>
+            Quantidade máxima
+            <input name="maxReviews" type="number" min="1" max="24" value="8">
+          </label>
+
+          <label class="check wide">
+            <input name="hideNativeHomeReviews" type="checkbox">
+            Esconder bloco nativo de avaliações da home
+          </label>
+
+          <p id="settingsMessage" class="message wide" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Nova avaliação</h2>
+        <form id="reviewForm" class="form">
+          <label>
+            Nome da cliente
+            <input name="customerName" required placeholder="Ex: Ju Lopes">
+          </label>
+
+          <label>
+            Produto comprado
+            <input name="productName" required placeholder="Ex: Conjunto Biquíni Tropical Vibes">
+          </label>
+
+          <label>
+            Nota
+            <select name="rating">
+              <option value="5">5 estrelas</option>
+              <option value="4">4 estrelas</option>
+              <option value="3">3 estrelas</option>
+              <option value="2">2 estrelas</option>
+              <option value="1">1 estrela</option>
+            </select>
+          </label>
+
+          <label>
+            Selo
+            <input name="verifiedLabel" value="cliente verificada">
+          </label>
+
+          <label class="wide">
+            Comentário
+            <textarea name="comment" required rows="4" placeholder="Ex: Amei o caimento, ficou lindo no corpo."></textarea>
+          </label>
+
+          <label class="wide">
+            Foto da cliente/produto
+            <input name="photo" type="file" accept="image/*" required>
+          </label>
+
+          <label class="check">
+            <input name="active" type="checkbox" checked>
+            Mostrar na loja
+          </label>
+
+          <button class="button" type="submit">Salvar avaliação</button>
+          <p id="formMessage" class="message" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Avaliações cadastradas</h2>
+          <button class="ghost" id="refreshButton" type="button">Atualizar</button>
+        </div>
+        <div id="reviewsList" class="reviews-list"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Preview do widget</h2>
+        <div id="verao-reviews-widget"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/admin.js"></script>
+    <script src="/widget.js"></script>
+  </body>
+</html>
