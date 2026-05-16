@@ -82,7 +82,13 @@
       .vr-widget__head {
         margin: 0 auto 24px;
         max-width: 760px;
+        opacity: 1 !important;
+        position: static !important;
         text-align: center;
+        top: auto !important;
+        transform: none !important;
+        visibility: visible !important;
+        z-index: auto !important;
       }
 
       .vr-widget__kicker {
@@ -91,6 +97,9 @@
         font-size: 13px;
         font-weight: 800;
         margin-bottom: 8px;
+        position: static !important;
+        top: auto !important;
+        transform: none !important;
         text-transform: uppercase;
       }
 
@@ -100,12 +109,18 @@
         font-weight: 800;
         line-height: 1.2;
         margin: 0;
+        position: static !important;
+        top: auto !important;
+        transform: none !important;
       }
 
       .vr-widget__subtitle {
         color: var(--vr-muted);
         font-size: 15px;
         margin: 10px 0 0;
+        position: static !important;
+        top: auto !important;
+        transform: none !important;
       }
 
       .vr-widget__grid {
