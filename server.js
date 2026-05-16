@@ -13,8 +13,9 @@ const app = express();
 const PORT = process.env.PORT || 4173;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'verao123';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'troque-este-segredo-antes-de-hospedar';
-const DATA_DIR = path.join(__dirname, 'data');
-const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
+const RUNTIME_DIR = process.env.VERCEL ? '/tmp/verao-reviews' : __dirname;
+const DATA_DIR = process.env.VERCEL ? path.join(RUNTIME_DIR, 'data') : path.join(__dirname, 'data');
+const UPLOAD_DIR = process.env.VERCEL ? path.join(RUNTIME_DIR, 'uploads') : path.join(__dirname, 'public', 'uploads');
 const DB_FILE = path.join(DATA_DIR, 'reviews.json');
 const DEFAULT_SETTINGS = {
   title: 'Clientes usando Verão em Cores',
@@ -67,6 +68,7 @@ app.use((req, res, next) => {
   if (req.path === '/admin.html' && !isAuthed(req)) return res.redirect('/login.html');
   next();
 });
+app.use('/uploads', express.static(UPLOAD_DIR));
 app.use(express.static(path.join(__dirname, 'public')));
 
 async function readDb() {
