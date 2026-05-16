@@ -153,6 +153,12 @@ label {
   font-weight: 800;
 }
 
+label small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
 input,
 select,
 textarea {

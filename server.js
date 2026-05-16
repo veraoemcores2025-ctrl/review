@@ -85,11 +85,17 @@ async function writeDb(db) {
 }
 
 function publicReview(review, req) {
-  const origin = `${req.protocol}://${req.get('host')}`;
+  const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const proto = process.env.VERCEL ? 'https' : (forwardedProto || req.protocol);
+  const origin = `${proto}://${req.get('host')}`;
   return {
     ...review,
     imageUrl: review.imagePath ? `${origin}${review.imagePath}` : ''
   };
+}
+
+function limitText(value, max) {
+  return String(value || '').trim().slice(0, max);
 }
 
 function parseCookies(req) {
@@ -211,11 +217,11 @@ app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req,
   const db = await readDb();
   const review = {
     id: randomUUID(),
-    customerName: String(req.body.customerName || '').trim(),
-    productName: String(req.body.productName || '').trim(),
+    customerName: limitText(req.body.customerName, 80),
+    productName: limitText(req.body.productName, 120),
     rating: Math.max(1, Math.min(5, Number(req.body.rating || 5))),
-    comment: String(req.body.comment || '').trim(),
-    verifiedLabel: String(req.body.verifiedLabel || 'cliente verificada').trim(),
+    comment: limitText(req.body.comment, 500),
+    verifiedLabel: limitText(req.body.verifiedLabel || 'cliente verificada', 80),
     imagePath: req.file ? `/uploads/${req.file.filename}` : '',
     active: req.body.active !== 'off',
     createdAt: new Date().toISOString()
@@ -236,11 +242,11 @@ app.patch('/api/admin/reviews/:id', requireAdmin, async (req, res) => {
   if (!review) return res.status(404).json({ error: 'Avaliação não encontrada.' });
 
   if ('active' in req.body) review.active = Boolean(req.body.active);
-  if ('customerName' in req.body) review.customerName = String(req.body.customerName).trim();
-  if ('productName' in req.body) review.productName = String(req.body.productName).trim();
-  if ('comment' in req.body) review.comment = String(req.body.comment).trim();
+  if ('customerName' in req.body) review.customerName = limitText(req.body.customerName, 80);
+  if ('productName' in req.body) review.productName = limitText(req.body.productName, 120);
+  if ('comment' in req.body) review.comment = limitText(req.body.comment, 500);
   if ('rating' in req.body) review.rating = Math.max(1, Math.min(5, Number(req.body.rating)));
-  if ('verifiedLabel' in req.body) review.verifiedLabel = String(req.body.verifiedLabel).trim();
+  if ('verifiedLabel' in req.body) review.verifiedLabel = limitText(req.body.verifiedLabel, 80);
 
   await writeDb(db);
   res.json({ review: publicReview(review, req) });

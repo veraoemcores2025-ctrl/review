@@ -113,16 +113,24 @@
 
       .vr-card__comment {
         color: #333;
+        display: -webkit-box;
         font-size: 13px;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
         line-height: 1.5;
         margin: 0 0 12px;
+        overflow: hidden;
       }
 
       .vr-card__product {
         color: var(--vr-brand);
+        display: -webkit-box;
         font-size: 12px;
         font-weight: 800;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         margin-bottom: 6px;
+        overflow: hidden;
       }
 
       .vr-card__customer {
@@ -178,9 +186,15 @@
 
   function createMount() {
     let mount = document.getElementById(mountId);
-    if (mount) return mount;
-
     const nativeReviews = document.querySelector('#widget_avaliacoes');
+
+    if (mount) {
+      if (nativeReviews && mount.previousElementSibling !== nativeReviews) {
+        nativeReviews.insertAdjacentElement('afterend', mount);
+      }
+      return mount;
+    }
+
     mount = document.createElement('div');
     mount.id = mountId;
 
