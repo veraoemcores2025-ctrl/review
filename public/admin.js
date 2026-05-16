@@ -85,6 +85,9 @@ async function loadSettings() {
   settingsForm.buttonText.value = settings.buttonText;
   settingsForm.buttonUrl.value = settings.buttonUrl;
   settingsForm.brandColor.value = settings.brandColor;
+  settingsForm.backgroundColor.value = settings.backgroundColor || '#fff7f7';
+  settingsForm.textColor.value = settings.textColor || '#222222';
+  settingsForm.displayMode.value = settings.displayMode || 'grid';
   settingsForm.maxReviews.value = settings.maxReviews;
   settingsForm.hideNativeHomeReviews.checked = Boolean(settings.hideNativeHomeReviews);
 }
@@ -120,6 +123,7 @@ settingsForm.addEventListener('submit', async (event) => {
   const payload = Object.fromEntries(formData.entries());
   payload.hideNativeHomeReviews = settingsForm.hideNativeHomeReviews.checked;
   payload.maxReviews = Number(payload.maxReviews);
+  payload.displayMode = settingsForm.displayMode.value;
 
   const response = await fetchAdmin('/api/admin/settings', {
     method: 'PUT',

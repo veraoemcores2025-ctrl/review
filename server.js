@@ -30,7 +30,10 @@ const DEFAULT_SETTINGS = {
   buttonText: 'Ver todas as avaliações',
   buttonUrl: '/m/clientes-usando-verao-em-cores/',
   brandColor: '#b0565b',
+  backgroundColor: '#fff7f7',
+  textColor: '#222222',
   maxReviews: 8,
+  displayMode: 'grid',
   hideNativeHomeReviews: false
 };
 const supabase = SUPABASE_URL && SUPABASE_KEY
@@ -194,7 +197,10 @@ function dbSettingsToApp(settings) {
     buttonText: settings.button_text,
     buttonUrl: settings.button_url,
     brandColor: settings.brand_color,
+    backgroundColor: settings.background_color,
+    textColor: settings.text_color,
     maxReviews: settings.max_reviews,
+    displayMode: settings.display_mode,
     hideNativeHomeReviews: settings.hide_native_home_reviews
   };
 }
@@ -208,7 +214,10 @@ function appSettingsToDb(settings) {
     button_text: settings.buttonText,
     button_url: settings.buttonUrl,
     brand_color: settings.brandColor,
+    background_color: settings.backgroundColor,
+    text_color: settings.textColor,
     max_reviews: settings.maxReviews,
+    display_mode: settings.displayMode,
     hide_native_home_reviews: settings.hideNativeHomeReviews
   };
 }
@@ -306,7 +315,10 @@ function publicSettings(settings) {
     buttonText: settings.buttonText,
     buttonUrl: settings.buttonUrl,
     brandColor: settings.brandColor,
+    backgroundColor: settings.backgroundColor,
+    textColor: settings.textColor,
     maxReviews: settings.maxReviews,
+    displayMode: settings.displayMode,
     hideNativeHomeReviews: settings.hideNativeHomeReviews
   };
 }
@@ -367,7 +379,10 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     buttonText: String(req.body.buttonText || DEFAULT_SETTINGS.buttonText).trim(),
     buttonUrl: String(req.body.buttonUrl || DEFAULT_SETTINGS.buttonUrl).trim(),
     brandColor: /^#[0-9a-f]{6}$/i.test(String(req.body.brandColor || '')) ? req.body.brandColor : DEFAULT_SETTINGS.brandColor,
+    backgroundColor: /^#[0-9a-f]{6}$/i.test(String(req.body.backgroundColor || '')) ? req.body.backgroundColor : DEFAULT_SETTINGS.backgroundColor,
+    textColor: /^#[0-9a-f]{6}$/i.test(String(req.body.textColor || '')) ? req.body.textColor : DEFAULT_SETTINGS.textColor,
     maxReviews: Math.max(1, Math.min(24, Number(req.body.maxReviews || DEFAULT_SETTINGS.maxReviews))),
+    displayMode: ['grid', 'carousel'].includes(String(req.body.displayMode)) ? req.body.displayMode : DEFAULT_SETTINGS.displayMode,
     hideNativeHomeReviews: Boolean(req.body.hideNativeHomeReviews)
   };
   await writeDb(db);

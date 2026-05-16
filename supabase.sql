@@ -6,10 +6,22 @@ create table if not exists public.review_settings (
   button_text text not null default 'Ver todas as avaliações',
   button_url text not null default '/m/clientes-usando-verao-em-cores/',
   brand_color text not null default '#b0565b',
+  background_color text not null default '#fff7f7',
+  text_color text not null default '#222222',
   max_reviews integer not null default 8,
+  display_mode text not null default 'grid' check (display_mode in ('grid', 'carousel')),
   hide_native_home_reviews boolean not null default false,
   updated_at timestamptz not null default now()
 );
+
+alter table public.review_settings
+  add column if not exists background_color text not null default '#fff7f7';
+
+alter table public.review_settings
+  add column if not exists text_color text not null default '#222222';
+
+alter table public.review_settings
+  add column if not exists display_mode text not null default 'grid';
 
 create table if not exists public.reviews (
   id uuid primary key,

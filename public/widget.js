@@ -11,7 +11,10 @@
     buttonText: 'Ver todas as avaliações',
     buttonUrl: '/m/clientes-usando-verao-em-cores/',
     brandColor: '#b0565b',
+    backgroundColor: '#fff7f7',
+    textColor: '#222222',
     maxReviews: 8,
+    displayMode: 'grid',
     hideNativeHomeReviews: false
   };
 
@@ -150,6 +153,51 @@
         width: 100% !important;
       }
 
+      .vr-widget[data-mode="carousel"] .vr-widget__grid {
+        display: flex !important;
+        gap: 16px;
+        justify-content: flex-start !important;
+        max-width: 100% !important;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding: 4px 2px 14px;
+        scroll-behavior: smooth;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+      }
+
+      .vr-widget[data-mode="carousel"] .vr-card {
+        flex: 0 0 min(282px, 82vw);
+        scroll-snap-align: start;
+      }
+
+      .vr-widget__controls {
+        display: none;
+        gap: 10px;
+        justify-content: center;
+        margin: 18px 0 0;
+      }
+
+      .vr-widget[data-mode="carousel"] .vr-widget__controls {
+        display: flex;
+      }
+
+      .vr-widget__nav {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--vr-line);
+        border-radius: 999px;
+        color: var(--vr-brand);
+        cursor: pointer;
+        display: inline-flex;
+        font-size: 22px;
+        font-weight: 800;
+        height: 42px;
+        justify-content: center;
+        line-height: 1;
+        width: 42px;
+      }
+
       .vr-card {
         background: #fff;
         border: 1px solid var(--vr-line);
@@ -240,6 +288,10 @@
 
         .vr-widget__grid {
           grid-template-columns: minmax(0, min(100%, 300px));
+        }
+
+        .vr-widget[data-mode="carousel"] .vr-widget__grid {
+          grid-template-columns: none;
         }
 
         .vr-card {
@@ -335,6 +387,8 @@
       </article>
     `).join('');
 
+    const mode = settings.displayMode === 'carousel' ? 'carousel' : 'grid';
+
     mount.innerHTML = `
       <section class="vr-widget" style="--vr-brand: ${escapeHtml(settings.brandColor)};" aria-label="Avaliações com fotos de clientes">
         <div class="vr-widget__inner">
@@ -348,6 +402,29 @@
         </div>
       </section>
     `;
+
+    const widget = mount.querySelector('.vr-widget');
+    widget?.setAttribute('data-mode', mode);
+    widget?.style.setProperty('--vr-bg', settings.backgroundColor || defaultSettings.backgroundColor);
+    widget?.style.setProperty('--vr-text', settings.textColor || defaultSettings.textColor);
+
+    const track = mount.querySelector('.vr-widget__grid');
+    track?.insertAdjacentHTML('afterend', `
+      <div class="vr-widget__controls" aria-label="Controle do carrossel">
+        <button class="vr-widget__nav" type="button" data-vr-prev aria-label="Avaliação anterior">‹</button>
+        <button class="vr-widget__nav" type="button" data-vr-next aria-label="Próxima avaliação">›</button>
+      </div>
+    `);
+
+    const prev = mount.querySelector('[data-vr-prev]');
+    const next = mount.querySelector('[data-vr-next]');
+    const scrollByCard = (direction) => {
+      const card = track?.querySelector('.vr-card');
+      if (!track || !card) return;
+      track.scrollBy({ left: direction * (card.getBoundingClientRect().width + 16), behavior: 'smooth' });
+    };
+    prev?.addEventListener('click', () => scrollByCard(-1));
+    next?.addEventListener('click', () => scrollByCard(1));
   }
 
   async function load() {
