@@ -41,20 +41,31 @@
         --vr-bg: #fff7f7;
         font-family: inherit;
         background: linear-gradient(180deg, #fff 0%, var(--vr-bg) 100%);
-        clear: both;
+        clear: both !important;
+        display: block !important;
+        float: none !important;
         isolation: isolate;
-        margin-top: 56px;
+        margin: 56px 0 0 !important;
+        opacity: 1 !important;
         padding: 48px 14px;
-        position: relative;
-        z-index: 2;
+        position: static !important;
+        transform: none !important;
+        visibility: visible !important;
+        width: 100% !important;
+        z-index: auto !important;
       }
 
       #verao-reviews-widget {
-        clear: both;
-        display: block;
-        float: none;
-        position: relative;
-        width: 100%;
+        clear: both !important;
+        display: block !important;
+        float: none !important;
+        margin: 0 !important;
+        opacity: 1 !important;
+        position: static !important;
+        transform: none !important;
+        visibility: visible !important;
+        width: 100% !important;
+        z-index: auto !important;
       }
 
       .vr-widget__inner {
