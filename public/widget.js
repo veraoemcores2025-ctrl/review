@@ -12,6 +12,7 @@
     buttonUrl: '/m/clientes-usando-verao-em-cores/',
     brandColor: '#b0565b',
     backgroundColor: '#fff7f7',
+    headerBackgroundColor: '#f4f6f5',
     textColor: '#222222',
     maxReviews: 8,
     displayMode: 'grid',
@@ -43,6 +44,7 @@
         --vr-muted: #666;
         --vr-line: #f0dddd;
         --vr-bg: #fff7f7;
+        --vr-head-bg: #f4f6f5;
         font-family: inherit;
         background: linear-gradient(180deg, #fff 0%, var(--vr-bg) 100%);
         clear: both !important;
@@ -93,12 +95,14 @@
       }
 
       .vr-widget__head {
+        background: var(--vr-head-bg);
         clear: both !important;
         display: block !important;
         float: none !important;
-        margin: 0 auto 24px;
-        max-width: 760px;
+        margin: 0 auto 32px;
+        max-width: 950px;
         opacity: 1 !important;
+        padding: 8px 18px;
         position: static !important;
         text-align: center;
         top: auto !important;
@@ -406,6 +410,7 @@
     const widget = mount.querySelector('.vr-widget');
     widget?.setAttribute('data-mode', mode);
     widget?.style.setProperty('--vr-bg', settings.backgroundColor || defaultSettings.backgroundColor);
+    widget?.style.setProperty('--vr-head-bg', settings.headerBackgroundColor || defaultSettings.headerBackgroundColor);
     widget?.style.setProperty('--vr-text', settings.textColor || defaultSettings.textColor);
 
     const track = mount.querySelector('.vr-widget__grid');

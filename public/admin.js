@@ -86,6 +86,7 @@ async function loadSettings() {
   settingsForm.buttonUrl.value = settings.buttonUrl;
   settingsForm.brandColor.value = settings.brandColor;
   settingsForm.backgroundColor.value = settings.backgroundColor || '#fff7f7';
+  settingsForm.headerBackgroundColor.value = settings.headerBackgroundColor || '#f4f6f5';
   settingsForm.textColor.value = settings.textColor || '#222222';
   settingsForm.displayMode.value = settings.displayMode || 'grid';
   settingsForm.maxReviews.value = settings.maxReviews;

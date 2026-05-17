@@ -7,6 +7,7 @@ create table if not exists public.review_settings (
   button_url text not null default '/m/clientes-usando-verao-em-cores/',
   brand_color text not null default '#b0565b',
   background_color text not null default '#fff7f7',
+  header_background_color text not null default '#f4f6f5',
   text_color text not null default '#222222',
   max_reviews integer not null default 8,
   display_mode text not null default 'grid' check (display_mode in ('grid', 'carousel')),
@@ -16,6 +17,9 @@ create table if not exists public.review_settings (
 
 alter table public.review_settings
   add column if not exists background_color text not null default '#fff7f7';
+
+alter table public.review_settings
+  add column if not exists header_background_color text not null default '#f4f6f5';
 
 alter table public.review_settings
   add column if not exists text_color text not null default '#222222';
