@@ -718,17 +718,45 @@
         }
 
         .vr-social-proof {
-          bottom: 12px;
-          grid-template-columns: 46px 1fr auto;
-          left: 10px;
-          max-width: calc(100vw - 20px);
-          padding: 9px;
-          width: calc(100vw - 20px);
+          bottom: 10px;
+          border-radius: 12px;
+          grid-template-columns: 42px 1fr auto;
+          left: 12px;
+          max-width: calc(100vw - 24px);
+          padding: 8px;
+          width: calc(100vw - 24px);
         }
 
         .vr-social-proof img {
           border-radius: 10px;
-          width: 46px;
+          width: 42px;
+        }
+
+        .vr-social-proof__kicker {
+          font-size: 10px;
+          margin-bottom: 1px;
+        }
+
+        .vr-social-proof__title {
+          font-size: 12px;
+          -webkit-line-clamp: 1;
+        }
+
+        .vr-social-proof__text {
+          font-size: 11px;
+          -webkit-line-clamp: 1;
+          margin-top: 2px;
+        }
+
+        .vr-social-proof__stars {
+          font-size: 11px;
+          margin-top: 2px;
+        }
+
+        .vr-social-proof__close {
+          font-size: 16px;
+          height: 24px;
+          width: 24px;
         }
       }
     `;
@@ -932,6 +960,7 @@
   function renderSocialProofToast(reviews, settings) {
     const isPlatformPage = ['/admin.html', '/login.html', '/avaliar.html'].includes(window.location.pathname);
     if (isPlatformPage) return;
+    if (!settings.productContext && window.innerWidth <= 640) return;
     if (!reviews.length || socialProofDismissed()) return;
 
     let toast = document.getElementById(socialProofId);
