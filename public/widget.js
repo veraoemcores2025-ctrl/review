@@ -24,7 +24,13 @@
     subtitleColor: '#4b5563',
     maxReviews: 8,
     displayMode: 'grid',
-    hideNativeHomeReviews: false
+    hideNativeHomeReviews: false,
+    socialProofEnabled: true,
+    socialProofHome: true,
+    socialProofProduct: true,
+    socialProofLabel: 'Cliente real aprovou',
+    socialProofDelaySeconds: 6,
+    socialProofIntervalSeconds: 26
   };
 
   function escapeHtml(value) {
@@ -951,16 +957,28 @@
     const toast = document.getElementById(socialProofId);
     if (toast) toast.classList.remove('is-visible');
     if (canUseSessionStorage()) window.sessionStorage.setItem(socialProofDismissKey, '1');
+    clearSocialProofTimers();
+  }
+
+  function clearSocialProofTimers() {
     if (socialProofTimeout) clearTimeout(socialProofTimeout);
     if (socialProofTimer) clearInterval(socialProofTimer);
     socialProofTimeout = null;
     socialProofTimer = null;
   }
 
+  function removeSocialProofToast() {
+    clearSocialProofTimers();
+    document.getElementById(socialProofId)?.remove();
+  }
+
   function renderSocialProofToast(reviews, settings) {
     const isPlatformPage = ['/admin.html', '/login.html', '/avaliar.html'].includes(window.location.pathname);
-    if (isPlatformPage) return;
-    if (!reviews.length || socialProofDismissed()) return;
+    if (isPlatformPage) return removeSocialProofToast();
+    if (settings.socialProofEnabled === false) return removeSocialProofToast();
+    if (settings.productContext && settings.socialProofProduct === false) return removeSocialProofToast();
+    if (!settings.productContext && settings.socialProofHome === false) return removeSocialProofToast();
+    if (!reviews.length || socialProofDismissed()) return removeSocialProofToast();
 
     let toast = document.getElementById(socialProofId);
     if (!toast) {
@@ -979,7 +997,7 @@
       toast.innerHTML = `
         <img src="${escapeHtml(review.imageUrl)}" alt="">
         <div>
-          <p class="vr-social-proof__kicker">Cliente real aprovou</p>
+          <p class="vr-social-proof__kicker">${escapeHtml(settings.socialProofLabel || defaultSettings.socialProofLabel)}</p>
           <p class="vr-social-proof__title">${escapeHtml(review.customerName)} avaliou ${escapeHtml(review.productName)}</p>
           <p class="vr-social-proof__text">${escapeHtml(review.comment)}</p>
           <div class="vr-social-proof__stars">${stars(review.rating)}</div>
@@ -993,8 +1011,10 @@
 
     if (socialProofTimeout) clearTimeout(socialProofTimeout);
     if (socialProofTimer) clearInterval(socialProofTimer);
-    socialProofTimeout = window.setTimeout(showReview, 6500);
-    socialProofTimer = window.setInterval(showReview, 26000);
+    const delay = Math.max(2, Math.min(60, Number(settings.socialProofDelaySeconds || defaultSettings.socialProofDelaySeconds))) * 1000;
+    const interval = Math.max(10, Math.min(180, Number(settings.socialProofIntervalSeconds || defaultSettings.socialProofIntervalSeconds))) * 1000;
+    socialProofTimeout = window.setTimeout(showReview, delay);
+    socialProofTimer = window.setInterval(showReview, interval);
   }
 
   function render(mount, reviews, settings) {

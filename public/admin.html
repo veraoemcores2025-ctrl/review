@@ -131,6 +131,43 @@
             Esconder bloco nativo de avalia&ccedil;&otilde;es da home
           </label>
 
+          <div class="form-divider wide">
+            <p class="section-kicker">Popup de prova social</p>
+            <h3>Notifica&ccedil;&atilde;o de vendas/avalia&ccedil;&otilde;es</h3>
+          </div>
+
+          <label class="check">
+            <input name="socialProofEnabled" type="checkbox">
+            Ativar popup
+          </label>
+
+          <label class="check">
+            <input name="socialProofHome" type="checkbox">
+            Mostrar na home
+          </label>
+
+          <label class="check">
+            <input name="socialProofProduct" type="checkbox">
+            Mostrar no produto
+          </label>
+
+          <label>
+            Texto pequeno do popup
+            <input name="socialProofLabel" maxlength="60" placeholder="Cliente real aprovou">
+          </label>
+
+          <label>
+            Aparecer depois de
+            <input name="socialProofDelaySeconds" type="number" min="2" max="60" value="6">
+            <small>Tempo em segundos antes do primeiro popup.</small>
+          </label>
+
+          <label>
+            Repetir a cada
+            <input name="socialProofIntervalSeconds" type="number" min="10" max="180" value="26">
+            <small>Intervalo em segundos entre popups.</small>
+          </label>
+
           <p id="settingsMessage" class="message wide" aria-live="polite"></p>
         </form>
       </section>

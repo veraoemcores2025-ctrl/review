@@ -180,6 +180,12 @@ async function loadSettings() {
   settingsForm.displayMode.value = settings.displayMode || 'grid';
   settingsForm.maxReviews.value = settings.maxReviews;
   settingsForm.hideNativeHomeReviews.checked = Boolean(settings.hideNativeHomeReviews);
+  settingsForm.socialProofEnabled.checked = settings.socialProofEnabled !== false;
+  settingsForm.socialProofHome.checked = settings.socialProofHome !== false;
+  settingsForm.socialProofProduct.checked = settings.socialProofProduct !== false;
+  settingsForm.socialProofLabel.value = settings.socialProofLabel || 'Cliente real aprovou';
+  settingsForm.socialProofDelaySeconds.value = settings.socialProofDelaySeconds || 6;
+  settingsForm.socialProofIntervalSeconds.value = settings.socialProofIntervalSeconds || 26;
 }
 
 form.addEventListener('submit', async (event) => {
@@ -212,8 +218,13 @@ settingsForm.addEventListener('submit', async (event) => {
   const formData = new FormData(settingsForm);
   const payload = Object.fromEntries(formData.entries());
   payload.hideNativeHomeReviews = settingsForm.hideNativeHomeReviews.checked;
+  payload.socialProofEnabled = settingsForm.socialProofEnabled.checked;
+  payload.socialProofHome = settingsForm.socialProofHome.checked;
+  payload.socialProofProduct = settingsForm.socialProofProduct.checked;
   payload.maxReviews = Number(payload.maxReviews);
   payload.displayMode = settingsForm.displayMode.value;
+  payload.socialProofDelaySeconds = Number(payload.socialProofDelaySeconds);
+  payload.socialProofIntervalSeconds = Number(payload.socialProofIntervalSeconds);
 
   const response = await fetchAdmin('/api/admin/settings', {
     method: 'PUT',

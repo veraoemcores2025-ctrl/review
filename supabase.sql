@@ -15,6 +15,12 @@ create table if not exists public.review_settings (
   max_reviews integer not null default 8,
   display_mode text not null default 'grid' check (display_mode in ('grid', 'carousel')),
   hide_native_home_reviews boolean not null default false,
+  social_proof_enabled boolean not null default true,
+  social_proof_home boolean not null default true,
+  social_proof_product boolean not null default true,
+  social_proof_label text not null default 'Cliente real aprovou',
+  social_proof_delay_seconds integer not null default 6,
+  social_proof_interval_seconds integer not null default 26,
   updated_at timestamptz not null default now()
 );
 
@@ -38,6 +44,24 @@ alter table public.review_settings
 
 alter table public.review_settings
   add column if not exists display_mode text not null default 'grid';
+
+alter table public.review_settings
+  add column if not exists social_proof_enabled boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists social_proof_home boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists social_proof_product boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists social_proof_label text not null default 'Cliente real aprovou';
+
+alter table public.review_settings
+  add column if not exists social_proof_delay_seconds integer not null default 6;
+
+alter table public.review_settings
+  add column if not exists social_proof_interval_seconds integer not null default 26;
 
 create table if not exists public.reviews (
   id uuid primary key,

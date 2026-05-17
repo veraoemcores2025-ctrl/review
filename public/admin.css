@@ -271,6 +271,16 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.form-divider {
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+  padding-top: 18px;
+}
+
+.form-divider h3 {
+  font-size: 18px;
+}
+
 .check {
   align-items: center;
   display: flex;

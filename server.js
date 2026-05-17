@@ -38,7 +38,13 @@ const DEFAULT_SETTINGS = {
   subtitleColor: '#4b5563',
   maxReviews: 8,
   displayMode: 'grid',
-  hideNativeHomeReviews: false
+  hideNativeHomeReviews: false,
+  socialProofEnabled: true,
+  socialProofHome: true,
+  socialProofProduct: true,
+  socialProofLabel: 'Cliente real aprovou',
+  socialProofDelaySeconds: 6,
+  socialProofIntervalSeconds: 26
 };
 const supabase = SUPABASE_URL && SUPABASE_KEY
   ? createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -224,7 +230,13 @@ function dbSettingsToApp(settings) {
     subtitleColor: settings.subtitle_color,
     maxReviews: settings.max_reviews,
     displayMode: settings.display_mode,
-    hideNativeHomeReviews: settings.hide_native_home_reviews
+    hideNativeHomeReviews: settings.hide_native_home_reviews,
+    socialProofEnabled: settings.social_proof_enabled ?? DEFAULT_SETTINGS.socialProofEnabled,
+    socialProofHome: settings.social_proof_home ?? DEFAULT_SETTINGS.socialProofHome,
+    socialProofProduct: settings.social_proof_product ?? DEFAULT_SETTINGS.socialProofProduct,
+    socialProofLabel: settings.social_proof_label ?? DEFAULT_SETTINGS.socialProofLabel,
+    socialProofDelaySeconds: settings.social_proof_delay_seconds ?? DEFAULT_SETTINGS.socialProofDelaySeconds,
+    socialProofIntervalSeconds: settings.social_proof_interval_seconds ?? DEFAULT_SETTINGS.socialProofIntervalSeconds
   };
 }
 
@@ -245,7 +257,13 @@ function appSettingsToDb(settings) {
     subtitle_color: settings.subtitleColor,
     max_reviews: settings.maxReviews,
     display_mode: settings.displayMode,
-    hide_native_home_reviews: settings.hideNativeHomeReviews
+    hide_native_home_reviews: settings.hideNativeHomeReviews,
+    social_proof_enabled: settings.socialProofEnabled,
+    social_proof_home: settings.socialProofHome,
+    social_proof_product: settings.socialProofProduct,
+    social_proof_label: settings.socialProofLabel,
+    social_proof_delay_seconds: settings.socialProofDelaySeconds,
+    social_proof_interval_seconds: settings.socialProofIntervalSeconds
   };
 }
 
@@ -366,7 +384,13 @@ function publicSettings(settings) {
     subtitleColor: settings.subtitleColor,
     maxReviews: settings.maxReviews,
     displayMode: settings.displayMode,
-    hideNativeHomeReviews: settings.hideNativeHomeReviews
+    hideNativeHomeReviews: settings.hideNativeHomeReviews,
+    socialProofEnabled: settings.socialProofEnabled,
+    socialProofHome: settings.socialProofHome,
+    socialProofProduct: settings.socialProofProduct,
+    socialProofLabel: settings.socialProofLabel,
+    socialProofDelaySeconds: settings.socialProofDelaySeconds,
+    socialProofIntervalSeconds: settings.socialProofIntervalSeconds
   };
 }
 
@@ -436,7 +460,13 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     subtitleColor: /^#[0-9a-f]{6}$/i.test(String(req.body.subtitleColor || '')) ? req.body.subtitleColor : DEFAULT_SETTINGS.subtitleColor,
     maxReviews: Math.max(1, Math.min(24, Number(req.body.maxReviews || DEFAULT_SETTINGS.maxReviews))),
     displayMode: ['grid', 'carousel'].includes(String(req.body.displayMode)) ? req.body.displayMode : DEFAULT_SETTINGS.displayMode,
-    hideNativeHomeReviews: Boolean(req.body.hideNativeHomeReviews)
+    hideNativeHomeReviews: Boolean(req.body.hideNativeHomeReviews),
+    socialProofEnabled: Boolean(req.body.socialProofEnabled),
+    socialProofHome: Boolean(req.body.socialProofHome),
+    socialProofProduct: Boolean(req.body.socialProofProduct),
+    socialProofLabel: limitText(req.body.socialProofLabel || DEFAULT_SETTINGS.socialProofLabel, 60),
+    socialProofDelaySeconds: Math.max(2, Math.min(60, Number(req.body.socialProofDelaySeconds || DEFAULT_SETTINGS.socialProofDelaySeconds))),
+    socialProofIntervalSeconds: Math.max(10, Math.min(180, Number(req.body.socialProofIntervalSeconds || DEFAULT_SETTINGS.socialProofIntervalSeconds)))
   };
   await writeDb(db);
   res.json({ settings: db.settings });
