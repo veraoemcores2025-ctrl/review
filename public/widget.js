@@ -14,6 +14,9 @@
     backgroundColor: '#fff7f7',
     headerBackgroundColor: '#f4f6f5',
     textColor: '#222222',
+    kickerColor: '#b0565b',
+    titleColor: '#111827',
+    subtitleColor: '#4b5563',
     maxReviews: 8,
     displayMode: 'grid',
     hideNativeHomeReviews: false
@@ -45,6 +48,9 @@
         --vr-line: #f0dddd;
         --vr-bg: #fff7f7;
         --vr-head-bg: #f4f6f5;
+        --vr-kicker: #b0565b;
+        --vr-title: #111827;
+        --vr-subtitle: #4b5563;
         font-family: inherit;
         background: var(--vr-bg);
         clear: both !important;
@@ -113,7 +119,7 @@
       }
 
       .vr-widget__kicker {
-        color: var(--vr-brand);
+        color: var(--vr-kicker);
         display: block;
         font-size: 13px;
         font-weight: 800;
@@ -125,7 +131,7 @@
       }
 
       .vr-widget h2 {
-        color: var(--vr-text);
+        color: var(--vr-title);
         font-size: 28px;
         font-weight: 800;
         line-height: 1.2;
@@ -136,7 +142,7 @@
       }
 
       .vr-widget__subtitle {
-        color: var(--vr-muted);
+        color: var(--vr-subtitle);
         font-size: 15px;
         margin: 10px 0 0;
         position: static !important;
@@ -412,6 +418,9 @@
     widget?.style.setProperty('--vr-bg', settings.backgroundColor || defaultSettings.backgroundColor);
     widget?.style.setProperty('--vr-head-bg', settings.headerBackgroundColor || defaultSettings.headerBackgroundColor);
     widget?.style.setProperty('--vr-text', settings.textColor || defaultSettings.textColor);
+    widget?.style.setProperty('--vr-kicker', settings.kickerColor || defaultSettings.kickerColor);
+    widget?.style.setProperty('--vr-title', settings.titleColor || defaultSettings.titleColor);
+    widget?.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
 
     const track = mount.querySelector('.vr-widget__grid');
     track?.insertAdjacentHTML('afterend', `

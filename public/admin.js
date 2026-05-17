@@ -82,6 +82,9 @@ async function loadSettings() {
   settingsForm.title.value = settings.title;
   settingsForm.kicker.value = settings.kicker;
   settingsForm.subtitle.value = settings.subtitle;
+  settingsForm.kickerColor.value = settings.kickerColor || '#b0565b';
+  settingsForm.titleColor.value = settings.titleColor || '#111827';
+  settingsForm.subtitleColor.value = settings.subtitleColor || '#4b5563';
   settingsForm.buttonText.value = settings.buttonText;
   settingsForm.buttonUrl.value = settings.buttonUrl;
   settingsForm.brandColor.value = settings.brandColor;

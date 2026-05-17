@@ -9,6 +9,9 @@ create table if not exists public.review_settings (
   background_color text not null default '#fff7f7',
   header_background_color text not null default '#f4f6f5',
   text_color text not null default '#222222',
+  kicker_color text not null default '#b0565b',
+  title_color text not null default '#111827',
+  subtitle_color text not null default '#4b5563',
   max_reviews integer not null default 8,
   display_mode text not null default 'grid' check (display_mode in ('grid', 'carousel')),
   hide_native_home_reviews boolean not null default false,
@@ -23,6 +26,15 @@ alter table public.review_settings
 
 alter table public.review_settings
   add column if not exists text_color text not null default '#222222';
+
+alter table public.review_settings
+  add column if not exists kicker_color text not null default '#b0565b';
+
+alter table public.review_settings
+  add column if not exists title_color text not null default '#111827';
+
+alter table public.review_settings
+  add column if not exists subtitle_color text not null default '#4b5563';
 
 alter table public.review_settings
   add column if not exists display_mode text not null default 'grid';

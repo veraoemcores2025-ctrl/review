@@ -33,6 +33,9 @@ const DEFAULT_SETTINGS = {
   backgroundColor: '#fff7f7',
   headerBackgroundColor: '#f4f6f5',
   textColor: '#222222',
+  kickerColor: '#b0565b',
+  titleColor: '#111827',
+  subtitleColor: '#4b5563',
   maxReviews: 8,
   displayMode: 'grid',
   hideNativeHomeReviews: false
@@ -210,6 +213,9 @@ function dbSettingsToApp(settings) {
     backgroundColor: settings.background_color,
     headerBackgroundColor: settings.header_background_color,
     textColor: settings.text_color,
+    kickerColor: settings.kicker_color,
+    titleColor: settings.title_color,
+    subtitleColor: settings.subtitle_color,
     maxReviews: settings.max_reviews,
     displayMode: settings.display_mode,
     hideNativeHomeReviews: settings.hide_native_home_reviews
@@ -228,6 +234,9 @@ function appSettingsToDb(settings) {
     background_color: settings.backgroundColor,
     header_background_color: settings.headerBackgroundColor,
     text_color: settings.textColor,
+    kicker_color: settings.kickerColor,
+    title_color: settings.titleColor,
+    subtitle_color: settings.subtitleColor,
     max_reviews: settings.maxReviews,
     display_mode: settings.displayMode,
     hide_native_home_reviews: settings.hideNativeHomeReviews
@@ -330,6 +339,9 @@ function publicSettings(settings) {
     backgroundColor: settings.backgroundColor,
     headerBackgroundColor: settings.headerBackgroundColor,
     textColor: settings.textColor,
+    kickerColor: settings.kickerColor,
+    titleColor: settings.titleColor,
+    subtitleColor: settings.subtitleColor,
     maxReviews: settings.maxReviews,
     displayMode: settings.displayMode,
     hideNativeHomeReviews: settings.hideNativeHomeReviews
@@ -395,6 +407,9 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     backgroundColor: /^#[0-9a-f]{6}$/i.test(String(req.body.backgroundColor || '')) ? req.body.backgroundColor : DEFAULT_SETTINGS.backgroundColor,
     headerBackgroundColor: /^#[0-9a-f]{6}$/i.test(String(req.body.headerBackgroundColor || '')) ? req.body.headerBackgroundColor : DEFAULT_SETTINGS.headerBackgroundColor,
     textColor: /^#[0-9a-f]{6}$/i.test(String(req.body.textColor || '')) ? req.body.textColor : DEFAULT_SETTINGS.textColor,
+    kickerColor: /^#[0-9a-f]{6}$/i.test(String(req.body.kickerColor || '')) ? req.body.kickerColor : DEFAULT_SETTINGS.kickerColor,
+    titleColor: /^#[0-9a-f]{6}$/i.test(String(req.body.titleColor || '')) ? req.body.titleColor : DEFAULT_SETTINGS.titleColor,
+    subtitleColor: /^#[0-9a-f]{6}$/i.test(String(req.body.subtitleColor || '')) ? req.body.subtitleColor : DEFAULT_SETTINGS.subtitleColor,
     maxReviews: Math.max(1, Math.min(24, Number(req.body.maxReviews || DEFAULT_SETTINGS.maxReviews))),
     displayMode: ['grid', 'carousel'].includes(String(req.body.displayMode)) ? req.body.displayMode : DEFAULT_SETTINGS.displayMode,
     hideNativeHomeReviews: Boolean(req.body.hideNativeHomeReviews)
