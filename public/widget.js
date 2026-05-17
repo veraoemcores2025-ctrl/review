@@ -306,6 +306,16 @@
         scroll-snap-align: start;
       }
 
+      .vr-widget[data-product="true"][data-count="1"] .vr-widget__grid {
+        display: flex !important;
+        justify-content: center !important;
+        max-width: 360px !important;
+      }
+
+      .vr-widget[data-product="true"][data-count="1"] .vr-card {
+        max-width: 360px !important;
+      }
+
       .vr-widget__controls {
         display: none;
         gap: 10px;
@@ -349,6 +359,7 @@
       .vr-card__image {
         aspect-ratio: 1 / 1.16;
         background: #f6eeee;
+        cursor: pointer;
         display: block;
         object-fit: cover;
         width: 100%;
@@ -798,7 +809,7 @@
 
     const cards = reviews.slice(0, settings.maxReviews).map((review) => `
       <article class="vr-card">
-        <img class="vr-card__image" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+        <img class="vr-card__image" data-vr-card-photo="${escapeHtml(review.id)}" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
         <div class="vr-card__body">
           <div class="vr-card__stars">${stars(review.rating)}</div>
           <p class="vr-card__comment">${escapeHtml(review.comment)}</p>
@@ -809,33 +820,6 @@
     `).join('');
 
     const mode = settings.displayMode === 'carousel' ? 'carousel' : 'grid';
-    const score = averageRating(reviews);
-    const scoreLabel = score ? score.toFixed(1) : '5.0';
-    const countLabel = reviews.length === 1 ? '1 avalia\u00e7\u00e3o com foto' : `${reviews.length} avalia\u00e7\u00f5es com foto`;
-    const proof = productContext && reviews.length ? `
-      <div class="vr-proof">
-        <div class="vr-proof__score"><strong>${scoreLabel}</strong><span>/5</span></div>
-        <div>
-          <p class="vr-proof__title">Fotos reais deste produto</p>
-          <p class="vr-proof__text">${countLabel} de clientes verificadas. Clique nas fotos para ver detalhes antes de comprar.</p>
-          <div class="vr-proof__photos">
-            ${reviews.slice(0, 5).map((review) => `<img src="${escapeHtml(review.imageUrl)}" alt="">`).join('')}
-          </div>
-        </div>
-      </div>
-    ` : '';
-    const gallery = productContext && reviews.length ? `
-      <div class="vr-gallery-wrap">
-        <h3>Galeria de fotos reais</h3>
-        <div class="vr-gallery">
-          ${reviews.slice(0, 10).map((review, index) => `
-            <button class="vr-gallery__button" type="button" data-vr-gallery="${index}" aria-label="Abrir avalia\u00e7\u00e3o de ${escapeHtml(review.customerName)}">
-              <img src="${escapeHtml(review.imageUrl)}" alt="">
-            </button>
-          `).join('')}
-        </div>
-      </div>
-    ` : '';
     const submitUrl = productContext
       ? `${baseUrl}/avaliar.html?productName=${encodeURIComponent(productContext.name)}&productUrl=${encodeURIComponent(productContext.url)}&productSlug=${encodeURIComponent(productContext.slug)}`
       : '';
@@ -848,8 +832,6 @@
             <h2>${escapeHtml(settings.title)}</h2>
             <p class="vr-widget__subtitle">${escapeHtml(settings.subtitle)}</p>
           </header>
-          ${proof}
-          ${gallery}
           ${cards ? `<div class="vr-widget__grid">${cards}</div>` : '<p class="vr-widget__empty">Este produto ainda n\u00e3o tem avalia\u00e7\u00f5es com foto.</p>'}
           <div class="vr-widget__actions">
             ${productContext ? `<a class="vr-widget__button vr-widget__button--ghost" href="${escapeHtml(submitUrl)}">Avaliar este produto</a>` : ''}
@@ -861,6 +843,8 @@
 
     const widget = mount.querySelector('.vr-widget');
     widget?.setAttribute('data-mode', mode);
+    widget?.setAttribute('data-product', productContext ? 'true' : 'false');
+    widget?.setAttribute('data-count', String(reviews.length));
     widget?.style.setProperty('--vr-bg', settings.backgroundColor || defaultSettings.backgroundColor);
     widget?.style.setProperty('--vr-head-bg', settings.headerBackgroundColor || defaultSettings.headerBackgroundColor);
     widget?.style.setProperty('--vr-text', settings.textColor || defaultSettings.textColor);
@@ -868,8 +852,11 @@
     widget?.style.setProperty('--vr-title', settings.titleColor || defaultSettings.titleColor);
     widget?.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
 
-    mount.querySelectorAll('[data-vr-gallery]').forEach((button) => {
-      button.addEventListener('click', () => openReviewLightbox(reviews[Number(button.dataset.vrGallery)]));
+    mount.querySelectorAll('[data-vr-card-photo]').forEach((image) => {
+      image.addEventListener('click', () => {
+        const review = reviews.find((item) => String(item.id) === image.dataset.vrCardPhoto);
+        if (review) openReviewLightbox(review);
+      });
     });
 
     const track = mount.querySelector('.vr-widget__grid');
