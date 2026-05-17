@@ -392,6 +392,12 @@
       nativeReviews.style.display = 'none';
     }
 
+    if (settings.productContext) {
+      document.querySelectorAll('#produto .comentarios').forEach((item) => {
+        item.style.display = 'none';
+      });
+    }
+
     const relatedTitle = Array.from(document.querySelectorAll('h2, h3, .titulo'))
       .find((item) => item.textContent?.trim().toLowerCase().includes('produtos relacionados'));
     const relatedSection = relatedTitle?.closest('section, .block, div');
