@@ -4,6 +4,11 @@
   const mountId = 'verao-reviews-widget';
   const safeMountId = 'verao-reviews-widget-safe';
   const existingStyleId = 'verao-reviews-widget-style';
+  const socialProofId = 'verao-social-proof';
+  const socialProofDismissKey = 'veraoSocialProofDismissed';
+  let socialProofTimer = null;
+  let socialProofTimeout = null;
+  let socialProofIndex = 0;
   const defaultSettings = {
     title: 'Clientes usando Ver\u00e3o em Cores',
     kicker: 'Avalia\u00e7\u00f5es com foto',
@@ -506,6 +511,94 @@
         text-decoration: none !important;
       }
 
+      .vr-social-proof {
+        align-items: center;
+        background: rgba(255, 255, 255, .98);
+        border: 1px solid #f0dddd;
+        border-radius: 14px;
+        bottom: 18px;
+        box-shadow: 0 18px 42px rgba(17, 24, 39, .14);
+        color: #222;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 54px 1fr auto;
+        left: 18px;
+        max-width: min(390px, calc(100vw - 36px));
+        opacity: 0;
+        padding: 10px;
+        pointer-events: none;
+        position: fixed;
+        transform: translateY(14px);
+        transition: opacity .22s ease, transform .22s ease;
+        width: 390px;
+        z-index: 2147483000;
+      }
+
+      .vr-social-proof.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+
+      .vr-social-proof img {
+        aspect-ratio: 1;
+        border-radius: 12px;
+        object-fit: cover;
+        width: 54px;
+      }
+
+      .vr-social-proof__kicker {
+        color: var(--vr-brand, #b0565b);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .03em;
+        margin: 0 0 2px;
+        text-transform: uppercase;
+      }
+
+      .vr-social-proof__title {
+        color: #222;
+        display: -webkit-box;
+        font-size: 13px;
+        font-weight: 800;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        line-height: 1.25;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      .vr-social-proof__text {
+        color: #666;
+        display: -webkit-box;
+        font-size: 12px;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.35;
+        margin: 3px 0 0;
+        overflow: hidden;
+      }
+
+      .vr-social-proof__stars {
+        color: #ffc400;
+        font-size: 12px;
+        letter-spacing: .5px;
+        margin-top: 3px;
+      }
+
+      .vr-social-proof__close {
+        align-self: start;
+        background: #f7f2f2;
+        border: 0;
+        border-radius: 999px;
+        color: #8a4147;
+        cursor: pointer;
+        font-size: 18px;
+        height: 26px;
+        line-height: 1;
+        width: 26px;
+      }
+
       .vr-lightbox {
         align-items: center;
         background: rgba(17, 24, 39, .82);
@@ -622,6 +715,20 @@
 
         .vr-proof__score {
           margin: 0 auto;
+        }
+
+        .vr-social-proof {
+          bottom: 12px;
+          grid-template-columns: 46px 1fr auto;
+          left: 10px;
+          max-width: calc(100vw - 20px);
+          padding: 9px;
+          width: calc(100vw - 20px);
+        }
+
+        .vr-social-proof img {
+          border-radius: 10px;
+          width: 46px;
         }
       }
     `;
@@ -797,9 +904,75 @@
     });
   }
 
+  function canUseSessionStorage() {
+    try {
+      window.sessionStorage.setItem('__vr_test', '1');
+      window.sessionStorage.removeItem('__vr_test');
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function socialProofDismissed() {
+    if (!canUseSessionStorage()) return false;
+    return window.sessionStorage.getItem(socialProofDismissKey) === '1';
+  }
+
+  function dismissSocialProof() {
+    const toast = document.getElementById(socialProofId);
+    if (toast) toast.classList.remove('is-visible');
+    if (canUseSessionStorage()) window.sessionStorage.setItem(socialProofDismissKey, '1');
+    if (socialProofTimeout) clearTimeout(socialProofTimeout);
+    if (socialProofTimer) clearInterval(socialProofTimer);
+    socialProofTimeout = null;
+    socialProofTimer = null;
+  }
+
+  function renderSocialProofToast(reviews, settings) {
+    const isPlatformPage = ['/admin.html', '/login.html', '/avaliar.html'].includes(window.location.pathname);
+    if (isPlatformPage) return;
+    if (!reviews.length || socialProofDismissed()) return;
+
+    let toast = document.getElementById(socialProofId);
+    if (!toast) {
+      toast = document.createElement('aside');
+      toast.id = socialProofId;
+      toast.className = 'vr-social-proof';
+      toast.setAttribute('aria-live', 'polite');
+      document.body.appendChild(toast);
+    }
+
+    toast.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
+
+    const showReview = () => {
+      const review = reviews[socialProofIndex % reviews.length];
+      socialProofIndex += 1;
+      toast.innerHTML = `
+        <img src="${escapeHtml(review.imageUrl)}" alt="">
+        <div>
+          <p class="vr-social-proof__kicker">Cliente real aprovou</p>
+          <p class="vr-social-proof__title">${escapeHtml(review.customerName)} avaliou ${escapeHtml(review.productName)}</p>
+          <p class="vr-social-proof__text">${escapeHtml(review.comment)}</p>
+          <div class="vr-social-proof__stars">${stars(review.rating)}</div>
+        </div>
+        <button class="vr-social-proof__close" type="button" aria-label="Fechar">×</button>
+      `;
+      toast.querySelector('.vr-social-proof__close')?.addEventListener('click', dismissSocialProof);
+      toast.classList.add('is-visible');
+      window.setTimeout(() => toast.classList.remove('is-visible'), 8500);
+    };
+
+    if (socialProofTimeout) clearTimeout(socialProofTimeout);
+    if (socialProofTimer) clearInterval(socialProofTimer);
+    socialProofTimeout = window.setTimeout(showReview, 6500);
+    socialProofTimer = window.setInterval(showReview, 26000);
+  }
+
   function render(mount, reviews, settings) {
     placeMount(mount, settings);
     renderProductTrustBadge(reviews, settings);
+    renderSocialProofToast(reviews, settings);
 
     const productContext = settings.productContext || null;
     if (!reviews.length && !productContext) {
