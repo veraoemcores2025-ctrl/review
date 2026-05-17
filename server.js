@@ -139,6 +139,9 @@ async function writeDb(db) {
       .upsert(appSettingsToDb(settings), { onConflict: 'id' });
 
     if (settingsError) {
+      if (process.env.VERCEL) {
+        throw new Error(`Falha ao salvar configurações no Supabase: ${settingsError.message}`);
+      }
       console.warn('[Verão Reviews] Falha ao salvar configurações no Supabase, usando arquivo local.', settingsError);
     } else {
       const rows = (db.reviews || []).map(appReviewToDb);
@@ -146,10 +149,16 @@ async function writeDb(db) {
         const { error: deleteError } = await supabase.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000');
         const { error: insertError } = await supabase.from('reviews').insert(rows);
         if (!deleteError && !insertError) return;
+        if (process.env.VERCEL) {
+          throw new Error(`Falha ao salvar avaliações no Supabase: ${(deleteError || insertError).message}`);
+        }
         console.warn('[Verão Reviews] Falha ao salvar avaliações no Supabase, usando arquivo local.', deleteError || insertError);
       } else {
         const { error: deleteError } = await supabase.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000');
         if (!deleteError) return;
+        if (process.env.VERCEL) {
+          throw new Error(`Falha ao limpar avaliações no Supabase: ${deleteError.message}`);
+        }
         console.warn('[Verão Reviews] Falha ao limpar avaliações no Supabase, usando arquivo local.', deleteError);
       }
     }
