@@ -36,6 +36,31 @@
     return '★★★★★'.slice(0, count) + '☆☆☆☆☆'.slice(0, 5 - count);
   }
 
+  function productSlugFromUrl(url) {
+    try {
+      const parsed = new URL(url);
+      return parsed.pathname.replace(/\/$/, '').split('/').filter(Boolean).pop() || '';
+    } catch {
+      return '';
+    }
+  }
+
+  function getProductContext() {
+    const slug = productSlugFromUrl(window.location.href);
+    const isHome = ['/', '', '/index.php'].includes(window.location.pathname);
+    const hasProductSignal = document.querySelector('#produto, [itemtype*="schema.org/Product"], .nome_produto');
+    if (!slug || isHome || !hasProductSignal) return null;
+
+    const name = document.querySelector('.nome_produto')?.textContent?.trim()
+      || window.nome_produto
+      || document.querySelector('h1')?.textContent?.trim()
+      || document.querySelector('[itemprop="name"]')?.textContent?.trim()
+      || document.title.replace(/\s*\|.*$/, '').trim()
+      || slug.replaceAll('-', ' ');
+
+    return { slug, name, url: window.location.href.split('#')[0] };
+  }
+
   function ensureStyle() {
     if (document.getElementById(existingStyleId)) return;
     const style = document.createElement('style');
@@ -281,6 +306,28 @@
         width: fit-content;
       }
 
+      .vr-widget__empty {
+        color: var(--vr-subtitle);
+        font-size: 14px;
+        margin: 0 auto;
+        max-width: 620px;
+        text-align: center;
+      }
+
+      .vr-widget__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 24px;
+      }
+
+      .vr-widget__button--ghost {
+        background: #fff;
+        border: 1px solid var(--vr-line);
+        color: var(--vr-brand) !important;
+      }
+
       @media (max-width: 900px) {
         .vr-widget__grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -380,7 +427,8 @@
   function render(mount, reviews, settings) {
     placeMount(mount, settings);
 
-    if (!reviews.length) {
+    const productContext = settings.productContext || null;
+    if (!reviews.length && !productContext) {
       mount.innerHTML = '';
       return;
     }
@@ -398,6 +446,9 @@
     `).join('');
 
     const mode = settings.displayMode === 'carousel' ? 'carousel' : 'grid';
+    const submitUrl = productContext
+      ? `${baseUrl}/avaliar.html?productName=${encodeURIComponent(productContext.name)}&productUrl=${encodeURIComponent(productContext.url)}&productSlug=${encodeURIComponent(productContext.slug)}`
+      : '';
 
     mount.innerHTML = `
       <section class="vr-widget" style="--vr-brand: ${escapeHtml(settings.brandColor)};" aria-label="Avaliações com fotos de clientes">
@@ -407,8 +458,11 @@
             <h2>${escapeHtml(settings.title)}</h2>
             <p class="vr-widget__subtitle">${escapeHtml(settings.subtitle)}</p>
           </header>
-          <div class="vr-widget__grid">${cards}</div>
-          <a class="vr-widget__button" href="${escapeHtml(settings.buttonUrl)}">${escapeHtml(settings.buttonText)}</a>
+          ${cards ? `<div class="vr-widget__grid">${cards}</div>` : '<p class="vr-widget__empty">Este produto ainda não tem avaliações com foto.</p>'}
+          <div class="vr-widget__actions">
+            ${productContext ? `<a class="vr-widget__button vr-widget__button--ghost" href="${escapeHtml(submitUrl)}">Avaliar este produto</a>` : ''}
+            <a class="vr-widget__button" href="${escapeHtml(settings.buttonUrl)}">${escapeHtml(settings.buttonText)}</a>
+          </div>
         </div>
       </section>
     `;
@@ -423,7 +477,7 @@
     widget?.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
 
     const track = mount.querySelector('.vr-widget__grid');
-    track?.insertAdjacentHTML('afterend', `
+    if (track) track.insertAdjacentHTML('afterend', `
       <div class="vr-widget__controls" aria-label="Controle do carrossel">
         <button class="vr-widget__nav" type="button" data-vr-prev aria-label="Avaliação anterior">‹</button>
         <button class="vr-widget__nav" type="button" data-vr-next aria-label="Próxima avaliação">›</button>
@@ -462,9 +516,11 @@
   async function load() {
     ensureStyle();
     try {
-      const response = await fetch(`${baseUrl}/api/reviews`, { cache: 'no-store' });
+      const productContext = getProductContext();
+      const query = productContext ? `?productSlug=${encodeURIComponent(productContext.slug)}` : '';
+      const response = await fetch(`${baseUrl}/api/reviews${query}`, { cache: 'no-store' });
       const data = await response.json();
-      const settings = { ...defaultSettings, ...(data.settings || {}) };
+      const settings = { ...defaultSettings, ...(data.settings || {}), productContext };
       await waitForPageAnchor();
       const mount = settings.hideNativeHomeReviews ? createNativeMount() : createMount(settings);
       render(mount, data.reviews || [], settings);

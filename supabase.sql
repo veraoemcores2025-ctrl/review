@@ -43,13 +43,25 @@ create table if not exists public.reviews (
   id uuid primary key,
   customer_name text not null,
   product_name text not null,
+  product_url text not null default '',
+  product_slug text not null default '',
   rating smallint not null default 5 check (rating between 1 and 5),
   comment text not null,
   verified_label text not null default 'cliente verificada',
   image_url text not null,
   active boolean not null default true,
+  status text not null default 'approved' check (status in ('pending', 'approved', 'rejected')),
   created_at timestamptz not null default now()
 );
+
+alter table public.reviews
+  add column if not exists product_url text not null default '';
+
+alter table public.reviews
+  add column if not exists product_slug text not null default '';
+
+alter table public.reviews
+  add column if not exists status text not null default 'approved';
 
 insert into public.review_settings (id)
 values (1)

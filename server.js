@@ -178,11 +178,14 @@ function dbReviewToApp(review) {
     id: review.id,
     customerName: review.customer_name,
     productName: review.product_name,
+    productUrl: review.product_url || '',
+    productSlug: review.product_slug || makeProductSlug(review.product_url || review.product_name),
     rating: review.rating,
     comment: review.comment,
     verifiedLabel: review.verified_label,
     imagePath: review.image_url,
     active: review.active,
+    status: review.status || (review.active ? 'approved' : 'pending'),
     createdAt: review.created_at
   };
 }
@@ -192,11 +195,14 @@ function appReviewToDb(review) {
     id: review.id,
     customer_name: review.customerName,
     product_name: review.productName,
+    product_url: review.productUrl || '',
+    product_slug: review.productSlug || makeProductSlug(review.productUrl || review.productName),
     rating: review.rating,
     comment: review.comment,
     verified_label: review.verifiedLabel,
     image_url: review.imagePath,
     active: review.active,
+    status: review.status || (review.active ? 'approved' : 'pending'),
     created_at: review.createdAt
   };
 }
@@ -289,6 +295,22 @@ function limitText(value, max) {
   return String(value || '').trim().slice(0, max);
 }
 
+function makeProductSlug(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/^https?:\/\/[^/]+/i, '')
+    .replace(/[?#].*$/, '')
+    .replace(/\/$/, '')
+    .split('/')
+    .filter(Boolean)
+    .pop()
+    ?.replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    || '';
+}
+
 function parseCookies(req) {
   return Object.fromEntries(
     String(req.headers.cookie || '')
@@ -373,8 +395,10 @@ app.post('/api/admin/logout', (_req, res) => {
 
 app.get('/api/reviews', async (req, res) => {
   const db = await readDb();
+  const productSlug = makeProductSlug(req.query.productSlug || req.query.productUrl || '');
   const reviews = db.reviews
-    .filter((review) => review.active)
+    .filter((review) => review.active && (review.status || 'approved') === 'approved')
+    .filter((review) => !productSlug || makeProductSlug(review.productSlug || review.productUrl || review.productName) === productSlug)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((review) => publicReview(review, req));
   res.json({ reviews, settings: publicSettings(db.settings) });
@@ -421,15 +445,19 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
 app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req, res) => {
   const db = await readDb();
   const imagePath = await uploadReviewImage(req.file);
+  const productUrl = limitText(req.body.productUrl, 500);
   const review = {
     id: randomUUID(),
     customerName: limitText(req.body.customerName, 80),
     productName: limitText(req.body.productName, 120),
+    productUrl,
+    productSlug: makeProductSlug(productUrl || req.body.productName),
     rating: Math.max(1, Math.min(5, Number(req.body.rating || 5))),
     comment: limitText(req.body.comment, 500),
     verifiedLabel: limitText(req.body.verifiedLabel || 'cliente verificada', 80),
     imagePath,
     active: req.body.active !== 'off',
+    status: req.body.active === 'off' ? 'pending' : 'approved',
     createdAt: new Date().toISOString()
   };
 
@@ -442,14 +470,53 @@ app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req,
   res.status(201).json({ review: publicReview(review, req) });
 });
 
+app.post('/api/reviews/submit', upload.single('photo'), async (req, res) => {
+  const db = await readDb();
+  const imagePath = await uploadReviewImage(req.file);
+  const productUrl = limitText(req.body.productUrl, 500);
+  const review = {
+    id: randomUUID(),
+    customerName: limitText(req.body.customerName, 80),
+    productName: limitText(req.body.productName, 120),
+    productUrl,
+    productSlug: makeProductSlug(productUrl || req.body.productSlug || req.body.productName),
+    rating: Math.max(1, Math.min(5, Number(req.body.rating || 5))),
+    comment: limitText(req.body.comment, 500),
+    verifiedLabel: 'compra a validar',
+    imagePath,
+    active: false,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+
+  if (!review.customerName || !review.productName || !review.comment || !review.imagePath) {
+    return res.status(400).json({ error: 'Preencha nome, produto, comentário e foto.' });
+  }
+
+  db.reviews.push(review);
+  await writeDb(db);
+  res.status(201).json({ ok: true, message: 'Avaliação enviada para aprovação.' });
+});
+
 app.patch('/api/admin/reviews/:id', requireAdmin, async (req, res) => {
   const db = await readDb();
   const review = db.reviews.find((item) => item.id === req.params.id);
   if (!review) return res.status(404).json({ error: 'Avaliação não encontrada.' });
 
   if ('active' in req.body) review.active = Boolean(req.body.active);
+  if ('status' in req.body && ['pending', 'approved', 'rejected'].includes(String(req.body.status))) {
+    review.status = String(req.body.status);
+    review.active = review.status === 'approved';
+    if (review.status === 'approved' && (!review.verifiedLabel || review.verifiedLabel === 'compra a validar')) {
+      review.verifiedLabel = 'compra verificada';
+    }
+  }
   if ('customerName' in req.body) review.customerName = limitText(req.body.customerName, 80);
   if ('productName' in req.body) review.productName = limitText(req.body.productName, 120);
+  if ('productUrl' in req.body) {
+    review.productUrl = limitText(req.body.productUrl, 500);
+    review.productSlug = makeProductSlug(review.productUrl || review.productName);
+  }
   if ('comment' in req.body) review.comment = limitText(req.body.comment, 500);
   if ('rating' in req.body) review.rating = Math.max(1, Math.min(5, Number(req.body.rating)));
   if ('verifiedLabel' in req.body) review.verifiedLabel = limitText(req.body.verifiedLabel, 80);

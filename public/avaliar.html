@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Enviar avaliação | Verão Reviews</title>
+    <link rel="stylesheet" href="/admin.css">
+  </head>
+  <body>
+    <main class="login-shell">
+      <section class="login-card">
+        <p class="eyebrow">Verão em Cores</p>
+        <h1>Enviar avaliação</h1>
+        <p class="sub">Conte como foi sua experiência e envie uma foto real do produto.</p>
+
+        <form id="publicReviewForm" class="login-form">
+          <label>
+            Seu nome
+            <input name="customerName" required placeholder="Ex: Ana Paula">
+          </label>
+
+          <label>
+            Produto comprado
+            <input name="productName" required>
+          </label>
+
+          <input name="productUrl" type="hidden">
+          <input name="productSlug" type="hidden">
+
+          <label>
+            Nota
+            <select name="rating">
+              <option value="5">5 estrelas</option>
+              <option value="4">4 estrelas</option>
+              <option value="3">3 estrelas</option>
+              <option value="2">2 estrelas</option>
+              <option value="1">1 estrela</option>
+            </select>
+          </label>
+
+          <label>
+            Comentário
+            <textarea name="comment" required rows="5" placeholder="Escreva sua avaliação"></textarea>
+          </label>
+
+          <label>
+            Foto do produto
+            <input name="photo" type="file" accept="image/*" required>
+          </label>
+
+          <button class="button" type="submit">Enviar avaliação</button>
+          <p id="publicReviewMessage" class="message" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="/avaliar.js"></script>
+  </body>
+</html>

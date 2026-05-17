@@ -19,6 +19,12 @@ function stars(count) {
   return '★★★★★'.slice(0, count) + '☆☆☆☆☆'.slice(0, 5 - count);
 }
 
+function reviewStatus(review) {
+  if (review.status === 'pending') return 'pendente';
+  if (review.status === 'rejected') return 'reprovada';
+  return review.active ? 'ativo' : 'oculto';
+}
+
 async function fetchAdmin(url, options = {}) {
   const response = await fetch(url, options);
   if (response.status === 401) {
@@ -38,12 +44,15 @@ async function loadReviews() {
       <div>
         <h3>${escapeHtml(review.customerName)}</h3>
         <strong>${escapeHtml(review.productName)}</strong>
-        <p>${stars(review.rating)} · ${review.active ? 'ativo' : 'oculto'}</p>
+        <p>${stars(review.rating)} · ${reviewStatus(review)}</p>
+        ${review.productUrl ? `<p><a href="${escapeHtml(review.productUrl)}" target="_blank" rel="noopener">Ver produto</a></p>` : ''}
         <p>${escapeHtml(review.comment)}</p>
       </div>
       <div class="actions">
+        ${review.status === 'pending' ? `<button class="ghost" type="button" data-approve="${review.id}">Aprovar</button>` : ''}
         <button class="ghost" type="button" data-edit="${review.id}">Editar</button>
         <button class="ghost" type="button" data-toggle="${review.id}">${review.active ? 'Ocultar' : 'Mostrar'}</button>
+        ${review.status === 'pending' ? `<button class="ghost danger" type="button" data-reject="${review.id}">Reprovar</button>` : ''}
         <button class="ghost danger" type="button" data-delete="${review.id}">Excluir</button>
       </div>
       <form class="edit-review" data-edit-form="${review.id}" hidden>
@@ -54,6 +63,10 @@ async function loadReviews() {
         <label>
           Produto
           <input name="productName" value="${escapeHtml(review.productName)}">
+        </label>
+        <label class="wide">
+          Link do produto
+          <input name="productUrl" value="${escapeHtml(review.productUrl || '')}">
         </label>
         <label>
           Nota
@@ -149,6 +162,8 @@ reviewsList.addEventListener('click', async (event) => {
   const saveEditId = event.target.dataset.saveEdit;
   const toggleId = event.target.dataset.toggle;
   const deleteId = event.target.dataset.delete;
+  const approveId = event.target.dataset.approve;
+  const rejectId = event.target.dataset.reject;
 
   if (editId) {
     const editForm = reviewsList.querySelector(`[data-edit-form="${editId}"]`);
@@ -177,7 +192,27 @@ reviewsList.addEventListener('click', async (event) => {
     await fetchAdmin(`/api/admin/reviews/${toggleId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ active: !isActive })
+      body: JSON.stringify({ active: !isActive, status: !isActive ? 'approved' : 'pending' })
+    });
+    await loadReviews();
+    window.dispatchEvent(new Event('veraoReviewsRefresh'));
+  }
+
+  if (approveId) {
+    await fetchAdmin(`/api/admin/reviews/${approveId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'approved' })
+    });
+    await loadReviews();
+    window.dispatchEvent(new Event('veraoReviewsRefresh'));
+  }
+
+  if (rejectId) {
+    await fetchAdmin(`/api/admin/reviews/${rejectId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'rejected', active: false })
     });
     await loadReviews();
     window.dispatchEvent(new Event('veraoReviewsRefresh'));
