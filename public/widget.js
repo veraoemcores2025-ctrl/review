@@ -960,7 +960,6 @@
   function renderSocialProofToast(reviews, settings) {
     const isPlatformPage = ['/admin.html', '/login.html', '/avaliar.html'].includes(window.location.pathname);
     if (isPlatformPage) return;
-    if (!settings.productContext && window.innerWidth <= 640) return;
     if (!reviews.length || socialProofDismissed()) return;
 
     let toast = document.getElementById(socialProofId);
