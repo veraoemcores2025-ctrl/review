@@ -3,26 +3,34 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Verão Reviews</title>
+    <title>Ver&atilde;o Reviews</title>
     <link rel="stylesheet" href="/admin.css">
   </head>
   <body>
     <main class="shell">
       <section class="hero">
-        <div>
-          <p class="eyebrow">Verão Reviews</p>
-          <h1>Painel de avaliações com fotos</h1>
-          <p class="sub">Cadastre avaliações com foto, nome, produto e comentário. Depois instale o widget na wBuy uma única vez.</p>
+        <div class="hero-copy">
+          <p class="eyebrow">Ver&atilde;o Reviews</p>
+          <h1>Prova social com foto para sua loja</h1>
+          <p class="sub">Cadastre avalia&ccedil;&otilde;es reais, receba depoimentos de clientes e mostre tudo na home ou nas p&aacute;ginas de produto da wBuy.</p>
         </div>
-        <a class="button" href="/admin.html">Abrir painel</a>
+        <div class="quick-actions">
+          <a class="button" href="/admin.html">Abrir painel</a>
+          <a class="ghost" href="/avaliar.html">Enviar avalia&ccedil;&atilde;o</a>
+        </div>
       </section>
 
-      <section class="install">
-        <h2>Código para wBuy</h2>
-        <p>Quando estiver hospedado, troque o domínio abaixo pelo domínio final da plataforma.</p>
+      <section class="panel install">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Instala&ccedil;&atilde;o</p>
+            <h2>C&oacute;digo para wBuy</h2>
+          </div>
+        </div>
+        <p>Use este bloco no local em que deseja exibir as avalia&ccedil;&otilde;es. Na loja publicada, mantenha o dom&iacute;nio da Vercel no script.</p>
         <pre><code>&lt;div id="verao-reviews-widget"&gt;&lt;/div&gt;
-&lt;script src="http://localhost:4173/widget.js" async&gt;&lt;/script&gt;</code></pre>
-        <p>Senha padrão local do painel: <strong>verao123</strong>. Troque essa senha antes de hospedar.</p>
+&lt;script src="https://review-gamma-five.vercel.app/widget.js?v=24" async&gt;&lt;/script&gt;</code></pre>
+        <p>Depois de instalar uma vez, as mudan&ccedil;as feitas no painel aparecem no widget.</p>
       </section>
     </main>
   </body>

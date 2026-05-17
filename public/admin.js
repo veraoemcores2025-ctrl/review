@@ -5,6 +5,14 @@ const settingsMessage = document.querySelector('#settingsMessage');
 const reviewsList = document.querySelector('#reviewsList');
 const refreshButton = document.querySelector('#refreshButton');
 const logoutButton = document.querySelector('#logoutButton');
+const reviewSearch = document.querySelector('#reviewSearch');
+const reviewFilter = document.querySelector('#reviewFilter');
+const metricTotal = document.querySelector('#metricTotal');
+const metricPending = document.querySelector('#metricPending');
+const metricActive = document.querySelector('#metricActive');
+const metricRating = document.querySelector('#metricRating');
+
+let allReviews = [];
 
 function escapeHtml(value) {
   return String(value || '')
@@ -15,14 +23,35 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;');
 }
 
+function normalize(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 function stars(count) {
-  return '★★★★★'.slice(0, count) + '☆☆☆☆☆'.slice(0, 5 - count);
+  return '\u2605\u2605\u2605\u2605\u2605'.slice(0, count) + '\u2606\u2606\u2606\u2606\u2606'.slice(0, 5 - count);
 }
 
 function reviewStatus(review) {
   if (review.status === 'pending') return 'pendente';
   if (review.status === 'rejected') return 'reprovada';
   return review.active ? 'ativo' : 'oculto';
+}
+
+function isApproved(review) {
+  return review.status !== 'pending' && review.status !== 'rejected';
+}
+
+function isVisible(review) {
+  return isApproved(review) && review.active;
+}
+
+function statusClass(review) {
+  if (review.status === 'pending') return 'status-pending';
+  if (review.status === 'rejected') return 'status-rejected';
+  return review.active ? 'status-active' : 'status-hidden';
 }
 
 async function fetchAdmin(url, options = {}) {
@@ -34,17 +63,53 @@ async function fetchAdmin(url, options = {}) {
   return response;
 }
 
-async function loadReviews() {
-  const response = await fetchAdmin('/api/admin/reviews');
-  const data = await response.json();
+function updateMetrics() {
+  const approved = allReviews.filter(isApproved);
+  const active = allReviews.filter(isVisible);
+  const pending = allReviews.filter((review) => review.status === 'pending');
+  const average = approved.length
+    ? approved.reduce((sum, review) => sum + Number(review.rating || 0), 0) / approved.length
+    : 0;
 
-  reviewsList.innerHTML = data.reviews.map((review) => `
+  metricTotal.textContent = allReviews.length;
+  metricPending.textContent = pending.length;
+  metricActive.textContent = active.length;
+  metricRating.textContent = average.toFixed(1);
+}
+
+function matchesFilter(review, filter) {
+  if (filter === 'pending') return review.status === 'pending';
+  if (filter === 'approved') return isApproved(review);
+  if (filter === 'active') return isVisible(review);
+  if (filter === 'hidden') return isApproved(review) && !review.active;
+  if (filter === 'rejected') return review.status === 'rejected';
+  return true;
+}
+
+function renderReviews() {
+  const search = normalize(reviewSearch?.value || '');
+  const filter = reviewFilter?.value || 'all';
+  const filteredReviews = allReviews.filter((review) => {
+    const text = normalize([
+      review.customerName,
+      review.productName,
+      review.comment,
+      review.verifiedLabel
+    ].join(' '));
+
+    return matchesFilter(review, filter) && (!search || text.includes(search));
+  });
+
+  reviewsList.innerHTML = filteredReviews.map((review) => `
     <article class="admin-review" data-active="${review.active}">
       <img src="${escapeHtml(review.imageUrl)}" alt="">
       <div>
         <h3>${escapeHtml(review.customerName)}</h3>
         <strong>${escapeHtml(review.productName)}</strong>
-        <p>${stars(review.rating)} · ${reviewStatus(review)}</p>
+        <div class="review-meta">
+          <span class="stars">${stars(Number(review.rating || 0))}</span>
+          <span class="status-pill ${statusClass(review)}">${reviewStatus(review)}</span>
+        </div>
         ${review.productUrl ? `<p><a href="${escapeHtml(review.productUrl)}" target="_blank" rel="noopener">Ver produto</a></p>` : ''}
         <p>${escapeHtml(review.comment)}</p>
       </div>
@@ -79,13 +144,21 @@ async function loadReviews() {
           <input name="verifiedLabel" value="${escapeHtml(review.verifiedLabel)}">
         </label>
         <label class="wide">
-          Comentário
+          Comentario
           <textarea name="comment" rows="3">${escapeHtml(review.comment)}</textarea>
         </label>
-        <button class="button" type="button" data-save-edit="${review.id}">Salvar edição</button>
+        <button class="button" type="button" data-save-edit="${review.id}">Salvar edicao</button>
       </form>
     </article>
-  `).join('') || '<p class="message">Nenhuma avaliação cadastrada ainda.</p>';
+  `).join('') || '<p class="message">Nenhuma avaliacao encontrada.</p>';
+}
+
+async function loadReviews() {
+  const response = await fetchAdmin('/api/admin/reviews');
+  const data = await response.json();
+  allReviews = data.reviews || [];
+  updateMetrics();
+  renderReviews();
 }
 
 async function loadSettings() {
@@ -121,21 +194,21 @@ form.addEventListener('submit', async (event) => {
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    message.textContent = data.error || 'Não foi possível salvar.';
+    message.textContent = data.error || 'Nao foi possivel salvar.';
     return;
   }
 
   form.reset();
   form.active.checked = true;
   form.verifiedLabel.value = 'cliente verificada';
-  message.textContent = 'Avaliação salva.';
+  message.textContent = 'Avaliacao salva.';
   await loadReviews();
   window.dispatchEvent(new Event('veraoReviewsRefresh'));
 });
 
 settingsForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  settingsMessage.textContent = 'Salvando configuração...';
+  settingsMessage.textContent = 'Salvando configuracao...';
   const formData = new FormData(settingsForm);
   const payload = Object.fromEntries(formData.entries());
   payload.hideNativeHomeReviews = settingsForm.hideNativeHomeReviews.checked;
@@ -149,11 +222,11 @@ settingsForm.addEventListener('submit', async (event) => {
   });
 
   if (!response.ok) {
-    settingsMessage.textContent = 'Não foi possível salvar a configuração.';
+    settingsMessage.textContent = 'Nao foi possivel salvar a configuracao.';
     return;
   }
 
-  settingsMessage.textContent = 'Configuração salva.';
+  settingsMessage.textContent = 'Configuracao salva.';
   window.dispatchEvent(new Event('veraoReviewsRefresh'));
 });
 
@@ -192,7 +265,7 @@ reviewsList.addEventListener('click', async (event) => {
     await fetchAdmin(`/api/admin/reviews/${toggleId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ active: !isActive, status: !isActive ? 'approved' : 'pending' })
+      body: JSON.stringify({ active: !isActive, status: 'approved' })
     });
     await loadReviews();
     window.dispatchEvent(new Event('veraoReviewsRefresh'));
@@ -218,7 +291,7 @@ reviewsList.addEventListener('click', async (event) => {
     window.dispatchEvent(new Event('veraoReviewsRefresh'));
   }
 
-  if (deleteId && confirm('Excluir esta avaliação?')) {
+  if (deleteId && confirm('Excluir esta avaliacao?')) {
     await fetchAdmin(`/api/admin/reviews/${deleteId}`, { method: 'DELETE' });
     await loadReviews();
     window.dispatchEvent(new Event('veraoReviewsRefresh'));
@@ -230,6 +303,9 @@ logoutButton.addEventListener('click', async () => {
   window.location.href = '/login.html';
 });
 
+reviewSearch?.addEventListener('input', renderReviews);
+reviewFilter?.addEventListener('change', renderReviews);
 refreshButton.addEventListener('click', loadReviews);
+
 await loadSettings();
 await loadReviews();

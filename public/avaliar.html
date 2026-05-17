@@ -3,15 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Enviar avaliação | Verão Reviews</title>
+    <title>Enviar avalia&ccedil;&atilde;o | Ver&atilde;o Reviews</title>
     <link rel="stylesheet" href="/admin.css">
   </head>
-  <body>
-    <main class="login-shell">
-      <section class="login-card">
-        <p class="eyebrow">Verão em Cores</p>
-        <h1>Enviar avaliação</h1>
-        <p class="sub">Conte como foi sua experiência e envie uma foto real do produto.</p>
+  <body class="public-review-page">
+    <main class="review-submit-shell">
+      <section class="review-submit-card">
+        <div class="review-submit-intro">
+          <p class="eyebrow">Ver&atilde;o em Cores</p>
+          <h1>Mostre como ficou no corpo</h1>
+          <p class="sub">Envie sua avalia&ccedil;&atilde;o real com foto. Depois de aprovada, ela aparece na p&aacute;gina do produto e ajuda outras clientes a comprar com confian&ccedil;a.</p>
+        </div>
 
         <form id="publicReviewForm" class="login-form">
           <label>
@@ -39,8 +41,8 @@
           </label>
 
           <label>
-            Comentário
-            <textarea name="comment" required rows="5" placeholder="Escreva sua avaliação"></textarea>
+            Coment&aacute;rio
+            <textarea name="comment" required rows="5" placeholder="Conte o que voce achou do tecido, tamanho e caimento"></textarea>
           </label>
 
           <label>
@@ -48,7 +50,7 @@
             <input name="photo" type="file" accept="image/*" required>
           </label>
 
-          <button class="button" type="submit">Enviar avaliação</button>
+          <button class="button" type="submit">Enviar avalia&ccedil;&atilde;o</button>
           <p id="publicReviewMessage" class="message" aria-live="polite"></p>
         </form>
       </section>
