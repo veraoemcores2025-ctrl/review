@@ -392,6 +392,20 @@
       nativeReviews.style.display = 'none';
     }
 
+    const relatedTitle = Array.from(document.querySelectorAll('h2, h3, .titulo'))
+      .find((item) => item.textContent?.trim().toLowerCase().includes('produtos relacionados'));
+    const relatedSection = relatedTitle?.closest('section, .block, div');
+    if (settings.productContext && relatedSection && relatedSection.previousElementSibling !== mount) {
+      relatedSection.insertAdjacentElement('beforebegin', mount);
+      return;
+    }
+
+    const productSection = document.querySelector('#produto');
+    if (settings.productContext && productSection && productSection.nextElementSibling !== mount) {
+      productSection.insertAdjacentElement('afterend', mount);
+      return;
+    }
+
     const main = document.querySelector('main.page_home');
     const footer = document.querySelector('footer');
     if (main && main.nextElementSibling !== mount) {
