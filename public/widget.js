@@ -421,10 +421,28 @@
     const scrollByCard = (direction) => {
       const card = track?.querySelector('.vr-card');
       if (!track || !card) return;
-      track.scrollBy({ left: direction * (card.getBoundingClientRect().width + 16), behavior: 'smooth' });
+      const amount = card.getBoundingClientRect().width + 16;
+      const nextLeft = track.scrollLeft + (direction * amount);
+      const maxLeft = track.scrollWidth - track.clientWidth - 4;
+      track.scrollTo({ left: nextLeft > maxLeft ? 0 : Math.max(0, nextLeft), behavior: 'smooth' });
     };
     prev?.addEventListener('click', () => scrollByCard(-1));
     next?.addEventListener('click', () => scrollByCard(1));
+
+    if (mode === 'carousel' && track && track.scrollWidth > track.clientWidth) {
+      let paused = false;
+      const setPaused = (value) => {
+        paused = value;
+      };
+
+      track.addEventListener('mouseenter', () => setPaused(true));
+      track.addEventListener('mouseleave', () => setPaused(false));
+      track.addEventListener('touchstart', () => setPaused(true), { passive: true });
+      track.addEventListener('touchend', () => setPaused(false), { passive: true });
+      setInterval(() => {
+        if (!paused && document.visibilityState === 'visible') scrollByCard(1);
+      }, 4500);
+    }
   }
 
   async function load() {
