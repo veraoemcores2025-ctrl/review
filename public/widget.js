@@ -46,7 +46,7 @@
         --vr-bg: #fff7f7;
         --vr-head-bg: #f4f6f5;
         font-family: inherit;
-        background: linear-gradient(180deg, #fff 0%, var(--vr-bg) 100%);
+        background: var(--vr-bg);
         clear: both !important;
         display: block !important;
         float: none !important;
@@ -206,7 +206,7 @@
         background: #fff;
         border: 1px solid var(--vr-line);
         border-radius: 14px;
-        box-shadow: 0 14px 34px rgba(176, 86, 91, .12);
+        box-shadow: 0 8px 20px rgba(176, 86, 91, .055);
         float: none !important;
         max-width: 282px !important;
         min-width: 0 !important;
