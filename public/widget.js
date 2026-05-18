@@ -969,20 +969,71 @@
         }
 
         .vr-conversion {
+          border-radius: 10px;
+          box-shadow: none;
           grid-template-columns: 1fr;
-          margin: 14px auto;
-          padding: 14px;
+          margin: 10px 0 16px;
+          max-width: 100%;
+          padding: 10px 12px;
           text-align: left;
-          width: calc(100% - 24px);
+          width: 100%;
+        }
+
+        .vr-conversion__eyebrow,
+        .vr-conversion__benefits,
+        .vr-conversion__urgency {
+          display: none;
         }
 
         .vr-conversion h3 {
-          font-size: 16px;
+          font-size: 14px;
+          line-height: 1.25;
         }
 
-        .vr-conversion__urgency {
-          justify-self: start;
-          white-space: normal;
+        .vr-conversion__text {
+          font-size: 12px;
+          line-height: 1.35;
+          margin-top: 4px;
+        }
+
+        .vr-product-proof {
+          border-left: 0;
+          border-radius: 0;
+          border-right: 0;
+          box-shadow: none;
+          gap: 8px;
+          margin: 18px 0;
+          max-width: none;
+          padding: 14px 0;
+        }
+
+        .vr-product-proof__top {
+          align-items: flex-start;
+          display: grid;
+          gap: 5px;
+        }
+
+        .vr-product-proof__stars {
+          font-size: 18px;
+          letter-spacing: 0;
+        }
+
+        .vr-product-proof__title {
+          font-size: 13px;
+          line-height: 1.3;
+        }
+
+        .vr-product-proof__text {
+          font-size: 12px;
+          line-height: 1.4;
+        }
+
+        .vr-product-proof__photos img {
+          width: 34px;
+        }
+
+        .vr-product-proof__link {
+          font-size: 12px;
         }
 
         .vr-checkout-reviews__grid {
