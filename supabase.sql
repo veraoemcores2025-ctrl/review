@@ -24,6 +24,14 @@ create table if not exists public.review_settings (
   social_proof_label text not null default 'Cliente real aprovou',
   social_proof_delay_seconds integer not null default 6,
   social_proof_interval_seconds integer not null default 26,
+  conversion_enabled boolean not null default true,
+  conversion_home boolean not null default true,
+  conversion_product boolean not null default true,
+  conversion_checkout boolean not null default false,
+  conversion_title text not null default 'Compra segura na Verao em Cores',
+  conversion_text text not null default 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.',
+  conversion_benefits text not null default 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
+  conversion_urgency text not null default 'Oferta por tempo limitado',
   updated_at timestamptz not null default now()
 );
 
@@ -74,6 +82,30 @@ alter table public.review_settings
 
 alter table public.review_settings
   add column if not exists social_proof_interval_seconds integer not null default 26;
+
+alter table public.review_settings
+  add column if not exists conversion_enabled boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists conversion_home boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists conversion_product boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists conversion_checkout boolean not null default false;
+
+alter table public.review_settings
+  add column if not exists conversion_title text not null default 'Compra segura na Verao em Cores';
+
+alter table public.review_settings
+  add column if not exists conversion_text text not null default 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.';
+
+alter table public.review_settings
+  add column if not exists conversion_benefits text not null default 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp';
+
+alter table public.review_settings
+  add column if not exists conversion_urgency text not null default 'Oferta por tempo limitado';
 
 create table if not exists public.reviews (
   id uuid primary key,

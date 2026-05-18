@@ -5,6 +5,7 @@
   const safeMountId = 'verao-reviews-widget-safe';
   const existingStyleId = 'verao-reviews-widget-style';
   const socialProofId = 'verao-social-proof';
+  const conversionId = 'verao-conversion-block';
   const socialProofDismissKey = 'veraoSocialProofDismissed';
   let socialProofTimer = null;
   let socialProofTimeout = null;
@@ -33,7 +34,15 @@
     socialProofProduct: true,
     socialProofLabel: 'Cliente real aprovou',
     socialProofDelaySeconds: 6,
-    socialProofIntervalSeconds: 26
+    socialProofIntervalSeconds: 26,
+    conversionEnabled: true,
+    conversionHome: true,
+    conversionProduct: true,
+    conversionCheckout: false,
+    conversionTitle: 'Compra segura na Verao em Cores',
+    conversionText: 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.',
+    conversionBenefits: 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
+    conversionUrgency: 'Oferta por tempo limitado'
   };
 
   function escapeHtml(value) {
@@ -523,6 +532,96 @@
         text-decoration: none !important;
       }
 
+      .vr-conversion {
+        --vr-brand: #b0565b;
+        --vr-title: #111827;
+        --vr-subtitle: #4b5563;
+        --vr-font: inherit;
+        align-items: center;
+        background: #fff;
+        border: 1px solid #f0dddd;
+        border-radius: 16px;
+        box-shadow: 0 16px 34px rgba(17, 24, 39, .08);
+        box-sizing: border-box;
+        color: var(--vr-title);
+        display: grid;
+        font-family: var(--vr-font);
+        gap: 16px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        margin: 18px auto;
+        max-width: 1180px;
+        padding: 16px;
+        width: calc(100% - 28px);
+      }
+
+      .vr-conversion,
+      .vr-conversion * {
+        box-sizing: border-box;
+      }
+
+      .vr-conversion__eyebrow {
+        color: var(--vr-brand);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .04em;
+        margin: 0 0 5px;
+        text-transform: uppercase;
+      }
+
+      .vr-conversion h3 {
+        color: var(--vr-title);
+        font-size: 18px;
+        line-height: 1.25;
+        margin: 0;
+      }
+
+      .vr-conversion__text {
+        color: var(--vr-subtitle);
+        font-size: 13px;
+        line-height: 1.45;
+        margin: 6px 0 0;
+      }
+
+      .vr-conversion__benefits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .vr-conversion__pill {
+        align-items: center;
+        background: #fff7f7;
+        border: 1px solid #f0dddd;
+        border-radius: 999px;
+        color: #5b3438;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 800;
+        gap: 6px;
+        line-height: 1.25;
+        padding: 7px 10px;
+      }
+
+      .vr-conversion__pill::before {
+        background: var(--vr-brand);
+        border-radius: 999px;
+        content: "";
+        height: 7px;
+        width: 7px;
+      }
+
+      .vr-conversion__urgency {
+        background: var(--vr-brand);
+        border-radius: 999px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 10px 13px;
+        text-align: center;
+        white-space: nowrap;
+      }
+
       .vr-social-proof {
         align-items: center;
         background: rgba(255, 255, 255, .98);
@@ -727,6 +826,23 @@
 
         .vr-proof__score {
           margin: 0 auto;
+        }
+
+        .vr-conversion {
+          grid-template-columns: 1fr;
+          margin: 14px auto;
+          padding: 14px;
+          text-align: left;
+          width: calc(100% - 24px);
+        }
+
+        .vr-conversion h3 {
+          font-size: 16px;
+        }
+
+        .vr-conversion__urgency {
+          justify-self: start;
+          white-space: normal;
         }
 
         .vr-social-proof {
@@ -944,6 +1060,94 @@
     });
   }
 
+  function conversionBenefits(settings) {
+    return String(settings.conversionBenefits || defaultSettings.conversionBenefits)
+      .split(/\n|\|/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 5);
+  }
+
+  function isCheckoutLikePage() {
+    return /carrinho|checkout|finalizar|pagamento|pedido/i.test(window.location.pathname + window.location.search);
+  }
+
+  function conversionShouldShow(settings) {
+    const isPlatformPage = ['/admin.html', '/login.html', '/avaliar.html'].includes(window.location.pathname);
+    const isAdminPreview = window.location.pathname === '/admin.html' && document.getElementById(safeMountId);
+    if (isPlatformPage && !isAdminPreview) return false;
+    if (settings.conversionEnabled === false) return false;
+    if (isCheckoutLikePage()) return settings.conversionCheckout !== false;
+    if (settings.productContext) return settings.conversionProduct !== false;
+    return settings.conversionHome !== false;
+  }
+
+  function placeConversionBlock(block, mount, settings) {
+    if (settings.productContext) {
+      const proof = document.querySelector('.vr-product-proof');
+      if (proof && proof.nextElementSibling !== block) {
+        proof.insertAdjacentElement('afterend', block);
+        return;
+      }
+
+      const anchor = productTrustAnchor();
+      if (anchor && anchor.nextElementSibling !== block) {
+        anchor.insertAdjacentElement('afterend', block);
+        return;
+      }
+    }
+
+    if (isCheckoutLikePage()) {
+      const target = document.querySelector('main, #main, .checkout, .carrinho, form') || document.body.firstElementChild;
+      if (target && target.previousElementSibling !== block) {
+        target.insertAdjacentElement('beforebegin', block);
+        return;
+      }
+    }
+
+    if (mount && mount.previousElementSibling !== block) {
+      mount.insertAdjacentElement('beforebegin', block);
+    } else if (!block.parentElement) {
+      document.body.appendChild(block);
+    }
+  }
+
+  function renderConversionBlock(reviews, settings, mount) {
+    const existing = document.getElementById(conversionId);
+    if (!conversionShouldShow(settings)) {
+      existing?.remove();
+      return;
+    }
+
+    const block = existing || document.createElement('aside');
+    block.id = conversionId;
+    block.className = 'vr-conversion';
+    block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
+    block.style.setProperty('--vr-title', settings.titleColor || defaultSettings.titleColor);
+    block.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
+    block.style.setProperty('--vr-font', fontStack(settings.fontFamily));
+
+    const benefits = conversionBenefits(settings);
+    const reviewedLabel = reviews.length
+      ? `${reviews.length} foto${reviews.length > 1 ? 's' : ''} real${reviews.length > 1 ? 's' : ''} aprovada${reviews.length > 1 ? 's' : ''}`
+      : 'Prova social ativa';
+
+    block.innerHTML = `
+      <div>
+        <p class="vr-conversion__eyebrow">${escapeHtml(reviewedLabel)}</p>
+        <h3>${escapeHtml(settings.conversionTitle || defaultSettings.conversionTitle)}</h3>
+        <p class="vr-conversion__text">${escapeHtml(settings.conversionText || defaultSettings.conversionText)}</p>
+        <div class="vr-conversion__benefits">
+          ${benefits.map((item) => `<span class="vr-conversion__pill">${escapeHtml(item)}</span>`).join('')}
+        </div>
+      </div>
+      <div class="vr-conversion__urgency">${escapeHtml(settings.conversionUrgency || defaultSettings.conversionUrgency)}</div>
+    `;
+
+    loadWidgetFont(settings.fontFamily);
+    placeConversionBlock(block, mount, settings);
+  }
+
   function fontStack(fontFamily) {
     const family = String(fontFamily || 'inherit');
     if (family === 'Poppins') return "'Poppins', Arial, sans-serif";
@@ -1051,6 +1255,7 @@
   function render(mount, reviews, settings) {
     placeMount(mount, settings);
     renderProductTrustBadge(reviews, settings);
+    renderConversionBlock(reviews, settings, mount);
     renderSocialProofToast(reviews, settings);
 
     const productContext = settings.productContext || null;

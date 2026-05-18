@@ -47,7 +47,15 @@ const DEFAULT_SETTINGS = {
   socialProofProduct: true,
   socialProofLabel: 'Cliente real aprovou',
   socialProofDelaySeconds: 6,
-  socialProofIntervalSeconds: 26
+  socialProofIntervalSeconds: 26,
+  conversionEnabled: true,
+  conversionHome: true,
+  conversionProduct: true,
+  conversionCheckout: false,
+  conversionTitle: 'Compra segura na Verao em Cores',
+  conversionText: 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.',
+  conversionBenefits: 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
+  conversionUrgency: 'Oferta por tempo limitado'
 };
 const supabase = SUPABASE_URL && SUPABASE_KEY
   ? createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -242,7 +250,15 @@ function dbSettingsToApp(settings) {
     socialProofProduct: settings.social_proof_product ?? DEFAULT_SETTINGS.socialProofProduct,
     socialProofLabel: settings.social_proof_label ?? DEFAULT_SETTINGS.socialProofLabel,
     socialProofDelaySeconds: settings.social_proof_delay_seconds ?? DEFAULT_SETTINGS.socialProofDelaySeconds,
-    socialProofIntervalSeconds: settings.social_proof_interval_seconds ?? DEFAULT_SETTINGS.socialProofIntervalSeconds
+    socialProofIntervalSeconds: settings.social_proof_interval_seconds ?? DEFAULT_SETTINGS.socialProofIntervalSeconds,
+    conversionEnabled: settings.conversion_enabled ?? DEFAULT_SETTINGS.conversionEnabled,
+    conversionHome: settings.conversion_home ?? DEFAULT_SETTINGS.conversionHome,
+    conversionProduct: settings.conversion_product ?? DEFAULT_SETTINGS.conversionProduct,
+    conversionCheckout: settings.conversion_checkout ?? DEFAULT_SETTINGS.conversionCheckout,
+    conversionTitle: settings.conversion_title ?? DEFAULT_SETTINGS.conversionTitle,
+    conversionText: settings.conversion_text ?? DEFAULT_SETTINGS.conversionText,
+    conversionBenefits: settings.conversion_benefits ?? DEFAULT_SETTINGS.conversionBenefits,
+    conversionUrgency: settings.conversion_urgency ?? DEFAULT_SETTINGS.conversionUrgency
   };
 }
 
@@ -272,7 +288,15 @@ function appSettingsToDb(settings) {
     social_proof_product: settings.socialProofProduct,
     social_proof_label: settings.socialProofLabel,
     social_proof_delay_seconds: settings.socialProofDelaySeconds,
-    social_proof_interval_seconds: settings.socialProofIntervalSeconds
+    social_proof_interval_seconds: settings.socialProofIntervalSeconds,
+    conversion_enabled: settings.conversionEnabled,
+    conversion_home: settings.conversionHome,
+    conversion_product: settings.conversionProduct,
+    conversion_checkout: settings.conversionCheckout,
+    conversion_title: settings.conversionTitle,
+    conversion_text: settings.conversionText,
+    conversion_benefits: settings.conversionBenefits,
+    conversion_urgency: settings.conversionUrgency
   };
 }
 
@@ -402,7 +426,15 @@ function publicSettings(settings) {
     socialProofProduct: settings.socialProofProduct,
     socialProofLabel: settings.socialProofLabel,
     socialProofDelaySeconds: settings.socialProofDelaySeconds,
-    socialProofIntervalSeconds: settings.socialProofIntervalSeconds
+    socialProofIntervalSeconds: settings.socialProofIntervalSeconds,
+    conversionEnabled: settings.conversionEnabled,
+    conversionHome: settings.conversionHome,
+    conversionProduct: settings.conversionProduct,
+    conversionCheckout: settings.conversionCheckout,
+    conversionTitle: settings.conversionTitle,
+    conversionText: settings.conversionText,
+    conversionBenefits: settings.conversionBenefits,
+    conversionUrgency: settings.conversionUrgency
   };
 }
 
@@ -481,7 +513,15 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     socialProofProduct: Boolean(req.body.socialProofProduct),
     socialProofLabel: limitText(req.body.socialProofLabel || DEFAULT_SETTINGS.socialProofLabel, 60),
     socialProofDelaySeconds: Math.max(2, Math.min(60, Number(req.body.socialProofDelaySeconds || DEFAULT_SETTINGS.socialProofDelaySeconds))),
-    socialProofIntervalSeconds: Math.max(10, Math.min(180, Number(req.body.socialProofIntervalSeconds || DEFAULT_SETTINGS.socialProofIntervalSeconds)))
+    socialProofIntervalSeconds: Math.max(10, Math.min(180, Number(req.body.socialProofIntervalSeconds || DEFAULT_SETTINGS.socialProofIntervalSeconds))),
+    conversionEnabled: Boolean(req.body.conversionEnabled),
+    conversionHome: Boolean(req.body.conversionHome),
+    conversionProduct: Boolean(req.body.conversionProduct),
+    conversionCheckout: Boolean(req.body.conversionCheckout),
+    conversionTitle: limitText(req.body.conversionTitle || DEFAULT_SETTINGS.conversionTitle, 90),
+    conversionText: limitText(req.body.conversionText || DEFAULT_SETTINGS.conversionText, 180),
+    conversionBenefits: limitText(req.body.conversionBenefits || DEFAULT_SETTINGS.conversionBenefits, 320),
+    conversionUrgency: limitText(req.body.conversionUrgency || DEFAULT_SETTINGS.conversionUrgency, 80)
   };
   await writeDb(db);
   res.json({ settings: db.settings });

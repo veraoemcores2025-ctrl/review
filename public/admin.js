@@ -81,6 +81,15 @@ function settingsPayloadFromForm() {
   payload.socialProofEnabled = settingsForm.socialProofEnabled.checked;
   payload.socialProofHome = settingsForm.socialProofHome.checked;
   payload.socialProofProduct = settingsForm.socialProofProduct.checked;
+  payload.conversionEnabled = settingsForm.conversionEnabled.checked;
+  payload.conversionHome = settingsForm.conversionHome.checked;
+  payload.conversionProduct = settingsForm.conversionProduct.checked;
+  payload.conversionCheckout = settingsForm.conversionCheckout.checked;
+  payload.conversionBenefits = String(payload.conversionBenefits || '')
+    .split(/\n|\|/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join('|');
   payload.maxReviews = Number(payload.maxReviews);
   payload.displayMode = settingsForm.displayMode.value;
   payload.titleFontSize = Number(payload.titleFontSize);
@@ -234,6 +243,14 @@ async function loadSettings() {
   settingsForm.socialProofLabel.value = settings.socialProofLabel || 'Cliente real aprovou';
   settingsForm.socialProofDelaySeconds.value = settings.socialProofDelaySeconds || 6;
   settingsForm.socialProofIntervalSeconds.value = settings.socialProofIntervalSeconds || 26;
+  settingsForm.conversionEnabled.checked = settings.conversionEnabled !== false;
+  settingsForm.conversionHome.checked = settings.conversionHome !== false;
+  settingsForm.conversionProduct.checked = settings.conversionProduct !== false;
+  settingsForm.conversionCheckout.checked = Boolean(settings.conversionCheckout);
+  settingsForm.conversionTitle.value = settings.conversionTitle || 'Compra segura na Verao em Cores';
+  settingsForm.conversionText.value = settings.conversionText || 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.';
+  settingsForm.conversionBenefits.value = String(settings.conversionBenefits || 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp').split('|').join('\n');
+  settingsForm.conversionUrgency.value = settings.conversionUrgency || 'Oferta por tempo limitado';
   updatePreviewFromForm();
 }
 

@@ -31,6 +31,7 @@
           <button class="nav-item is-active" type="button" data-open-panel="overview">Vis&atilde;o geral</button>
           <button class="nav-item" type="button" data-open-panel="widget">Widget</button>
           <button class="nav-item" type="button" data-open-panel="popup">Popup</button>
+          <button class="nav-item" type="button" data-open-panel="conversion">Convers&atilde;o</button>
           <button class="nav-item" type="button" data-open-panel="new-review">Nova avalia&ccedil;&atilde;o</button>
           <button class="nav-item" type="button" data-open-panel="reviews">Avalia&ccedil;&otilde;es</button>
           <button class="nav-item" type="button" data-open-panel="preview">Preview</button>
@@ -81,6 +82,10 @@
               <button class="quick-card" type="button" data-open-panel="widget">
                 <strong>Editar visual</strong>
                 <span>Mude cores, t&iacute;tulos, carrossel e quantidade.</span>
+              </button>
+              <button class="quick-card" type="button" data-open-panel="conversion">
+                <strong>Melhorar convers&atilde;o</strong>
+                <span>Configure mensagens de confian&ccedil;a, urg&ecirc;ncia e seguran&ccedil;a.</span>
               </button>
             </div>
           </section>
@@ -243,6 +248,61 @@
                 </label>
 
                 <p class="message wide">Essas configura&ccedil;&otilde;es usam as avalia&ccedil;&otilde;es aprovadas da sua lista.</p>
+              </div>
+            </section>
+
+            <section class="panel panel-page" data-panel="conversion" hidden>
+              <div class="section-head">
+                <div>
+                  <p class="section-kicker">Convers&atilde;o</p>
+                  <h2>Bloco de confian&ccedil;a da loja</h2>
+                  <p class="section-subtitle">Mostre seguran&ccedil;a, prova social e urg&ecirc;ncia perto da compra sem poluir a p&aacute;gina.</p>
+                </div>
+                <button class="ghost" type="submit">Salvar convers&atilde;o</button>
+              </div>
+              <div class="form">
+                <label class="check">
+                  <input name="conversionEnabled" type="checkbox">
+                  Ativar bloco de convers&atilde;o
+                </label>
+
+                <label class="check">
+                  <input name="conversionHome" type="checkbox">
+                  Mostrar na home
+                </label>
+
+                <label class="check">
+                  <input name="conversionProduct" type="checkbox">
+                  Mostrar na p&aacute;gina do produto
+                </label>
+
+                <label class="check">
+                  <input name="conversionCheckout" type="checkbox">
+                  Mostrar no carrinho/checkout quando existir script nessa p&aacute;gina
+                </label>
+
+                <label class="wide">
+                  T&iacute;tulo do bloco
+                  <input name="conversionTitle" maxlength="90" placeholder="Compra segura na Verao em Cores">
+                </label>
+
+                <label class="wide">
+                  Texto de apoio
+                  <textarea name="conversionText" rows="3" maxlength="180" placeholder="Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca."></textarea>
+                </label>
+
+                <label class="wide">
+                  Benef&iacute;cios
+                  <textarea name="conversionBenefits" rows="4" maxlength="320" placeholder="Compra segura&#10;Fotos reais de clientes&#10;Pagamento protegido&#10;Atendimento no WhatsApp"></textarea>
+                  <small>Coloque um benef&iacute;cio por linha. Eles aparecem como selos compactos na loja.</small>
+                </label>
+
+                <label class="wide">
+                  Texto de urg&ecirc;ncia
+                  <input name="conversionUrgency" maxlength="80" placeholder="Oferta por tempo limitado">
+                </label>
+
+                <p class="message wide">Para aparecer no checkout, a wBuy precisa permitir script nessa etapa. Se permitir, use o mesmo script do widget nessa p&aacute;gina.</p>
               </div>
             </section>
           </form>
