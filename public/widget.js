@@ -6,6 +6,7 @@
   const existingStyleId = 'verao-reviews-widget-style';
   const socialProofId = 'verao-social-proof';
   const conversionId = 'verao-conversion-block';
+  const checkoutReviewsId = 'verao-checkout-reviews';
   const socialProofDismissKey = 'veraoSocialProofDismissed';
   let socialProofTimer = null;
   let socialProofTimeout = null;
@@ -658,6 +659,109 @@
         padding: 8px 10px;
       }
 
+      .vr-checkout-reviews {
+        --vr-brand: #b0565b;
+        --vr-font: inherit;
+        box-sizing: border-box;
+        color: #222;
+        font-family: var(--vr-font);
+        margin: 22px 0 0;
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .vr-checkout-reviews,
+      .vr-checkout-reviews * {
+        box-sizing: border-box;
+      }
+
+      .vr-checkout-reviews__head {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .vr-checkout-reviews__head strong {
+        color: #222;
+        font-size: 14px;
+        line-height: 1.25;
+      }
+
+      .vr-checkout-reviews__head span {
+        color: var(--vr-brand);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .vr-checkout-reviews__grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .vr-checkout-review {
+        background: #fff;
+        border: 1px solid #eee0e1;
+        border-radius: 10px;
+        min-width: 0;
+        padding: 12px;
+      }
+
+      .vr-checkout-review__top {
+        align-items: center;
+        display: flex;
+        gap: 9px;
+        margin-bottom: 8px;
+      }
+
+      .vr-checkout-review img {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        flex: 0 0 44px;
+        object-fit: cover;
+        width: 44px;
+      }
+
+      .vr-checkout-review__stars {
+        color: #ffc400;
+        font-size: 13px;
+        letter-spacing: .5px;
+        line-height: 1;
+      }
+
+      .vr-checkout-review__product {
+        color: var(--vr-brand);
+        display: -webkit-box;
+        font-size: 11px;
+        font-weight: 800;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        line-height: 1.25;
+        overflow: hidden;
+      }
+
+      .vr-checkout-review__text {
+        color: #333;
+        display: -webkit-box;
+        font-size: 12px;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        line-height: 1.35;
+        margin: 0 0 8px;
+        overflow: hidden;
+      }
+
+      .vr-checkout-review__customer {
+        color: #8a8a8a;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
       .vr-social-proof {
         align-items: center;
         background: rgba(255, 255, 255, .98);
@@ -879,6 +983,10 @@
         .vr-conversion__urgency {
           justify-self: start;
           white-space: normal;
+        }
+
+        .vr-checkout-reviews__grid {
+          grid-template-columns: 1fr;
         }
 
         .vr-social-proof {
@@ -1210,6 +1318,58 @@
     placeConversionBlock(block, mount, settings);
   }
 
+  function findCheckoutTotalAnchor() {
+    const totalLabel = findElementByText('span, p, strong, div, td, th', 'total');
+    return totalLabel?.closest('section, aside, div, table') || totalLabel;
+  }
+
+  function renderCheckoutReviews(reviews, settings) {
+    const existing = document.getElementById(checkoutReviewsId);
+    const visibleReviews = (reviews || []).filter((review) => review.imageUrl).slice(0, 4);
+    if (!isCheckoutLikePage() || !visibleReviews.length) {
+      existing?.remove();
+      return;
+    }
+
+    const anchor = findCheckoutTotalAnchor();
+    if (!anchor) {
+      existing?.remove();
+      return;
+    }
+
+    const block = existing || document.createElement('aside');
+    block.id = checkoutReviewsId;
+    block.className = 'vr-checkout-reviews';
+    block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
+    block.style.setProperty('--vr-font', fontStack(settings.fontFamily));
+    block.innerHTML = `
+      <div class="vr-checkout-reviews__head">
+        <strong>Clientes aprovaram</strong>
+        <span>${visibleReviews.length} fotos reais</span>
+      </div>
+      <div class="vr-checkout-reviews__grid">
+        ${visibleReviews.map((review) => `
+          <article class="vr-checkout-review">
+            <div class="vr-checkout-review__top">
+              <img src="${escapeHtml(review.imageUrl)}" alt="">
+              <div>
+                <div class="vr-checkout-review__stars">${stars(review.rating)}</div>
+                <div class="vr-checkout-review__product">${escapeHtml(review.productName)}</div>
+              </div>
+            </div>
+            <p class="vr-checkout-review__text">${escapeHtml(review.comment)}</p>
+            <div class="vr-checkout-review__customer">${escapeHtml(review.customerName || 'Cliente verificada')}</div>
+          </article>
+        `).join('')}
+      </div>
+    `;
+
+    loadWidgetFont(settings.fontFamily);
+    if (anchor.nextElementSibling !== block) {
+      anchor.insertAdjacentElement('afterend', block);
+    }
+  }
+
   function fontStack(fontFamily) {
     const family = String(fontFamily || 'inherit');
     if (family === 'Poppins') return "'Poppins', Arial, sans-serif";
@@ -1433,7 +1593,9 @@
         document.getElementById('verao-checkout-assist')?.remove();
         document.body.classList.remove('vr-checkout-enhanced');
         document.getElementById(conversionId)?.remove();
+        renderCheckoutReviews(data.reviews || [], settings);
         renderSocialProofToast(data.reviews || [], settings);
+        setTimeout(() => renderCheckoutReviews(data.reviews || [], settings), 1200);
         return;
       }
       await waitForPageAnchor();
