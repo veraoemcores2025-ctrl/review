@@ -22,6 +22,9 @@
     kickerColor: '#b0565b',
     titleColor: '#111827',
     subtitleColor: '#4b5563',
+    fontFamily: 'inherit',
+    titleFontSize: 28,
+    textFontSize: 15,
     maxReviews: 8,
     displayMode: 'grid',
     hideNativeHomeReviews: false,
@@ -92,7 +95,10 @@
         --vr-kicker: #b0565b;
         --vr-title: #111827;
         --vr-subtitle: #4b5563;
-        font-family: inherit;
+        --vr-font: inherit;
+        --vr-title-size: 28px;
+        --vr-text-size: 15px;
+        font-family: var(--vr-font);
         background: var(--vr-bg);
         clear: both !important;
         display: block !important;
@@ -173,7 +179,7 @@
 
       .vr-widget h2 {
         color: var(--vr-title);
-        font-size: 28px;
+        font-size: var(--vr-title-size);
         font-weight: 800;
         line-height: 1.2;
         margin: 0;
@@ -184,7 +190,7 @@
 
       .vr-widget__subtitle {
         color: var(--vr-subtitle);
-        font-size: 15px;
+        font-size: var(--vr-text-size);
         margin: 10px 0 0;
         position: static !important;
         top: auto !important;
@@ -232,7 +238,7 @@
 
       .vr-proof__text {
         color: var(--vr-subtitle);
-        font-size: 13px;
+        font-size: calc(var(--vr-text-size) - 2px);
         line-height: 1.45;
         margin: 0;
       }
@@ -390,7 +396,7 @@
       .vr-card__comment {
         color: #333;
         display: -webkit-box;
-        font-size: 13px;
+        font-size: calc(var(--vr-text-size) - 2px);
         -webkit-line-clamp: 4;
         -webkit-box-orient: vertical;
         line-height: 1.5;
@@ -401,7 +407,7 @@
       .vr-card__product {
         color: var(--vr-brand);
         display: -webkit-box;
-        font-size: 12px;
+        font-size: calc(var(--vr-text-size) - 3px);
         font-weight: 800;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -411,7 +417,7 @@
 
       .vr-card__customer {
         color: var(--vr-muted);
-        font-size: 12px;
+        font-size: calc(var(--vr-text-size) - 3px);
       }
 
       .vr-widget__button {
@@ -699,7 +705,7 @@
         }
 
         .vr-widget h2 {
-          font-size: 23px;
+          font-size: max(23px, calc(var(--vr-title-size) - 5px));
         }
 
         .vr-widget__grid {
@@ -938,6 +944,31 @@
     });
   }
 
+  function fontStack(fontFamily) {
+    const family = String(fontFamily || 'inherit');
+    if (family === 'Poppins') return "'Poppins', Arial, sans-serif";
+    if (family === 'Montserrat') return "'Montserrat', Arial, sans-serif";
+    if (family === 'Playfair Display') return "'Playfair Display', Georgia, serif";
+    if (family === 'Georgia') return "Georgia, 'Times New Roman', serif";
+    if (family === 'Arial') return 'Arial, Helvetica, sans-serif';
+    return 'inherit';
+  }
+
+  function loadWidgetFont(fontFamily) {
+    const fonts = {
+      Poppins: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap',
+      Montserrat: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap',
+      'Playfair Display': 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&display=swap'
+    };
+    const href = fonts[fontFamily];
+    if (!href || document.querySelector(`link[href="${href}"]`)) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
   function canUseSessionStorage() {
     try {
       window.sessionStorage.setItem('__vr_test', '1');
@@ -1072,6 +1103,10 @@
     widget?.style.setProperty('--vr-kicker', settings.kickerColor || defaultSettings.kickerColor);
     widget?.style.setProperty('--vr-title', settings.titleColor || defaultSettings.titleColor);
     widget?.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
+    loadWidgetFont(settings.fontFamily);
+    widget?.style.setProperty('--vr-font', fontStack(settings.fontFamily));
+    widget?.style.setProperty('--vr-title-size', `${Math.max(20, Math.min(44, Number(settings.titleFontSize || defaultSettings.titleFontSize)))}px`);
+    widget?.style.setProperty('--vr-text-size', `${Math.max(12, Math.min(22, Number(settings.textFontSize || defaultSettings.textFontSize)))}px`);
 
     mount.querySelectorAll('[data-vr-card-photo]').forEach((image) => {
       image.addEventListener('click', () => {

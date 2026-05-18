@@ -196,6 +196,9 @@ async function loadSettings() {
   settingsForm.backgroundColor.value = settings.backgroundColor || '#fff7f7';
   settingsForm.headerBackgroundColor.value = settings.headerBackgroundColor || '#f4f6f5';
   settingsForm.textColor.value = settings.textColor || '#222222';
+  settingsForm.fontFamily.value = settings.fontFamily || 'inherit';
+  settingsForm.titleFontSize.value = settings.titleFontSize || 28;
+  settingsForm.textFontSize.value = settings.textFontSize || 15;
   settingsForm.displayMode.value = settings.displayMode || 'grid';
   settingsForm.maxReviews.value = settings.maxReviews;
   settingsForm.hideNativeHomeReviews.checked = Boolean(settings.hideNativeHomeReviews);
@@ -242,6 +245,8 @@ settingsForm.addEventListener('submit', async (event) => {
   payload.socialProofProduct = settingsForm.socialProofProduct.checked;
   payload.maxReviews = Number(payload.maxReviews);
   payload.displayMode = settingsForm.displayMode.value;
+  payload.titleFontSize = Number(payload.titleFontSize);
+  payload.textFontSize = Number(payload.textFontSize);
   payload.socialProofDelaySeconds = Number(payload.socialProofDelaySeconds);
   payload.socialProofIntervalSeconds = Number(payload.socialProofIntervalSeconds);
 

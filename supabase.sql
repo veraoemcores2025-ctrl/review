@@ -12,6 +12,9 @@ create table if not exists public.review_settings (
   kicker_color text not null default '#b0565b',
   title_color text not null default '#111827',
   subtitle_color text not null default '#4b5563',
+  font_family text not null default 'inherit',
+  title_font_size integer not null default 28,
+  text_font_size integer not null default 15,
   max_reviews integer not null default 8,
   display_mode text not null default 'grid' check (display_mode in ('grid', 'carousel')),
   hide_native_home_reviews boolean not null default false,
@@ -41,6 +44,15 @@ alter table public.review_settings
 
 alter table public.review_settings
   add column if not exists subtitle_color text not null default '#4b5563';
+
+alter table public.review_settings
+  add column if not exists font_family text not null default 'inherit';
+
+alter table public.review_settings
+  add column if not exists title_font_size integer not null default 28;
+
+alter table public.review_settings
+  add column if not exists text_font_size integer not null default 15;
 
 alter table public.review_settings
   add column if not exists display_mode text not null default 'grid';
