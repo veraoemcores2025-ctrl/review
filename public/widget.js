@@ -1274,8 +1274,15 @@
     `;
 
     if (window.matchMedia('(max-width: 640px)').matches) {
-      const productBox = anchor.closest('form, .acoes, .comprar, .produto_detalhes, #produto') || anchor;
-      productBox.insertAdjacentElement('afterend', badge);
+      const freightText = Array.from(document.querySelectorAll('#produto *')).find((item) => (
+        item.textContent || ''
+      ).trim().toLowerCase().includes('calcular frete'));
+      const freightBox = freightText?.closest('.frete, .calcula_frete, [class*="frete"], [id*="frete"], div');
+      if (freightBox && freightBox !== document.querySelector('#produto')) {
+        freightBox.insertAdjacentElement('beforebegin', badge);
+      } else {
+        anchor.insertAdjacentElement('afterend', badge);
+      }
     } else {
       anchor.insertAdjacentElement('afterend', badge);
     }
