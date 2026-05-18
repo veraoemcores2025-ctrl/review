@@ -622,6 +622,38 @@
         white-space: nowrap;
       }
 
+      .vr-conversion--checkout {
+        border-radius: 12px;
+        box-shadow: 0 10px 24px rgba(17, 24, 39, .06);
+        gap: 12px;
+        grid-template-columns: 1fr;
+        margin: 16px 0;
+        max-width: 100%;
+        padding: 14px;
+        width: 100%;
+      }
+
+      .vr-conversion--checkout h3 {
+        font-size: 16px;
+      }
+
+      .vr-conversion--checkout .vr-conversion__text {
+        font-size: 12px;
+      }
+
+      .vr-conversion--checkout .vr-conversion__benefits {
+        gap: 6px;
+      }
+
+      .vr-conversion--checkout .vr-conversion__pill {
+        font-size: 11px;
+        padding: 6px 9px;
+      }
+
+      .vr-conversion--checkout .vr-conversion__urgency {
+        justify-self: start;
+      }
+
       .vr-social-proof {
         align-items: center;
         background: rgba(255, 255, 255, .98);
@@ -957,7 +989,12 @@
 
   function waitForPageAnchor() {
     return new Promise((resolve) => {
-      if (document.querySelector('main.page_home') || document.querySelector('footer') || document.querySelector('#produto')) {
+      const hasAnchor = () => document.querySelector('main.page_home')
+        || document.querySelector('footer')
+        || document.querySelector('#produto')
+        || findElementByText('h1, h2, h3, h4, strong, .titulo, .title', 'resumo da compra');
+
+      if (hasAnchor()) {
         resolve(true);
         return;
       }
@@ -965,7 +1002,7 @@
       let tries = 0;
       const interval = setInterval(() => {
         tries += 1;
-        if (document.querySelector('main.page_home') || document.querySelector('footer') || document.querySelector('#produto')) {
+        if (hasAnchor()) {
           clearInterval(interval);
           resolve(true);
         } else if (tries >= 16) {
@@ -1072,6 +1109,13 @@
     return /carrinho|checkout|finalizar|pagamento|pedido/i.test(window.location.pathname + window.location.search);
   }
 
+  function findElementByText(selector, text) {
+    const normalizedText = text.toLowerCase();
+    return Array.from(document.querySelectorAll(selector)).find((item) => (
+      item.textContent || ''
+    ).trim().toLowerCase().includes(normalizedText));
+  }
+
   function conversionShouldShow(settings) {
     const isPlatformPage = ['/admin.html', '/login.html', '/avaliar.html'].includes(window.location.pathname);
     const isAdminPreview = window.location.pathname === '/admin.html' && document.getElementById(safeMountId);
@@ -1098,9 +1142,21 @@
     }
 
     if (isCheckoutLikePage()) {
+      const summaryTitle = findElementByText('h1, h2, h3, h4, strong, .titulo, .title', 'resumo da compra');
+      const summaryBox = summaryTitle?.closest('aside, section, [class*="resumo"], [class*="summary"], [class*="checkout"], div');
+      if (summaryTitle && summaryTitle.nextElementSibling !== block) {
+        summaryTitle.insertAdjacentElement('afterend', block);
+        return;
+      }
+
+      if (summaryBox && summaryBox.firstElementChild !== block) {
+        summaryBox.insertAdjacentElement('afterbegin', block);
+        return;
+      }
+
       const target = document.querySelector('main, #main, .checkout, .carrinho, form') || document.body.firstElementChild;
-      if (target && target.previousElementSibling !== block) {
-        target.insertAdjacentElement('beforebegin', block);
+      if (target && target.firstElementChild !== block) {
+        target.insertAdjacentElement('afterbegin', block);
         return;
       }
     }
@@ -1121,7 +1177,7 @@
 
     const block = existing || document.createElement('aside');
     block.id = conversionId;
-    block.className = 'vr-conversion';
+    block.className = `vr-conversion${isCheckoutLikePage() ? ' vr-conversion--checkout' : ''}`;
     block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
     block.style.setProperty('--vr-title', settings.titleColor || defaultSettings.titleColor);
     block.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
@@ -1210,6 +1266,7 @@
   function renderSocialProofToast(reviews, settings) {
     const isPlatformPage = ['/admin.html', '/login.html', '/avaliar.html'].includes(window.location.pathname);
     if (isPlatformPage) return removeSocialProofToast();
+    if (isCheckoutLikePage()) return removeSocialProofToast();
     if (settings.socialProofEnabled === false) return removeSocialProofToast();
     if (settings.productContext && settings.socialProofProduct === false) return removeSocialProofToast();
     if (!settings.productContext && settings.socialProofHome === false) return removeSocialProofToast();
@@ -1365,6 +1422,12 @@
       const response = await fetch(`${baseUrl}/api/reviews${query}`, { cache: 'no-store' });
       const data = await response.json();
       const settings = { ...defaultSettings, ...(data.settings || {}), ...(overrideSettings || {}), productContext };
+      if (isCheckoutLikePage()) {
+        await waitForPageAnchor();
+        renderConversionBlock(data.reviews || [], settings, null);
+        renderSocialProofToast(data.reviews || [], settings);
+        return;
+      }
       await waitForPageAnchor();
       const mount = settings.hideNativeHomeReviews ? createNativeMount() : createMount(settings);
       render(mount, data.reviews || [], settings);
