@@ -6,7 +6,6 @@
   const existingStyleId = 'verao-reviews-widget-style';
   const socialProofId = 'verao-social-proof';
   const conversionId = 'verao-conversion-block';
-  const checkoutAssistId = 'verao-checkout-assist';
   const socialProofDismissKey = 'veraoSocialProofDismissed';
   let socialProofTimer = null;
   let socialProofTimeout = null;
@@ -624,130 +623,39 @@
       }
 
       .vr-conversion--checkout {
-        border-radius: 12px;
-        box-shadow: 0 10px 24px rgba(17, 24, 39, .06);
-        gap: 12px;
-        grid-template-columns: 1fr;
-        margin: 16px 0;
+        align-items: center;
+        border-radius: 10px;
+        box-shadow: none;
+        gap: 10px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        margin: 14px 0 20px;
         max-width: 100%;
-        padding: 14px;
+        padding: 12px 14px;
         width: 100%;
       }
 
       .vr-conversion--checkout h3 {
-        font-size: 16px;
+        font-size: 15px;
       }
 
       .vr-conversion--checkout .vr-conversion__text {
         font-size: 12px;
+        margin-top: 4px;
       }
 
       .vr-conversion--checkout .vr-conversion__benefits {
         gap: 6px;
+        margin-top: 8px;
       }
 
       .vr-conversion--checkout .vr-conversion__pill {
         font-size: 11px;
-        padding: 6px 9px;
+        padding: 5px 8px;
       }
 
       .vr-conversion--checkout .vr-conversion__urgency {
-        justify-self: start;
-      }
-
-      body.vr-checkout-enhanced {
-        background: #faf8f8 !important;
-      }
-
-      body.vr-checkout-enhanced input[type="email"],
-      body.vr-checkout-enhanced input[name*="email" i],
-      body.vr-checkout-enhanced input[placeholder*="email" i],
-      body.vr-checkout-enhanced input[placeholder*="e-mail" i] {
-        border: 1px solid #d9c5c7 !important;
-        border-radius: 10px !important;
-        box-shadow: 0 0 0 4px rgba(176, 86, 91, .05) !important;
-        min-height: 52px !important;
-      }
-
-      body.vr-checkout-enhanced input[type="email"]:focus,
-      body.vr-checkout-enhanced input[name*="email" i]:focus,
-      body.vr-checkout-enhanced input[placeholder*="email" i]:focus,
-      body.vr-checkout-enhanced input[placeholder*="e-mail" i]:focus {
-        border-color: var(--vr-brand, #b0565b) !important;
-        box-shadow: 0 0 0 4px rgba(176, 86, 91, .12) !important;
-        outline: none !important;
-      }
-
-      .vr-checkout-assist {
-        --vr-brand: #b0565b;
-        --vr-font: inherit;
-        background: linear-gradient(135deg, rgba(176, 86, 91, .10), rgba(255, 255, 255, .98));
-        border: 1px solid #f0dddd;
-        border-radius: 14px;
-        box-shadow: 0 12px 28px rgba(17, 24, 39, .06);
-        box-sizing: border-box;
-        color: #2b2021;
-        font-family: var(--vr-font);
-        margin: 14px 0;
-        padding: 14px;
-      }
-
-      .vr-checkout-assist,
-      .vr-checkout-assist * {
-        box-sizing: border-box;
-      }
-
-      .vr-checkout-assist__top {
-        align-items: center;
-        display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
-      }
-
-      .vr-checkout-assist__icon {
-        align-items: center;
-        background: var(--vr-brand);
-        border-radius: 999px;
-        color: #fff;
-        display: inline-flex;
-        flex: 0 0 32px;
-        font-size: 15px;
-        font-weight: 800;
-        height: 32px;
-        justify-content: center;
-        width: 32px;
-      }
-
-      .vr-checkout-assist strong {
-        display: block;
-        font-size: 14px;
-        line-height: 1.25;
-      }
-
-      .vr-checkout-assist span {
-        color: #6b5356;
-        display: block;
-        font-size: 12px;
-        line-height: 1.35;
-        margin-top: 2px;
-      }
-
-      .vr-checkout-assist__list {
-        display: grid;
-        gap: 7px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-
-      .vr-checkout-assist__item {
-        background: rgba(255, 255, 255, .84);
-        border: 1px solid rgba(240, 221, 221, .95);
-        border-radius: 10px;
-        color: #5b3438;
         font-size: 11px;
-        font-weight: 800;
-        line-height: 1.25;
-        padding: 8px;
-        text-align: center;
+        padding: 8px 10px;
       }
 
       .vr-social-proof {
@@ -971,10 +879,6 @@
         .vr-conversion__urgency {
           justify-self: start;
           white-space: normal;
-        }
-
-        .vr-checkout-assist__list {
-          grid-template-columns: 1fr;
         }
 
         .vr-social-proof {
@@ -1242,15 +1146,17 @@
     }
 
     if (isCheckoutLikePage()) {
-      const summaryTitle = findElementByText('h1, h2, h3, h4, strong, .titulo, .title', 'resumo da compra');
-      const summaryBox = summaryTitle?.closest('aside, section, [class*="resumo"], [class*="summary"], [class*="checkout"], div');
-      if (summaryTitle && summaryTitle.nextElementSibling !== block) {
-        summaryTitle.insertAdjacentElement('afterend', block);
+      const safeMessage = findElementByText('span, p, div, strong', 'ambiente seguro');
+      const safeBox = safeMessage?.closest('section, header, .row, .container, div');
+      if (safeBox && safeBox.nextElementSibling !== block) {
+        safeBox.insertAdjacentElement('afterend', block);
         return;
       }
 
-      if (summaryBox && summaryBox.firstElementChild !== block) {
-        summaryBox.insertAdjacentElement('afterbegin', block);
+      const infoTitle = findElementByText('h1, h2, h3, h4, strong, .titulo, .title, div', 'informações');
+      const infoBox = infoTitle?.closest('section, form, div');
+      if (infoBox && infoBox.previousElementSibling !== block) {
+        infoBox.insertAdjacentElement('beforebegin', block);
         return;
       }
 
@@ -1265,48 +1171,6 @@
       mount.insertAdjacentElement('beforebegin', block);
     } else if (!block.parentElement) {
       document.body.appendChild(block);
-    }
-  }
-
-  function checkoutEmailAnchor() {
-    return document.querySelector('input[type="email"], input[name*="email" i], input[placeholder*="email" i], input[placeholder*="e-mail" i]');
-  }
-
-  function renderCheckoutAssist(settings) {
-    if (!isCheckoutLikePage()) return;
-    document.body.classList.add('vr-checkout-enhanced');
-    document.body.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
-
-    const emailInput = checkoutEmailAnchor();
-    const anchor = emailInput?.closest('label, form, div') || emailInput;
-    if (!anchor) return;
-
-    let assist = document.getElementById(checkoutAssistId);
-    if (!assist) {
-      assist = document.createElement('aside');
-      assist.id = checkoutAssistId;
-      assist.className = 'vr-checkout-assist';
-    }
-
-    assist.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
-    assist.style.setProperty('--vr-font', fontStack(settings.fontFamily));
-    assist.innerHTML = `
-      <div class="vr-checkout-assist__top">
-        <span class="vr-checkout-assist__icon">✓</span>
-        <div>
-          <strong>Finalização protegida</strong>
-          <span>Complete seus dados com segurança. Seus produtos ficam reservados enquanto você conclui a compra.</span>
-        </div>
-      </div>
-      <div class="vr-checkout-assist__list">
-        <div class="vr-checkout-assist__item">Pagamento seguro</div>
-        <div class="vr-checkout-assist__item">Fotos reais aprovadas</div>
-        <div class="vr-checkout-assist__item">Atendimento humano</div>
-      </div>
-    `;
-
-    if (anchor.nextElementSibling !== assist) {
-      anchor.insertAdjacentElement('afterend', assist);
     }
   }
 
@@ -1566,11 +1430,11 @@
       const settings = { ...defaultSettings, ...(data.settings || {}), ...(overrideSettings || {}), productContext };
       if (isCheckoutLikePage()) {
         await waitForPageAnchor();
-        renderCheckoutAssist(settings);
+        document.getElementById('verao-checkout-assist')?.remove();
+        document.body.classList.remove('vr-checkout-enhanced');
         renderConversionBlock(data.reviews || [], settings, null);
         renderSocialProofToast(data.reviews || [], settings);
         setTimeout(() => {
-          renderCheckoutAssist(settings);
           renderConversionBlock(data.reviews || [], settings, null);
         }, 1200);
         return;
