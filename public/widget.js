@@ -1000,32 +1000,51 @@
           border-left: 0;
           border-radius: 0;
           border-right: 0;
+          box-sizing: border-box !important;
           box-shadow: none;
+          clear: both !important;
+          float: none !important;
           gap: 8px;
-          margin: 18px 0;
-          max-width: none;
-          padding: 14px 0;
+          margin: 18px 0 !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          overflow: hidden !important;
+          padding: 14px 0 !important;
+          position: relative !important;
+          transform: none !important;
+          width: 100% !important;
         }
 
         .vr-product-proof__top {
           align-items: flex-start;
           display: grid;
           gap: 5px;
+          min-width: 0;
         }
 
         .vr-product-proof__stars {
           font-size: 18px;
           letter-spacing: 0;
+          max-width: 100%;
+          overflow: hidden;
         }
 
         .vr-product-proof__title {
           font-size: 13px;
           line-height: 1.3;
+          overflow-wrap: anywhere;
         }
 
         .vr-product-proof__text {
           font-size: 12px;
           line-height: 1.4;
+          overflow-wrap: anywhere;
+        }
+
+        .vr-product-proof__photos {
+          max-width: 100%;
+          overflow-x: auto;
+          padding-bottom: 2px;
         }
 
         .vr-product-proof__photos img {
@@ -1254,7 +1273,12 @@
       <a class="vr-product-proof__link" href="#${safeMountId}">Ver todas as fotos e avalia\u00e7\u00f5es</a>
     `;
 
-    anchor.insertAdjacentElement('afterend', badge);
+    if (window.matchMedia('(max-width: 640px)').matches) {
+      const productBox = anchor.closest('form, .acoes, .comprar, .produto_detalhes, #produto') || anchor;
+      productBox.insertAdjacentElement('afterend', badge);
+    } else {
+      anchor.insertAdjacentElement('afterend', badge);
+    }
     badge.querySelectorAll('[data-vr-proof-photo]').forEach((button) => {
       button.addEventListener('click', () => openReviewLightbox(reviews[Number(button.dataset.vrProofPhoto)]));
     });
