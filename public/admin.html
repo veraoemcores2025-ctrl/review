@@ -251,58 +251,118 @@
               </div>
             </section>
 
-            <section class="panel panel-page" data-panel="conversion" hidden>
+            <section class="panel panel-page conversion-panel" data-panel="conversion" hidden>
               <div class="section-head">
                 <div>
                   <p class="section-kicker">Convers&atilde;o</p>
-                  <h2>Bloco de confian&ccedil;a da loja</h2>
-                  <p class="section-subtitle">Mostre seguran&ccedil;a, prova social e urg&ecirc;ncia perto da compra sem poluir a p&aacute;gina.</p>
+                  <h2>Central de convers&atilde;o</h2>
+                  <p class="section-subtitle">Controle os argumentos de confian&ccedil;a que aparecem antes da cliente comprar: prova social, seguran&ccedil;a, urg&ecirc;ncia e benef&iacute;cios.</p>
                 </div>
                 <button class="ghost" type="submit">Salvar convers&atilde;o</button>
               </div>
-              <div class="form">
-                <label class="check">
-                  <input name="conversionEnabled" type="checkbox">
-                  Ativar bloco de convers&atilde;o
-                </label>
+              <div class="conversion-layout">
+                <div class="conversion-editor">
+                  <div class="conversion-card">
+                    <div class="conversion-card__head">
+                      <span>01</span>
+                      <div>
+                        <strong>Onde mostrar</strong>
+                        <small>Escolha as p&aacute;ginas que recebem refor&ccedil;o de confian&ccedil;a.</small>
+                      </div>
+                    </div>
+                    <div class="conversion-switches">
+                      <label class="check conversion-switch">
+                        <input name="conversionEnabled" type="checkbox">
+                        <span>
+                          Ativar convers&atilde;o
+                          <small>Liga ou desliga os recursos desta &aacute;rea.</small>
+                        </span>
+                      </label>
 
-                <label class="check">
-                  <input name="conversionHome" type="checkbox">
-                  Mostrar na home
-                </label>
+                      <label class="check conversion-switch">
+                        <input name="conversionHome" type="checkbox">
+                        <span>
+                          Home
+                          <small>Refor&ccedil;o para quem acabou de chegar.</small>
+                        </span>
+                      </label>
 
-                <label class="check">
-                  <input name="conversionProduct" type="checkbox">
-                  Mostrar na p&aacute;gina do produto
-                </label>
+                      <label class="check conversion-switch">
+                        <input name="conversionProduct" type="checkbox">
+                        <span>
+                          Produto
+                          <small>Ideal perto do bot&atilde;o de compra.</small>
+                        </span>
+                      </label>
 
-                <label class="check">
-                  <input name="conversionCheckout" type="checkbox">
-                  Mostrar no carrinho/checkout quando existir script nessa p&aacute;gina
-                </label>
+                      <label class="check conversion-switch">
+                        <input name="conversionCheckout" type="checkbox">
+                        <span>
+                          Checkout
+                          <small>Use com cuidado; hoje mostramos avalia&ccedil;&otilde;es compactas.</small>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
 
-                <label class="wide">
-                  T&iacute;tulo do bloco
-                  <input name="conversionTitle" maxlength="90" placeholder="Compra segura na Verao em Cores">
-                </label>
+                  <div class="conversion-card">
+                    <div class="conversion-card__head">
+                      <span>02</span>
+                      <div>
+                        <strong>Mensagem principal</strong>
+                        <small>Escreva uma promessa clara e curta para reduzir inseguran&ccedil;a.</small>
+                      </div>
+                    </div>
+                    <div class="form conversion-form">
+                      <label class="wide">
+                        T&iacute;tulo
+                        <input name="conversionTitle" maxlength="90" placeholder="Compra segura na Verao em Cores">
+                      </label>
 
-                <label class="wide">
-                  Texto de apoio
-                  <textarea name="conversionText" rows="3" maxlength="180" placeholder="Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca."></textarea>
-                </label>
+                      <label class="wide">
+                        Texto de apoio
+                        <textarea name="conversionText" rows="3" maxlength="180" placeholder="Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca."></textarea>
+                      </label>
 
-                <label class="wide">
-                  Benef&iacute;cios
-                  <textarea name="conversionBenefits" rows="4" maxlength="320" placeholder="Compra segura&#10;Fotos reais de clientes&#10;Pagamento protegido&#10;Atendimento no WhatsApp"></textarea>
-                  <small>Coloque um benef&iacute;cio por linha. Eles aparecem como selos compactos na loja.</small>
-                </label>
+                      <label class="wide">
+                        Texto de urg&ecirc;ncia
+                        <input name="conversionUrgency" maxlength="80" placeholder="Oferta por tempo limitado">
+                      </label>
+                    </div>
+                  </div>
 
-                <label class="wide">
-                  Texto de urg&ecirc;ncia
-                  <input name="conversionUrgency" maxlength="80" placeholder="Oferta por tempo limitado">
-                </label>
+                  <div class="conversion-card">
+                    <div class="conversion-card__head">
+                      <span>03</span>
+                      <div>
+                        <strong>Selos de confian&ccedil;a</strong>
+                        <small>Coloque um benef&iacute;cio por linha. O preview monta os selos automaticamente.</small>
+                      </div>
+                    </div>
+                    <label class="wide">
+                      Benef&iacute;cios
+                      <textarea name="conversionBenefits" rows="5" maxlength="320" placeholder="Compra segura&#10;Fotos reais de clientes&#10;Pagamento protegido&#10;Atendimento no WhatsApp"></textarea>
+                    </label>
+                  </div>
+                </div>
 
-                <p class="message wide">Para aparecer no checkout, a wBuy precisa permitir script nessa etapa. Se permitir, use o mesmo script do widget nessa p&aacute;gina.</p>
+                <aside class="conversion-preview-shell" aria-label="Preview de convers&atilde;o">
+                  <div class="conversion-preview-sticky">
+                    <p class="section-kicker">Preview</p>
+                    <h3>Como a cliente vai perceber</h3>
+                    <div class="conversion-preview-card" id="conversionPreview">
+                      <span class="conversion-preview-card__kicker">Prova social ativa</span>
+                      <strong>Compra segura na Verao em Cores</strong>
+                      <p>Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.</p>
+                      <div class="conversion-preview-card__pills"></div>
+                      <em>Oferta por tempo limitado</em>
+                    </div>
+                    <div class="conversion-notes">
+                      <strong>Melhor uso</strong>
+                      <p>Produto e home funcionam melhor para convers&atilde;o. No checkout, prefira avalia&ccedil;&otilde;es compactas abaixo do valor.</p>
+                    </div>
+                  </div>
+                </aside>
               </div>
             </section>
           </form>

@@ -11,6 +11,7 @@ const metricTotal = document.querySelector('#metricTotal');
 const metricPending = document.querySelector('#metricPending');
 const metricActive = document.querySelector('#metricActive');
 const metricRating = document.querySelector('#metricRating');
+const conversionPreview = document.querySelector('#conversionPreview');
 const panels = document.querySelectorAll('[data-panel]');
 const panelButtons = document.querySelectorAll('[data-open-panel]');
 
@@ -100,12 +101,36 @@ function settingsPayloadFromForm() {
 }
 
 function updatePreviewFromForm() {
+  updateConversionPreview();
   if (previewTimer) window.clearTimeout(previewTimer);
   previewTimer = window.setTimeout(() => {
     window.dispatchEvent(new CustomEvent('veraoReviewsRefresh', {
       detail: { settings: settingsPayloadFromForm() }
     }));
   }, 180);
+}
+
+function benefitsFromFormText(value) {
+  return String(value || '')
+    .split(/\n|\|/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function updateConversionPreview() {
+  if (!conversionPreview || !settingsForm.conversionTitle) return;
+  const title = settingsForm.conversionTitle.value || 'Compra segura na Verao em Cores';
+  const text = settingsForm.conversionText.value || 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.';
+  const urgency = settingsForm.conversionUrgency.value || 'Oferta por tempo limitado';
+  const benefits = benefitsFromFormText(settingsForm.conversionBenefits.value || 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp');
+
+  conversionPreview.querySelector('strong').textContent = title;
+  conversionPreview.querySelector('p').textContent = text;
+  conversionPreview.querySelector('em').textContent = urgency;
+  conversionPreview.querySelector('.conversion-preview-card__pills').innerHTML = benefits
+    .map((item) => `<span>${escapeHtml(item)}</span>`)
+    .join('');
 }
 
 async function fetchAdmin(url, options = {}) {
@@ -251,6 +276,7 @@ async function loadSettings() {
   settingsForm.conversionText.value = settings.conversionText || 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.';
   settingsForm.conversionBenefits.value = String(settings.conversionBenefits || 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp').split('|').join('\n');
   settingsForm.conversionUrgency.value = settings.conversionUrgency || 'Oferta por tempo limitado';
+  updateConversionPreview();
   updatePreviewFromForm();
 }
 
