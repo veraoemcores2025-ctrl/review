@@ -1125,7 +1125,7 @@
     const isAdminPreview = window.location.pathname === '/admin.html' && document.getElementById(safeMountId);
     if (isPlatformPage && !isAdminPreview) return false;
     if (settings.conversionEnabled === false) return false;
-    if (isCheckoutLikePage()) return settings.conversionCheckout !== false;
+    if (isCheckoutLikePage()) return false;
     if (settings.productContext) return settings.conversionProduct !== false;
     return settings.conversionHome !== false;
   }
@@ -1432,11 +1432,8 @@
         await waitForPageAnchor();
         document.getElementById('verao-checkout-assist')?.remove();
         document.body.classList.remove('vr-checkout-enhanced');
-        renderConversionBlock(data.reviews || [], settings, null);
+        document.getElementById(conversionId)?.remove();
         renderSocialProofToast(data.reviews || [], settings);
-        setTimeout(() => {
-          renderConversionBlock(data.reviews || [], settings, null);
-        }, 1200);
         return;
       }
       await waitForPageAnchor();
