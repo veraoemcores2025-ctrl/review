@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS = {
   kicker: 'Avaliações com foto',
   subtitle: 'Fotos e comentários de quem comprou e aprovou.',
   buttonText: 'Ver todas as avaliações',
-  buttonUrl: '/m/clientes-usando-verao-em-cores/',
+  buttonUrl: '/avaliacoes.html',
   brandColor: '#b0565b',
   backgroundColor: '#fff7f7',
   headerBackgroundColor: '#f4f6f5',

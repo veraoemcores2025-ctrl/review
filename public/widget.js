@@ -16,7 +16,7 @@
     kicker: 'Avalia\u00e7\u00f5es com foto',
     subtitle: 'Fotos e coment\u00e1rios de quem comprou e aprovou.',
     buttonText: 'Ver todas as avalia\u00e7\u00f5es',
-    buttonUrl: '/m/clientes-usando-verao-em-cores/',
+    buttonUrl: '/avaliacoes.html',
     brandColor: '#b0565b',
     backgroundColor: '#fff7f7',
     headerBackgroundColor: '#f4f6f5',
@@ -1504,6 +1504,11 @@
       ? `${baseUrl}/avaliar.html?productName=${encodeURIComponent(productContext.name)}&productUrl=${encodeURIComponent(productContext.url)}&productSlug=${encodeURIComponent(productContext.slug)}`
       : '';
 
+    const legacyButtonUrl = '/m/clientes-usando-verao-em-cores/';
+    const buttonUrl = !settings.buttonUrl || settings.buttonUrl === legacyButtonUrl
+      ? `${baseUrl}/avaliacoes.html`
+      : settings.buttonUrl;
+
     mount.innerHTML = `
       <section class="vr-widget" style="--vr-brand: ${escapeHtml(settings.brandColor)};" aria-label="Avalia\u00e7\u00f5es com fotos de clientes">
         <div class="vr-widget__inner">
@@ -1515,7 +1520,7 @@
           ${cards ? `<div class="vr-widget__grid">${cards}</div>` : '<p class="vr-widget__empty">Este produto ainda n\u00e3o tem avalia\u00e7\u00f5es com foto.</p>'}
           <div class="vr-widget__actions">
             ${productContext ? `<a class="vr-widget__button vr-widget__button--ghost" href="${escapeHtml(submitUrl)}">Avaliar este produto</a>` : ''}
-            <a class="vr-widget__button" href="${escapeHtml(settings.buttonUrl)}">${escapeHtml(settings.buttonText)}</a>
+            <a class="vr-widget__button" href="${escapeHtml(buttonUrl)}">${escapeHtml(settings.buttonText)}</a>
           </div>
         </div>
       </section>
