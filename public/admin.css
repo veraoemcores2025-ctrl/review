@@ -1,17 +1,19 @@
 :root {
-  --brand: #b0565b;
-  --brand-dark: #87373f;
-  --brand-soft: #f6e8e9;
-  --accent: #158a8a;
-  --accent-soft: #e7f5f3;
-  --ink: #17202a;
-  --muted: #667085;
-  --line: #e4e7ec;
-  --bg: #f7f8fb;
+  --brand: #3f3f46;
+  --brand-dark: #18181b;
+  --brand-soft: #f1f2f4;
+  --accent: #64748b;
+  --accent-soft: #eef2f6;
+  --ink: #1f2933;
+  --muted: #697586;
+  --line: #dddfe4;
+  --bg: #efeeec;
   --card: #fff;
   --danger: #b42318;
   --warning: #b54708;
   --success: #027a48;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .06);
+  --shadow-hover: 0 12px 28px rgba(16, 24, 40, .08);
 }
 
 * {
@@ -20,50 +22,52 @@
 
 body {
   margin: 0;
-  background:
-    linear-gradient(180deg, #fff 0, var(--bg) 260px),
-    var(--bg);
+  background: var(--bg);
   color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
 }
 
 .shell {
-  width: min(1320px, calc(100% - 28px));
-  margin: 0 auto;
-  padding: 24px 0 56px;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .admin-layout {
-  align-items: start;
-  display: grid;
-  gap: 18px;
-  grid-template-columns: 252px minmax(0, 1fr);
-  margin-top: 18px;
+  display: contents;
 }
 
 .admin-nav {
   background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 18px 44px rgba(16, 24, 40, .06);
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
   display: grid;
   gap: 6px;
-  padding: 12px;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-content: start;
+  height: 100vh;
+  padding: 24px 22px;
   position: sticky;
-  top: 14px;
+  top: 0;
 }
 
 .nav-brand {
   border-bottom: 1px solid var(--line);
   display: grid;
   gap: 4px;
-  margin-bottom: 8px;
-  padding: 8px 10px 14px;
+  margin-bottom: 16px;
+  padding: 8px 4px 18px;
 }
 
 .nav-brand strong {
   color: var(--ink);
-  font-size: 17px;
+  font-size: 22px;
 }
 
 .nav-brand span {
@@ -83,25 +87,37 @@ body {
 }
 
 .nav-item {
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 800;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  min-height: 46px;
   padding: 12px 14px;
-  transition: background .16s ease, color .16s ease, transform .16s ease;
+  position: relative;
+  transition: background .16s ease, color .16s ease;
 }
 
 .nav-item:hover,
 .nav-item.is-active {
-  background: var(--brand-soft);
+  background: #f6f7f8;
   color: var(--brand-dark);
 }
 
-.nav-item:hover {
-  transform: translateX(2px);
+.nav-item.is-active::before {
+  background: var(--brand-dark);
+  border-radius: 999px;
+  content: "";
+  height: 22px;
+  left: -22px;
+  position: absolute;
+  top: 12px;
+  width: 4px;
 }
 
 .admin-content {
+  grid-column: 2;
+  grid-row: 2;
   min-width: 0;
+  padding: 0 32px 56px;
 }
 
 .settings-form-shell {
@@ -127,19 +143,24 @@ body {
 .review-submit-card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 18px 44px rgba(16, 24, 40, .06);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
 }
 
 .topbar {
   align-items: center;
-  background:
-    linear-gradient(135deg, rgba(176, 86, 91, .08), transparent 34%),
-    #fff;
+  background: #fff;
   display: flex;
+  grid-column: 2;
+  grid-row: 1;
   gap: 24px;
   justify-content: space-between;
-  padding: 28px;
+  margin: 0 0 18px;
+  min-height: 108px;
+  padding: 24px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .hero {
@@ -195,23 +216,22 @@ body {
 
 .metrics {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
 .metric-card {
-  background:
-    linear-gradient(180deg, #fff, #fbfcfd);
-  min-height: 128px;
-  padding: 20px;
+  background: #fff;
+  min-height: 114px;
+  padding: 20px 22px;
 }
 
 .metric-card span,
 .section-kicker,
 .eyebrow {
   color: var(--brand);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: .04em;
   margin: 0 0 8px;
@@ -220,7 +240,7 @@ body {
 
 .metric-card strong {
   display: block;
-  font-size: 36px;
+  font-size: 32px;
   line-height: 1;
 }
 
@@ -231,17 +251,17 @@ body {
 }
 
 .metric-card.accent {
-  background: var(--accent-soft);
-  border-color: #bfe5df;
+  background: #fff;
+  border-color: var(--line);
 }
 
 .metric-card.accent span {
-  color: var(--accent);
+  color: var(--brand);
 }
 
 .panel {
   margin-top: 18px;
-  padding: 26px;
+  padding: 24px;
 }
 
 .admin-content > .panel,
@@ -250,7 +270,7 @@ body {
 }
 
 .panel-settings {
-  border-top: 4px solid var(--brand);
+  border-top: 0;
 }
 
 .section-head {
@@ -277,26 +297,24 @@ body {
 
 .quick-grid {
   display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 18px;
 }
 
 .quick-card {
-  background:
-    linear-gradient(180deg, #fff, #fbfcfd);
+  background: #fff;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 8px;
   display: grid;
   gap: 8px;
   padding: 18px;
-  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+  transition: border-color .16s ease, box-shadow .16s ease;
 }
 
 .quick-card:hover {
-  border-color: var(--brand);
-  box-shadow: 0 12px 26px rgba(16, 24, 40, .08);
-  transform: translateY(-2px);
+  border-color: #c4c8cf;
+  box-shadow: var(--shadow-hover);
 }
 
 .quick-card strong {
@@ -317,9 +335,9 @@ h3 {
 }
 
 h1 {
-  font-size: clamp(30px, 4vw, 46px);
-  letter-spacing: -.02em;
-  line-height: 1.05;
+  font-size: 28px;
+  letter-spacing: 0;
+  line-height: 1.15;
 }
 
 h2 {
@@ -333,15 +351,15 @@ h2 {
 }
 
 .sub {
-  font-size: 16px;
-  line-height: 1.6;
-  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 8px 0 0;
 }
 
 .button,
 .ghost {
   align-items: center;
-  border-radius: 999px;
+  border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   font-weight: 800;
@@ -353,15 +371,15 @@ h2 {
 }
 
 .button {
-  background: var(--brand);
-  border: 1px solid var(--brand);
+  background: var(--brand-dark);
+  border: 1px solid var(--brand-dark);
   color: #fff;
 }
 
 .button:hover {
-  background: var(--brand-dark);
-  border-color: var(--brand-dark);
-  box-shadow: 0 10px 20px rgba(176, 86, 91, .22);
+  background: #000;
+  border-color: #000;
+  box-shadow: 0 10px 20px rgba(16, 24, 40, .12);
 }
 
 .ghost {
@@ -371,9 +389,9 @@ h2 {
 }
 
 .ghost:hover {
-  border-color: var(--brand);
+  border-color: #c4c8cf;
   box-shadow: 0 8px 16px rgba(16, 24, 40, .06);
-  color: var(--brand);
+  color: var(--brand-dark);
 }
 
 pre {
@@ -410,7 +428,7 @@ select,
 textarea {
   background: #fff;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--ink);
   font: inherit;
   min-height: 44px;
@@ -424,7 +442,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 4px rgba(176, 86, 91, .12);
+  box-shadow: 0 0 0 4px rgba(63, 63, 70, .10);
 }
 
 input[type="color"] {
@@ -461,9 +479,7 @@ textarea {
 }
 
 .conversion-panel {
-  background:
-    linear-gradient(135deg, rgba(176, 86, 91, .08), transparent 34%),
-    #fff;
+  background: #fff;
 }
 
 .conversion-layout {
@@ -480,10 +496,10 @@ textarea {
 
 .conversion-card,
 .conversion-preview-shell {
-  background: rgba(255, 255, 255, .92);
+  background: #fff;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 14px 34px rgba(16, 24, 40, .05);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
   padding: 18px;
 }
 
@@ -497,7 +513,7 @@ textarea {
 .conversion-card__head > span {
   align-items: center;
   background: var(--brand-soft);
-  border-radius: 999px;
+  border-radius: 8px;
   color: var(--brand-dark);
   display: inline-flex;
   flex: 0 0 38px;
@@ -534,7 +550,7 @@ textarea {
   align-items: flex-start;
   background: #fbfcfd;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px;
 }
 
@@ -564,12 +580,10 @@ textarea {
 }
 
 .conversion-preview-card {
-  background:
-    linear-gradient(135deg, rgba(176, 86, 91, .09), transparent 42%),
-    #fff;
-  border: 1px solid #f0dddd;
-  border-radius: 16px;
-  box-shadow: 0 18px 38px rgba(176, 86, 91, .12);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
   display: grid;
   gap: 10px;
   padding: 18px;
@@ -603,18 +617,18 @@ textarea {
 }
 
 .conversion-preview-card__pills span {
-  background: #fff7f7;
-  border: 1px solid #f0dddd;
+  background: #f6f7f8;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  color: #5b3438;
+  color: var(--ink);
   font-size: 12px;
   font-weight: 900;
   padding: 7px 10px;
 }
 
 .conversion-preview-card em {
-  background: var(--brand);
-  border-radius: 999px;
+  background: var(--brand-dark);
+  border-radius: 8px;
   color: #fff;
   font-size: 12px;
   font-style: normal;
@@ -626,7 +640,7 @@ textarea {
 .conversion-notes {
   background: #fbfcfd;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 8px;
   margin-top: 14px;
   padding: 14px;
 }
@@ -649,7 +663,7 @@ textarea {
   align-items: end;
   background: #fbfcfd;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 8px;
   display: grid;
   gap: 14px;
   grid-template-columns: 1fr 220px;
@@ -665,10 +679,9 @@ textarea {
 
 .admin-review {
   align-items: center;
-  background:
-    linear-gradient(180deg, #fff, #fbfcfd);
+  background: #fff;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 8px;
   display: grid;
   gap: 16px;
   grid-template-columns: 92px 1fr auto;
@@ -677,13 +690,13 @@ textarea {
 
 .admin-review:hover {
   border-color: #d7dce6;
-  box-shadow: 0 14px 30px rgba(16, 24, 40, .07);
+  box-shadow: var(--shadow-hover);
 }
 
 .admin-review img {
   aspect-ratio: 1;
   background: #f2f4f7;
-  border-radius: 10px;
+  border-radius: 8px;
   object-fit: cover;
   width: 92px;
 }
@@ -694,7 +707,7 @@ textarea {
 }
 
 .admin-review strong {
-  color: var(--brand);
+  color: var(--brand-dark);
 }
 
 .admin-review p {
@@ -829,19 +842,40 @@ textarea {
 }
 
 @media (max-width: 860px) {
+  .shell {
+    display: block;
+  }
+
   .admin-layout {
     grid-template-columns: 1fr;
   }
 
   .admin-nav {
     display: flex;
+    height: auto;
     overflow-x: auto;
     position: static;
+    padding: 12px;
+  }
+
+  .topbar {
+    margin: 0;
+    min-height: 0;
+    padding: 18px;
+    position: static;
+  }
+
+  .admin-content {
+    padding: 12px 12px 36px;
   }
 
   .nav-item {
     flex: 0 0 auto;
     white-space: nowrap;
+  }
+
+  .nav-item.is-active::before {
+    display: none;
   }
 
   .hero,
@@ -875,8 +909,8 @@ textarea {
 
 @media (max-width: 520px) {
   .shell {
-    width: min(100% - 18px, 1240px);
-    padding-top: 12px;
+    width: 100%;
+    padding-top: 0;
   }
 
   .topbar,
