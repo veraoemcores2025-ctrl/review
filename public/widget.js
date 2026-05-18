@@ -1274,12 +1274,9 @@
     `;
 
     if (window.matchMedia('(max-width: 640px)').matches) {
-      const freightText = Array.from(document.querySelectorAll('#produto *')).find((item) => (
-        item.textContent || ''
-      ).trim().toLowerCase().includes('calcular frete'));
-      const freightBox = freightText?.closest('.frete, .calcula_frete, [class*="frete"], [id*="frete"], div');
-      if (freightBox && freightBox !== document.querySelector('#produto')) {
-        freightBox.insertAdjacentElement('beforebegin', badge);
+      const conversionBlock = document.getElementById(conversionId);
+      if (conversionBlock && conversionBlock.nextElementSibling !== badge) {
+        conversionBlock.insertAdjacentElement('afterend', badge);
       } else {
         anchor.insertAdjacentElement('afterend', badge);
       }
@@ -1559,8 +1556,8 @@
 
   function render(mount, reviews, settings) {
     placeMount(mount, settings);
-    renderProductTrustBadge(reviews, settings);
     renderConversionBlock(reviews, settings, mount);
+    renderProductTrustBadge(reviews, settings);
     renderSocialProofToast(reviews, settings);
 
     const productContext = settings.productContext || null;
