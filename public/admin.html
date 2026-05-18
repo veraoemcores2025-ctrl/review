@@ -15,6 +15,7 @@
           <p class="sub">Organize fotos reais, aprove depoimentos de clientes e ajuste como a prova social aparece na loja.</p>
         </div>
         <div class="top-actions">
+          <span class="status-chip">Sistema ativo</span>
           <a class="ghost" href="/avaliar.html">Link para cliente</a>
           <a class="ghost" href="/">Instala&ccedil;&atilde;o</a>
           <button class="ghost" id="logoutButton" type="button">Sair</button>
@@ -23,6 +24,10 @@
 
       <div class="admin-layout">
         <nav class="admin-nav" aria-label="Navega&ccedil;&atilde;o do painel">
+          <div class="nav-brand">
+            <strong>Painel</strong>
+            <span>Gest&atilde;o da prova social</span>
+          </div>
           <button class="nav-item is-active" type="button" data-open-panel="overview">Vis&atilde;o geral</button>
           <button class="nav-item" type="button" data-open-panel="widget">Widget</button>
           <button class="nav-item" type="button" data-open-panel="popup">Popup</button>
@@ -39,6 +44,7 @@
               <div>
                 <p class="section-kicker">Resumo</p>
                 <h2>Vis&atilde;o geral</h2>
+                <p class="section-subtitle">Acompanhe o desempenho das avalia&ccedil;&otilde;es e acesse rapidamente as principais &aacute;reas.</p>
               </div>
             </div>
             <div class="metrics" aria-label="Resumo das avalia&ccedil;&otilde;es">
@@ -85,6 +91,7 @@
                 <div>
                   <p class="section-kicker">Apar&ecirc;ncia</p>
                   <h2>Configura&ccedil;&atilde;o do widget</h2>
+                  <p class="section-subtitle">Controle o bloco de avalia&ccedil;&otilde;es exibido na home e nas p&aacute;ginas de produto.</p>
                 </div>
                 <button class="ghost" id="saveSettingsButton" type="submit">Salvar configura&ccedil;&atilde;o</button>
               </div>
@@ -174,6 +181,7 @@
                 <div>
                   <p class="section-kicker">Popup de prova social</p>
                   <h2>Notifica&ccedil;&atilde;o de vendas/avalia&ccedil;&otilde;es</h2>
+                  <p class="section-subtitle">Ajuste a notifica&ccedil;&atilde;o discreta que aparece para refor&ccedil;ar confian&ccedil;a.</p>
                 </div>
                 <button class="ghost" type="submit">Salvar popup</button>
               </div>
@@ -220,6 +228,7 @@
               <div>
                 <p class="section-kicker">Cadastro manual</p>
                 <h2>Nova avalia&ccedil;&atilde;o</h2>
+                <p class="section-subtitle">Adicione depoimentos recebidos pelo WhatsApp, Instagram ou atendimento.</p>
               </div>
             </div>
             <form id="reviewForm" class="form">
@@ -281,6 +290,7 @@
               <div>
                 <p class="section-kicker">Modera&ccedil;&atilde;o</p>
                 <h2>Avalia&ccedil;&otilde;es cadastradas</h2>
+                <p class="section-subtitle">Aprove novas fotos, corrija textos e controle o que aparece na loja.</p>
               </div>
               <button class="ghost" id="refreshButton" type="button">Atualizar</button>
             </div>
@@ -309,6 +319,7 @@
               <div>
                 <p class="section-kicker">Loja</p>
                 <h2>Preview do widget</h2>
+                <p class="section-subtitle">Veja uma pr&eacute;via r&aacute;pida do bloco com as configura&ccedil;&otilde;es atuais.</p>
               </div>
             </div>
             <div id="verao-reviews-widget"></div>
