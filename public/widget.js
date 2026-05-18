@@ -1152,14 +1152,14 @@
     }
   }
 
-  async function load() {
+  async function load(overrideSettings = null) {
     ensureStyle();
     try {
       const productContext = getProductContext();
       const query = productContext ? `?productSlug=${encodeURIComponent(productContext.slug)}` : '';
       const response = await fetch(`${baseUrl}/api/reviews${query}`, { cache: 'no-store' });
       const data = await response.json();
-      const settings = { ...defaultSettings, ...(data.settings || {}), productContext };
+      const settings = { ...defaultSettings, ...(data.settings || {}), ...(overrideSettings || {}), productContext };
       await waitForPageAnchor();
       const mount = settings.hideNativeHomeReviews ? createNativeMount() : createMount(settings);
       render(mount, data.reviews || [], settings);
@@ -1176,5 +1176,7 @@
     load();
   }
 
-  window.addEventListener('veraoReviewsRefresh', load);
+  window.addEventListener('veraoReviewsRefresh', (event) => {
+    load(event.detail?.settings || null);
+  });
 })();

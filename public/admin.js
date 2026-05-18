@@ -15,6 +15,7 @@ const panels = document.querySelectorAll('[data-panel]');
 const panelButtons = document.querySelectorAll('[data-open-panel]');
 
 let allReviews = [];
+let previewTimer = null;
 
 function openPanel(panelName, updateHash = true) {
   const validPanel = [...panels].some((panel) => panel.dataset.panel === panelName);
@@ -71,6 +72,31 @@ function statusClass(review) {
   if (review.status === 'pending') return 'status-pending';
   if (review.status === 'rejected') return 'status-rejected';
   return review.active ? 'status-active' : 'status-hidden';
+}
+
+function settingsPayloadFromForm() {
+  const formData = new FormData(settingsForm);
+  const payload = Object.fromEntries(formData.entries());
+  payload.hideNativeHomeReviews = settingsForm.hideNativeHomeReviews.checked;
+  payload.socialProofEnabled = settingsForm.socialProofEnabled.checked;
+  payload.socialProofHome = settingsForm.socialProofHome.checked;
+  payload.socialProofProduct = settingsForm.socialProofProduct.checked;
+  payload.maxReviews = Number(payload.maxReviews);
+  payload.displayMode = settingsForm.displayMode.value;
+  payload.titleFontSize = Number(payload.titleFontSize);
+  payload.textFontSize = Number(payload.textFontSize);
+  payload.socialProofDelaySeconds = Number(payload.socialProofDelaySeconds);
+  payload.socialProofIntervalSeconds = Number(payload.socialProofIntervalSeconds);
+  return payload;
+}
+
+function updatePreviewFromForm() {
+  if (previewTimer) window.clearTimeout(previewTimer);
+  previewTimer = window.setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('veraoReviewsRefresh', {
+      detail: { settings: settingsPayloadFromForm() }
+    }));
+  }, 180);
 }
 
 async function fetchAdmin(url, options = {}) {
@@ -208,6 +234,7 @@ async function loadSettings() {
   settingsForm.socialProofLabel.value = settings.socialProofLabel || 'Cliente real aprovou';
   settingsForm.socialProofDelaySeconds.value = settings.socialProofDelaySeconds || 6;
   settingsForm.socialProofIntervalSeconds.value = settings.socialProofIntervalSeconds || 26;
+  updatePreviewFromForm();
 }
 
 form.addEventListener('submit', async (event) => {
@@ -237,18 +264,7 @@ form.addEventListener('submit', async (event) => {
 settingsForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   settingsMessage.textContent = 'Salvando configuracao...';
-  const formData = new FormData(settingsForm);
-  const payload = Object.fromEntries(formData.entries());
-  payload.hideNativeHomeReviews = settingsForm.hideNativeHomeReviews.checked;
-  payload.socialProofEnabled = settingsForm.socialProofEnabled.checked;
-  payload.socialProofHome = settingsForm.socialProofHome.checked;
-  payload.socialProofProduct = settingsForm.socialProofProduct.checked;
-  payload.maxReviews = Number(payload.maxReviews);
-  payload.displayMode = settingsForm.displayMode.value;
-  payload.titleFontSize = Number(payload.titleFontSize);
-  payload.textFontSize = Number(payload.textFontSize);
-  payload.socialProofDelaySeconds = Number(payload.socialProofDelaySeconds);
-  payload.socialProofIntervalSeconds = Number(payload.socialProofIntervalSeconds);
+  const payload = settingsPayloadFromForm();
 
   const response = await fetchAdmin('/api/admin/settings', {
     method: 'PUT',
@@ -262,7 +278,7 @@ settingsForm.addEventListener('submit', async (event) => {
   }
 
   settingsMessage.textContent = 'Configuracao salva.';
-  window.dispatchEvent(new Event('veraoReviewsRefresh'));
+  updatePreviewFromForm();
 });
 
 reviewsList.addEventListener('click', async (event) => {
@@ -341,6 +357,8 @@ logoutButton.addEventListener('click', async () => {
 reviewSearch?.addEventListener('input', renderReviews);
 reviewFilter?.addEventListener('change', renderReviews);
 refreshButton.addEventListener('click', loadReviews);
+settingsForm.addEventListener('input', updatePreviewFromForm);
+settingsForm.addEventListener('change', updatePreviewFromForm);
 panelButtons.forEach((button) => {
   button.addEventListener('click', () => openPanel(button.dataset.openPanel));
 });
