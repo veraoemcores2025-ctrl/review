@@ -11,8 +11,27 @@ const metricTotal = document.querySelector('#metricTotal');
 const metricPending = document.querySelector('#metricPending');
 const metricActive = document.querySelector('#metricActive');
 const metricRating = document.querySelector('#metricRating');
+const panels = document.querySelectorAll('[data-panel]');
+const panelButtons = document.querySelectorAll('[data-open-panel]');
 
 let allReviews = [];
+
+function openPanel(panelName, updateHash = true) {
+  const validPanel = [...panels].some((panel) => panel.dataset.panel === panelName);
+  const nextPanel = validPanel ? panelName : 'overview';
+
+  panels.forEach((panel) => {
+    panel.hidden = panel.dataset.panel !== nextPanel;
+  });
+
+  panelButtons.forEach((button) => {
+    button.classList.toggle('is-active', button.classList.contains('nav-item') && button.dataset.openPanel === nextPanel);
+  });
+
+  if (updateHash) {
+    window.history.replaceState(null, '', `#${nextPanel}`);
+  }
+}
 
 function escapeHtml(value) {
   return String(value || '')
@@ -317,6 +336,10 @@ logoutButton.addEventListener('click', async () => {
 reviewSearch?.addEventListener('input', renderReviews);
 reviewFilter?.addEventListener('change', renderReviews);
 refreshButton.addEventListener('click', loadReviews);
+panelButtons.forEach((button) => {
+  button.addEventListener('click', () => openPanel(button.dataset.openPanel));
+});
 
 await loadSettings();
 await loadReviews();
+openPanel(window.location.hash.replace('#', '') || 'overview', false);

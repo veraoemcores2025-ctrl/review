@@ -21,255 +21,300 @@
         </div>
       </header>
 
-      <section class="metrics" aria-label="Resumo das avalia&ccedil;&otilde;es">
-        <article class="metric-card">
-          <span>Total</span>
-          <strong id="metricTotal">0</strong>
-          <small>avalia&ccedil;&otilde;es recebidas</small>
-        </article>
-        <article class="metric-card accent">
-          <span>Pendentes</span>
-          <strong id="metricPending">0</strong>
-          <small>aguardando aprova&ccedil;&atilde;o</small>
-        </article>
-        <article class="metric-card">
-          <span>Na loja</span>
-          <strong id="metricActive">0</strong>
-          <small>vis&iacute;veis para clientes</small>
-        </article>
-        <article class="metric-card">
-          <span>M&eacute;dia</span>
-          <strong id="metricRating">0.0</strong>
-          <small>nota das aprovadas</small>
-        </article>
-      </section>
+      <div class="admin-layout">
+        <nav class="admin-nav" aria-label="Navega&ccedil;&atilde;o do painel">
+          <button class="nav-item is-active" type="button" data-open-panel="overview">Vis&atilde;o geral</button>
+          <button class="nav-item" type="button" data-open-panel="widget">Widget</button>
+          <button class="nav-item" type="button" data-open-panel="popup">Popup</button>
+          <button class="nav-item" type="button" data-open-panel="new-review">Nova avalia&ccedil;&atilde;o</button>
+          <button class="nav-item" type="button" data-open-panel="reviews">Avalia&ccedil;&otilde;es</button>
+          <button class="nav-item" type="button" data-open-panel="preview">Preview</button>
+        </nav>
 
-      <section class="panel panel-settings">
-        <div class="section-head">
-          <div>
-            <p class="section-kicker">Apar&ecirc;ncia</p>
-            <h2>Configura&ccedil;&atilde;o do widget</h2>
-          </div>
-          <button class="ghost" id="saveSettingsButton" form="settingsForm" type="submit">Salvar configura&ccedil;&atilde;o</button>
+        <div class="admin-content">
+          <p id="settingsMessage" class="message settings-status" aria-live="polite"></p>
+
+          <section class="panel panel-page" data-panel="overview">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Resumo</p>
+                <h2>Vis&atilde;o geral</h2>
+              </div>
+            </div>
+            <div class="metrics" aria-label="Resumo das avalia&ccedil;&otilde;es">
+              <article class="metric-card">
+                <span>Total</span>
+                <strong id="metricTotal">0</strong>
+                <small>avalia&ccedil;&otilde;es recebidas</small>
+              </article>
+              <article class="metric-card accent">
+                <span>Pendentes</span>
+                <strong id="metricPending">0</strong>
+                <small>aguardando aprova&ccedil;&atilde;o</small>
+              </article>
+              <article class="metric-card">
+                <span>Na loja</span>
+                <strong id="metricActive">0</strong>
+                <small>vis&iacute;veis para clientes</small>
+              </article>
+              <article class="metric-card">
+                <span>M&eacute;dia</span>
+                <strong id="metricRating">0.0</strong>
+                <small>nota das aprovadas</small>
+              </article>
+            </div>
+            <div class="quick-grid">
+              <button class="quick-card" type="button" data-open-panel="reviews">
+                <strong>Moderar avalia&ccedil;&otilde;es</strong>
+                <span>Aprove, oculte ou edite fotos e coment&aacute;rios.</span>
+              </button>
+              <button class="quick-card" type="button" data-open-panel="popup">
+                <strong>Ajustar popup</strong>
+                <span>Controle quando a prova social aparece na loja.</span>
+              </button>
+              <button class="quick-card" type="button" data-open-panel="widget">
+                <strong>Editar visual</strong>
+                <span>Mude cores, t&iacute;tulos, carrossel e quantidade.</span>
+              </button>
+            </div>
+          </section>
+
+          <form id="settingsForm" class="settings-form-shell">
+            <section class="panel panel-settings panel-page" data-panel="widget" hidden>
+              <div class="section-head">
+                <div>
+                  <p class="section-kicker">Apar&ecirc;ncia</p>
+                  <h2>Configura&ccedil;&atilde;o do widget</h2>
+                </div>
+                <button class="ghost" id="saveSettingsButton" type="submit">Salvar configura&ccedil;&atilde;o</button>
+              </div>
+              <div class="form">
+                <label>
+                  T&iacute;tulo
+                  <input name="title" required>
+                </label>
+
+                <label>
+                  Chamada pequena
+                  <input name="kicker" required>
+                </label>
+
+                <label>
+                  Cor da chamada pequena
+                  <input name="kickerColor" type="color" value="#b0565b">
+                </label>
+
+                <label>
+                  Cor do t&iacute;tulo
+                  <input name="titleColor" type="color" value="#111827">
+                </label>
+
+                <label class="wide">
+                  Subt&iacute;tulo
+                  <input name="subtitle" required>
+                </label>
+
+                <label>
+                  Cor do subt&iacute;tulo
+                  <input name="subtitleColor" type="color" value="#4b5563">
+                </label>
+
+                <label>
+                  Texto do bot&atilde;o
+                  <input name="buttonText" required>
+                </label>
+
+                <label>
+                  Link do bot&atilde;o
+                  <input name="buttonUrl" required>
+                </label>
+
+                <label>
+                  Cor principal
+                  <input name="brandColor" type="color" value="#b0565b">
+                </label>
+
+                <label>
+                  Cor do fundo
+                  <input name="backgroundColor" type="color" value="#fff7f7">
+                </label>
+
+                <label>
+                  Cor do fundo do t&iacute;tulo
+                  <input name="headerBackgroundColor" type="color" value="#f4f6f5">
+                </label>
+
+                <label>
+                  Cor dos textos
+                  <input name="textColor" type="color" value="#222222">
+                </label>
+
+                <label>
+                  Exibi&ccedil;&atilde;o
+                  <select name="displayMode">
+                    <option value="grid">Grade</option>
+                    <option value="carousel">Carrossel</option>
+                  </select>
+                </label>
+
+                <label>
+                  Quantidade m&aacute;xima
+                  <input name="maxReviews" type="number" min="1" max="24" value="8">
+                </label>
+
+                <label class="check wide">
+                  <input name="hideNativeHomeReviews" type="checkbox">
+                  Esconder bloco nativo de avalia&ccedil;&otilde;es da home
+                </label>
+              </div>
+            </section>
+
+            <section class="panel panel-page" data-panel="popup" hidden>
+              <div class="section-head">
+                <div>
+                  <p class="section-kicker">Popup de prova social</p>
+                  <h2>Notifica&ccedil;&atilde;o de vendas/avalia&ccedil;&otilde;es</h2>
+                </div>
+                <button class="ghost" type="submit">Salvar popup</button>
+              </div>
+              <div class="form">
+                <label class="check">
+                  <input name="socialProofEnabled" type="checkbox">
+                  Ativar popup
+                </label>
+
+                <label class="check">
+                  <input name="socialProofHome" type="checkbox">
+                  Mostrar na home
+                </label>
+
+                <label class="check">
+                  <input name="socialProofProduct" type="checkbox">
+                  Mostrar no produto
+                </label>
+
+                <label>
+                  Texto pequeno do popup
+                  <input name="socialProofLabel" maxlength="60" placeholder="Cliente real aprovou">
+                </label>
+
+                <label>
+                  Aparecer depois de
+                  <input name="socialProofDelaySeconds" type="number" min="2" max="60" value="6">
+                  <small>Tempo em segundos antes do primeiro popup.</small>
+                </label>
+
+                <label>
+                  Repetir a cada
+                  <input name="socialProofIntervalSeconds" type="number" min="10" max="180" value="26">
+                  <small>Intervalo em segundos entre popups.</small>
+                </label>
+
+                <p class="message wide">Essas configura&ccedil;&otilde;es usam as avalia&ccedil;&otilde;es aprovadas da sua lista.</p>
+              </div>
+            </section>
+          </form>
+
+          <section class="panel panel-page" data-panel="new-review" hidden>
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Cadastro manual</p>
+                <h2>Nova avalia&ccedil;&atilde;o</h2>
+              </div>
+            </div>
+            <form id="reviewForm" class="form">
+              <label>
+                Nome da cliente
+                <input name="customerName" required placeholder="Ex: Ju Lopes">
+              </label>
+
+              <label>
+                Produto comprado
+                <input name="productName" required placeholder="Ex: Conjunto Biquini Tropical Vibes">
+                <small>Coloque somente o nome do produto, sem descri&ccedil;&atilde;o completa.</small>
+              </label>
+
+              <label class="wide">
+                Link do produto
+                <input name="productUrl" placeholder="Cole o link da p&aacute;gina do produto na loja">
+                <small>Esse link faz a avalia&ccedil;&atilde;o aparecer na p&aacute;gina certa do produto.</small>
+              </label>
+
+              <label>
+                Nota
+                <select name="rating">
+                  <option value="5">5 estrelas</option>
+                  <option value="4">4 estrelas</option>
+                  <option value="3">3 estrelas</option>
+                  <option value="2">2 estrelas</option>
+                  <option value="1">1 estrela</option>
+                </select>
+              </label>
+
+              <label>
+                Selo
+                <input name="verifiedLabel" value="cliente verificada">
+              </label>
+
+              <label class="wide">
+                Coment&aacute;rio
+                <textarea name="comment" required rows="4" placeholder="Ex: Amei o caimento, ficou lindo no corpo."></textarea>
+              </label>
+
+              <label class="wide">
+                Foto da cliente/produto
+                <input name="photo" type="file" accept="image/*" required>
+              </label>
+
+              <label class="check">
+                <input name="active" type="checkbox" checked>
+                Mostrar na loja
+              </label>
+
+              <button class="button" type="submit">Salvar avalia&ccedil;&atilde;o</button>
+              <p id="formMessage" class="message" aria-live="polite"></p>
+            </form>
+          </section>
+
+          <section class="panel panel-page" data-panel="reviews" hidden>
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Modera&ccedil;&atilde;o</p>
+                <h2>Avalia&ccedil;&otilde;es cadastradas</h2>
+              </div>
+              <button class="ghost" id="refreshButton" type="button">Atualizar</button>
+            </div>
+            <div class="toolbar">
+              <label>
+                Buscar
+                <input id="reviewSearch" type="search" placeholder="Cliente, produto ou comentario">
+              </label>
+              <label>
+                Status
+                <select id="reviewFilter">
+                  <option value="all">Todas</option>
+                  <option value="pending">Pendentes</option>
+                  <option value="approved">Aprovadas</option>
+                  <option value="active">Vis&iacute;veis na loja</option>
+                  <option value="hidden">Ocultas</option>
+                  <option value="rejected">Reprovadas</option>
+                </select>
+              </label>
+            </div>
+            <div id="reviewsList" class="reviews-list"></div>
+          </section>
+
+          <section class="panel preview-panel panel-page" data-panel="preview" hidden>
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Loja</p>
+                <h2>Preview do widget</h2>
+              </div>
+            </div>
+            <div id="verao-reviews-widget"></div>
+          </section>
         </div>
-        <form id="settingsForm" class="form">
-          <label>
-            T&iacute;tulo
-            <input name="title" required>
-          </label>
-
-          <label>
-            Chamada pequena
-            <input name="kicker" required>
-          </label>
-
-          <label>
-            Cor da chamada pequena
-            <input name="kickerColor" type="color" value="#b0565b">
-          </label>
-
-          <label>
-            Cor do t&iacute;tulo
-            <input name="titleColor" type="color" value="#111827">
-          </label>
-
-          <label class="wide">
-            Subt&iacute;tulo
-            <input name="subtitle" required>
-          </label>
-
-          <label>
-            Cor do subt&iacute;tulo
-            <input name="subtitleColor" type="color" value="#4b5563">
-          </label>
-
-          <label>
-            Texto do bot&atilde;o
-            <input name="buttonText" required>
-          </label>
-
-          <label>
-            Link do bot&atilde;o
-            <input name="buttonUrl" required>
-          </label>
-
-          <label>
-            Cor principal
-            <input name="brandColor" type="color" value="#b0565b">
-          </label>
-
-          <label>
-            Cor do fundo
-            <input name="backgroundColor" type="color" value="#fff7f7">
-          </label>
-
-          <label>
-            Cor do fundo do t&iacute;tulo
-            <input name="headerBackgroundColor" type="color" value="#f4f6f5">
-          </label>
-
-          <label>
-            Cor dos textos
-            <input name="textColor" type="color" value="#222222">
-          </label>
-
-          <label>
-            Exibi&ccedil;&atilde;o
-            <select name="displayMode">
-              <option value="grid">Grade</option>
-              <option value="carousel">Carrossel</option>
-            </select>
-          </label>
-
-          <label>
-            Quantidade m&aacute;xima
-            <input name="maxReviews" type="number" min="1" max="24" value="8">
-          </label>
-
-          <label class="check wide">
-            <input name="hideNativeHomeReviews" type="checkbox">
-            Esconder bloco nativo de avalia&ccedil;&otilde;es da home
-          </label>
-
-          <div class="form-divider wide">
-            <p class="section-kicker">Popup de prova social</p>
-            <h3>Notifica&ccedil;&atilde;o de vendas/avalia&ccedil;&otilde;es</h3>
-          </div>
-
-          <label class="check">
-            <input name="socialProofEnabled" type="checkbox">
-            Ativar popup
-          </label>
-
-          <label class="check">
-            <input name="socialProofHome" type="checkbox">
-            Mostrar na home
-          </label>
-
-          <label class="check">
-            <input name="socialProofProduct" type="checkbox">
-            Mostrar no produto
-          </label>
-
-          <label>
-            Texto pequeno do popup
-            <input name="socialProofLabel" maxlength="60" placeholder="Cliente real aprovou">
-          </label>
-
-          <label>
-            Aparecer depois de
-            <input name="socialProofDelaySeconds" type="number" min="2" max="60" value="6">
-            <small>Tempo em segundos antes do primeiro popup.</small>
-          </label>
-
-          <label>
-            Repetir a cada
-            <input name="socialProofIntervalSeconds" type="number" min="10" max="180" value="26">
-            <small>Intervalo em segundos entre popups.</small>
-          </label>
-
-          <p id="settingsMessage" class="message wide" aria-live="polite"></p>
-        </form>
-      </section>
-
-      <section class="panel">
-        <div class="section-head">
-          <div>
-            <p class="section-kicker">Cadastro manual</p>
-            <h2>Nova avalia&ccedil;&atilde;o</h2>
-          </div>
-        </div>
-        <form id="reviewForm" class="form">
-          <label>
-            Nome da cliente
-            <input name="customerName" required placeholder="Ex: Ju Lopes">
-          </label>
-
-          <label>
-            Produto comprado
-            <input name="productName" required placeholder="Ex: Conjunto Biquini Tropical Vibes">
-            <small>Coloque somente o nome do produto, sem descri&ccedil;&atilde;o completa.</small>
-          </label>
-
-          <label class="wide">
-            Link do produto
-            <input name="productUrl" placeholder="Cole o link da p&aacute;gina do produto na loja">
-            <small>Esse link faz a avalia&ccedil;&atilde;o aparecer na p&aacute;gina certa do produto.</small>
-          </label>
-
-          <label>
-            Nota
-            <select name="rating">
-              <option value="5">5 estrelas</option>
-              <option value="4">4 estrelas</option>
-              <option value="3">3 estrelas</option>
-              <option value="2">2 estrelas</option>
-              <option value="1">1 estrela</option>
-            </select>
-          </label>
-
-          <label>
-            Selo
-            <input name="verifiedLabel" value="cliente verificada">
-          </label>
-
-          <label class="wide">
-            Coment&aacute;rio
-            <textarea name="comment" required rows="4" placeholder="Ex: Amei o caimento, ficou lindo no corpo."></textarea>
-          </label>
-
-          <label class="wide">
-            Foto da cliente/produto
-            <input name="photo" type="file" accept="image/*" required>
-          </label>
-
-          <label class="check">
-            <input name="active" type="checkbox" checked>
-            Mostrar na loja
-          </label>
-
-          <button class="button" type="submit">Salvar avalia&ccedil;&atilde;o</button>
-          <p id="formMessage" class="message" aria-live="polite"></p>
-        </form>
-      </section>
-
-      <section class="panel">
-        <div class="section-head">
-          <div>
-            <p class="section-kicker">Modera&ccedil;&atilde;o</p>
-            <h2>Avalia&ccedil;&otilde;es cadastradas</h2>
-          </div>
-          <button class="ghost" id="refreshButton" type="button">Atualizar</button>
-        </div>
-        <div class="toolbar">
-          <label>
-            Buscar
-            <input id="reviewSearch" type="search" placeholder="Cliente, produto ou comentario">
-          </label>
-          <label>
-            Status
-            <select id="reviewFilter">
-              <option value="all">Todas</option>
-              <option value="pending">Pendentes</option>
-              <option value="approved">Aprovadas</option>
-              <option value="active">Vis&iacute;veis na loja</option>
-              <option value="hidden">Ocultas</option>
-              <option value="rejected">Reprovadas</option>
-            </select>
-          </label>
-        </div>
-        <div id="reviewsList" class="reviews-list"></div>
-      </section>
-
-      <section class="panel preview-panel">
-        <div class="section-head">
-          <div>
-            <p class="section-kicker">Loja</p>
-            <h2>Preview do widget</h2>
-          </div>
-        </div>
-        <div id="verao-reviews-widget"></div>
-      </section>
+      </div>
     </main>
 
     <script type="module" src="/admin.js"></script>
