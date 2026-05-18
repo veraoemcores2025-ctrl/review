@@ -1005,14 +1005,14 @@
           clear: both !important;
           float: none !important;
           gap: 8px;
-          margin: 18px 0 !important;
+          margin: 18px 12px !important;
           max-width: 100% !important;
           min-width: 0 !important;
           overflow: hidden !important;
-          padding: 14px 0 !important;
+          padding: 14px 10px !important;
           position: relative !important;
           transform: none !important;
-          width: 100% !important;
+          width: calc(100% - 24px) !important;
         }
 
         .vr-product-proof__top {
