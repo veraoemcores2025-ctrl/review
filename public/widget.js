@@ -860,7 +860,8 @@
 
       .vr-lightbox {
         align-items: center;
-        background: rgba(17, 24, 39, .82);
+        backdrop-filter: blur(2px);
+        background: rgba(17, 24, 39, .94);
         display: flex;
         inset: 0;
         justify-content: center;
@@ -1360,6 +1361,10 @@
   function openAllReviewsModal(reviews, settings) {
     const visibleReviews = (reviews || []).filter((review) => review.imageUrl);
     if (!visibleReviews.length) return;
+
+    if (window.location.hash === `#${safeMountId}`) {
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+    }
 
     let lightbox = document.querySelector('.vr-lightbox');
     if (!lightbox) {
