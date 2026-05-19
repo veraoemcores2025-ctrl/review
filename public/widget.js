@@ -861,7 +861,7 @@
       .vr-lightbox {
         align-items: center;
         backdrop-filter: blur(2px);
-        background: rgba(17, 24, 39, .94);
+        background: #111827;
         display: flex;
         inset: 0;
         justify-content: center;
