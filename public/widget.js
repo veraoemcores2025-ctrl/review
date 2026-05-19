@@ -1385,17 +1385,10 @@
       head.style.setProperty('display', 'none', 'important');
     });
 
-    const score = averageRating(visibleReviews).toFixed(1);
-    const countLabel = visibleReviews.length === 1 ? '1 avalia\u00e7\u00e3o aprovada' : `${visibleReviews.length} avalia\u00e7\u00f5es aprovadas`;
     lightbox.innerHTML = `
       <div class="vr-lightbox__dialog vr-lightbox__dialog--reviews" role="dialog" aria-modal="true" aria-label="Todas as avalia\u00e7\u00f5es com foto">
         <button class="vr-lightbox__close" type="button" aria-label="Fechar">×</button>
         <section class="vr-modal-reviews" style="--vr-brand: ${escapeHtml(settings.brandColor || defaultSettings.brandColor)};">
-          <header class="vr-modal-reviews__head">
-            <p class="vr-modal-reviews__kicker">${escapeHtml(settings.kicker || defaultSettings.kicker)}</p>
-            <h3>${escapeHtml(settings.title || defaultSettings.title)}</h3>
-            <p class="vr-modal-reviews__summary">${score}/5 com ${countLabel} com fotos reais de clientes.</p>
-          </header>
           <div class="vr-modal-reviews__grid">
             ${visibleReviews.map((review) => `
               <article class="vr-modal-review">
