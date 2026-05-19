@@ -16,6 +16,19 @@ function stars(rating) {
   return '★★★★★'.slice(0, count) + '☆☆☆☆☆'.slice(0, 5 - count);
 }
 
+function isVideoReview(review) {
+  return review.mediaType === 'video' || /\.(mp4|mov|m4v|webm)(\?|$)/i.test(String(review.mediaUrl || review.imageUrl || ''));
+}
+
+function reviewMedia(review) {
+  const url = escapeHtml(review.mediaUrl || review.imageUrl);
+  if (isVideoReview(review)) {
+    return `<video class="review-card__media" src="${url}" controls muted playsinline preload="metadata"></video>`;
+  }
+
+  return `<img class="review-card__media" loading="lazy" src="${url}" alt="Cliente usando ${escapeHtml(review.productName)}">`;
+}
+
 async function loadReviews() {
   const response = await fetch('/api/reviews', { cache: 'no-store' });
   const data = await response.json();
@@ -29,7 +42,7 @@ async function loadReviews() {
 
   grid.innerHTML = reviews.map((review) => `
     <article class="review-card">
-      <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+      ${reviewMedia(review)}
       <div class="review-card__body">
         <div class="review-card__stars">${stars(review.rating)}</div>
         <p class="review-card__comment">${escapeHtml(review.comment)}</p>

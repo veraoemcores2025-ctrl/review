@@ -99,7 +99,9 @@ body {
   overflow: hidden;
 }
 
-.review-card img {
+.review-card img,
+.review-card video,
+.review-card__media {
   aspect-ratio: 1 / 1.15;
   background: #f0e7e8;
   display: block;

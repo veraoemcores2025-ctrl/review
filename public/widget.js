@@ -60,6 +60,22 @@
     return '\u2605\u2605\u2605\u2605\u2605'.slice(0, count) + '\u2606\u2606\u2606\u2606\u2606'.slice(0, 5 - count);
   }
 
+  function isVideoReview(review) {
+    return review.mediaType === 'video' || /\.(mp4|mov|m4v|webm)(\?|$)/i.test(String(review.mediaUrl || review.imageUrl || ''));
+  }
+
+  function reviewMedia(review, className, options = {}) {
+    const url = escapeHtml(review.mediaUrl || review.imageUrl);
+    const attrs = options.attributes ? ` ${options.attributes}` : '';
+    if (isVideoReview(review)) {
+      const controls = options.controls ? ' controls' : '';
+      const autoplay = options.autoplay ? ' autoplay loop' : '';
+      return `<video class="${className}"${attrs} src="${url}" muted playsinline preload="metadata"${controls}${autoplay}></video>`;
+    }
+
+    return `<img class="${className}"${attrs} loading="lazy" src="${url}" alt="Cliente usando ${escapeHtml(review.productName)}">`;
+  }
+
   function averageRating(reviews) {
     if (!reviews.length) return 0;
     return reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length;
@@ -521,7 +537,8 @@
         padding: 0;
       }
 
-      .vr-product-proof__photos img {
+      .vr-product-proof__photos img,
+      .vr-product-proof__photos video {
         aspect-ratio: 1;
         border-radius: 999px;
         object-fit: cover;
@@ -726,7 +743,8 @@
         margin-bottom: 8px;
       }
 
-      .vr-checkout-review img {
+      .vr-checkout-review img,
+      .vr-checkout-review video {
         aspect-ratio: 1;
         border-radius: 8px;
         flex: 0 0 44px;
@@ -799,7 +817,8 @@
         transform: translateY(0);
       }
 
-      .vr-social-proof img {
+      .vr-social-proof img,
+      .vr-social-proof video {
         aspect-ratio: 1;
         border-radius: 12px;
         object-fit: cover;
@@ -1006,7 +1025,8 @@
         scroll-snap-align: start;
       }
 
-      .vr-modal-review img {
+      .vr-modal-review img,
+      .vr-modal-review video {
         aspect-ratio: 1 / 1.1;
         background: #f6eeee;
         display: block;
@@ -1214,7 +1234,8 @@
           padding-bottom: 2px;
         }
 
-        .vr-product-proof__photos img {
+        .vr-product-proof__photos img,
+        .vr-product-proof__photos video {
           width: 34px;
         }
 
@@ -1236,7 +1257,8 @@
           width: calc(100vw - 24px);
         }
 
-        .vr-social-proof img {
+        .vr-social-proof img,
+        .vr-social-proof video {
           border-radius: 10px;
           width: 42px;
         }
@@ -1409,7 +1431,7 @@
       <div class="vr-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Avalia\u00e7\u00e3o de cliente">
         <button class="vr-lightbox__close" type="button" aria-label="Fechar">×</button>
         <div class="vr-lightbox__body">
-          <img class="vr-lightbox__image" loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+          ${reviewMedia(review, 'vr-lightbox__image', { controls: true })}
           <div class="vr-lightbox__copy">
             <div class="vr-lightbox__stars">${stars(review.rating)}</div>
             <div class="vr-lightbox__product">${escapeHtml(review.productName)}</div>
@@ -1458,7 +1480,7 @@
             <div class="vr-modal-reviews__track" data-vr-modal-track>
               ${visibleReviews.map((review) => `
                 <article class="vr-modal-review">
-                  <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+                  ${reviewMedia(review, 'vr-modal-review__media', { controls: true })}
                   <div class="vr-modal-review__body">
                     <div class="vr-modal-review__stars">${stars(review.rating)}</div>
                     <p class="vr-modal-review__text">${escapeHtml(review.comment)}</p>
@@ -1565,7 +1587,7 @@
       <div class="vr-product-proof__photos">
         ${reviews.slice(0, 5).map((review, index) => `
           <button type="button" data-vr-proof-photo="${index}" aria-label="Abrir foto de cliente">
-            <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="">
+            ${reviewMedia(review, 'vr-product-proof__media')}
           </button>
         `).join('')}
       </div>
@@ -1730,7 +1752,7 @@
         ${visibleReviews.map((review) => `
           <article class="vr-checkout-review">
             <div class="vr-checkout-review__top">
-              <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="">
+              ${reviewMedia(review, 'vr-checkout-review__media')}
               <div>
                 <div class="vr-checkout-review__stars">${stars(review.rating)}</div>
                 <div class="vr-checkout-review__product">${escapeHtml(review.productName)}</div>
@@ -1832,7 +1854,7 @@
       const review = reviews[socialProofIndex % reviews.length];
       socialProofIndex += 1;
       toast.innerHTML = `
-        <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="">
+        ${reviewMedia(review, 'vr-social-proof__media')}
         <div>
           <p class="vr-social-proof__kicker">${escapeHtml(settings.socialProofLabel || defaultSettings.socialProofLabel)}</p>
           <p class="vr-social-proof__title">${escapeHtml(review.customerName)} avaliou ${escapeHtml(review.productName)}</p>
@@ -1868,7 +1890,7 @@
 
     const cards = reviews.slice(0, settings.maxReviews).map((review) => `
       <article class="vr-card">
-        <img class="vr-card__image" data-vr-card-photo="${escapeHtml(review.id)}" loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+        ${reviewMedia(review, 'vr-card__image', { attributes: `data-vr-card-photo="${escapeHtml(review.id)}"` })}
         <div class="vr-card__body">
           <div class="vr-card__stars">${stars(review.rating)}</div>
           <p class="vr-card__comment">${escapeHtml(review.comment)}</p>

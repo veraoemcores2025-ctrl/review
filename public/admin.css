@@ -706,10 +706,13 @@ textarea {
   box-shadow: var(--shadow-hover);
 }
 
-.admin-review img {
+.admin-review img,
+.admin-review video,
+.admin-review__media {
   aspect-ratio: 1;
   background: #f2f4f7;
   border-radius: 8px;
+  display: block;
   object-fit: cover;
   width: 92px;
 }
@@ -915,7 +918,9 @@ textarea {
     justify-content: flex-start;
   }
 
-  .admin-review img {
+  .admin-review img,
+  .admin-review video,
+  .admin-review__media {
     width: 100%;
   }
 }

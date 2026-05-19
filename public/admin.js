@@ -55,6 +55,19 @@ function stars(count) {
   return '\u2605\u2605\u2605\u2605\u2605'.slice(0, count) + '\u2606\u2606\u2606\u2606\u2606'.slice(0, 5 - count);
 }
 
+function isVideoReview(review) {
+  return review.mediaType === 'video' || /\.(mp4|mov|m4v|webm)(\?|$)/i.test(String(review.mediaUrl || review.imageUrl || ''));
+}
+
+function reviewMedia(review, className = '') {
+  const url = escapeHtml(review.mediaUrl || review.imageUrl);
+  if (isVideoReview(review)) {
+    return `<video class="${className}" src="${url}" muted playsinline preload="metadata"></video>`;
+  }
+
+  return `<img class="${className}" src="${url}" alt="">`;
+}
+
 function reviewStatus(review) {
   if (review.status === 'pending') return 'pendente';
   if (review.status === 'rejected') return 'reprovada';
@@ -181,7 +194,7 @@ function renderReviews() {
 
   reviewsList.innerHTML = filteredReviews.map((review) => `
     <article class="admin-review" data-active="${review.active}">
-      <img src="${escapeHtml(review.imageUrl)}" alt="">
+      ${reviewMedia(review, 'admin-review__media')}
       <div>
         <h3>${escapeHtml(review.customerName)}</h3>
         <strong>${escapeHtml(review.productName)}</strong>

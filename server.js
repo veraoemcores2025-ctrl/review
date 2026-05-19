@@ -89,12 +89,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 35 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-    if (!file.mimetype.startsWith('image/') && !allowed.includes(ext)) {
-      return cb(new Error('Envie apenas imagens.'));
+    const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.m4v', '.webm'];
+    if (!file.mimetype.startsWith('image/') && !file.mimetype.startsWith('video/') && !allowed.includes(ext)) {
+      return cb(new Error('Envie apenas imagens ou videos.'));
     }
     cb(null, true);
   }
@@ -201,6 +201,7 @@ function dbReviewToApp(review) {
     comment: review.comment,
     verifiedLabel: review.verified_label,
     imagePath: review.image_url,
+    mediaType: mediaTypeFromPath(review.image_url),
     active: review.active,
     status: review.status || (review.active ? 'approved' : 'pending'),
     createdAt: review.created_at
@@ -301,8 +302,9 @@ function appSettingsToDb(settings) {
 }
 
 function publicReview(review, req) {
+  const mediaType = review.mediaType || mediaTypeFromPath(review.imagePath);
   if (/^https?:\/\//i.test(String(review.imagePath || ''))) {
-    return { ...review, imageUrl: review.imagePath };
+    return { ...review, imageUrl: review.imagePath, mediaUrl: review.imagePath, mediaType };
   }
 
   const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
@@ -310,11 +312,18 @@ function publicReview(review, req) {
   const origin = `${proto}://${req.get('host')}`;
   return {
     ...review,
-    imageUrl: review.imagePath ? `${origin}${review.imagePath}` : ''
+    imageUrl: review.imagePath ? `${origin}${review.imagePath}` : '',
+    mediaUrl: review.imagePath ? `${origin}${review.imagePath}` : '',
+    mediaType
   };
 }
 
-async function uploadReviewImage(file) {
+function mediaTypeFromPath(value) {
+  const ext = path.extname(String(value || '').split('?')[0]).toLowerCase();
+  return ['.mp4', '.mov', '.m4v', '.webm'].includes(ext) ? 'video' : 'image';
+}
+
+async function uploadReviewMedia(file) {
   if (!file) return '';
 
   if (!supabase) {
@@ -332,7 +341,7 @@ async function uploadReviewImage(file) {
     });
 
   if (error) {
-    console.warn('[Verão Reviews] Falha ao enviar foto ao Supabase Storage, usando arquivo local.', error);
+    console.warn('[Verão Reviews] Falha ao enviar midia ao Supabase Storage, usando arquivo local.', error);
     return `/uploads/${file.filename}`;
   }
 
@@ -529,7 +538,7 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
 
 app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req, res) => {
   const db = await readDb();
-  const imagePath = await uploadReviewImage(req.file);
+  const imagePath = await uploadReviewMedia(req.file);
   const productUrl = limitText(req.body.productUrl, 500);
   const review = {
     id: randomUUID(),
@@ -541,13 +550,14 @@ app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req,
     comment: limitText(req.body.comment, 500),
     verifiedLabel: limitText(req.body.verifiedLabel || 'cliente verificada', 80),
     imagePath,
+    mediaType: req.file?.mimetype?.startsWith('video/') ? 'video' : mediaTypeFromPath(imagePath),
     active: req.body.active !== 'off',
     status: req.body.active === 'off' ? 'pending' : 'approved',
     createdAt: new Date().toISOString()
   };
 
   if (!review.customerName || !review.productName || !review.comment || !review.imagePath) {
-    return res.status(400).json({ error: 'Preencha nome, produto, comentário e foto.' });
+    return res.status(400).json({ error: 'Preencha nome, produto, comentario e foto ou video.' });
   }
 
   db.reviews.push(review);
@@ -557,7 +567,7 @@ app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req,
 
 app.post('/api/reviews/submit', upload.single('photo'), async (req, res) => {
   const db = await readDb();
-  const imagePath = await uploadReviewImage(req.file);
+  const imagePath = await uploadReviewMedia(req.file);
   const productUrl = limitText(req.body.productUrl, 500);
   const review = {
     id: randomUUID(),
@@ -569,13 +579,14 @@ app.post('/api/reviews/submit', upload.single('photo'), async (req, res) => {
     comment: limitText(req.body.comment, 500),
     verifiedLabel: 'compra a validar',
     imagePath,
+    mediaType: req.file?.mimetype?.startsWith('video/') ? 'video' : mediaTypeFromPath(imagePath),
     active: false,
     status: 'pending',
     createdAt: new Date().toISOString()
   };
 
   if (!review.customerName || !review.productName || !review.comment || !review.imagePath) {
-    return res.status(400).json({ error: 'Preencha nome, produto, comentário e foto.' });
+    return res.status(400).json({ error: 'Preencha nome, produto, comentario e foto ou video.' });
   }
 
   db.reviews.push(review);
