@@ -980,16 +980,30 @@
         margin: 10px 0 0;
       }
 
-      .vr-modal-reviews__grid {
-        display: grid;
-        gap: 14px;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      .vr-modal-reviews__viewport {
+        overflow: hidden;
+        width: 100%;
+      }
+
+      .vr-modal-reviews__track {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+      }
+
+      .vr-modal-reviews__track::-webkit-scrollbar {
+        display: none;
       }
 
       .vr-modal-review {
         border: 1px solid #f0dddd;
         border-radius: 12px;
+        flex: 0 0 calc((100% - 16px) / 2);
         overflow: hidden;
+        scroll-snap-align: start;
       }
 
       .vr-modal-review img {
@@ -1033,6 +1047,52 @@
       .vr-modal-review__customer {
         color: #777;
         font-size: 11px;
+      }
+
+      .vr-modal-reviews__controls {
+        align-items: center;
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        margin-top: 18px;
+      }
+
+      .vr-modal-reviews__nav {
+        align-items: center;
+        background: #fff;
+        border: 1px solid #f0dddd;
+        border-radius: 999px;
+        color: var(--vr-brand, #b0565b);
+        cursor: pointer;
+        display: inline-flex;
+        font-family: inherit;
+        font-size: 24px;
+        font-weight: 800;
+        height: 42px;
+        justify-content: center;
+        line-height: 1;
+        width: 42px;
+      }
+
+      .vr-modal-reviews__dots {
+        align-items: center;
+        display: inline-flex;
+        gap: 7px;
+      }
+
+      .vr-modal-reviews__dot {
+        background: #d8c7c8;
+        border: 0;
+        border-radius: 999px;
+        cursor: pointer;
+        height: 8px;
+        padding: 0;
+        width: 8px;
+      }
+
+      .vr-modal-reviews__dot.is-active {
+        background: var(--vr-brand, #b0565b);
+        width: 18px;
       }
 
       @media (max-width: 900px) {
@@ -1216,8 +1276,13 @@
           font-size: 23px;
         }
 
-        .vr-modal-reviews__grid {
-          grid-template-columns: 1fr;
+        .vr-modal-review {
+          flex-basis: 100%;
+        }
+
+        .vr-modal-reviews__nav {
+          height: 38px;
+          width: 38px;
         }
       }
     `;
@@ -1389,27 +1454,84 @@
       <div class="vr-lightbox__dialog vr-lightbox__dialog--reviews" role="dialog" aria-modal="true" aria-label="Todas as avalia\u00e7\u00f5es com foto">
         <button class="vr-lightbox__close" type="button" aria-label="Fechar">×</button>
         <section class="vr-modal-reviews" style="--vr-brand: ${escapeHtml(settings.brandColor || defaultSettings.brandColor)};">
-          <div class="vr-modal-reviews__grid">
-            ${visibleReviews.map((review) => `
-              <article class="vr-modal-review">
-                <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
-                <div class="vr-modal-review__body">
-                  <div class="vr-modal-review__stars">${stars(review.rating)}</div>
-                  <p class="vr-modal-review__text">${escapeHtml(review.comment)}</p>
-                  <div class="vr-modal-review__product">${escapeHtml(review.productName)}</div>
-                  <div class="vr-modal-review__customer">${escapeHtml(review.customerName)} \u00b7 ${escapeHtml(review.verifiedLabel || 'cliente verificada')}</div>
-                </div>
-              </article>
-            `).join('')}
+          <div class="vr-modal-reviews__viewport">
+            <div class="vr-modal-reviews__track" data-vr-modal-track>
+              ${visibleReviews.map((review) => `
+                <article class="vr-modal-review">
+                  <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+                  <div class="vr-modal-review__body">
+                    <div class="vr-modal-review__stars">${stars(review.rating)}</div>
+                    <p class="vr-modal-review__text">${escapeHtml(review.comment)}</p>
+                    <div class="vr-modal-review__product">${escapeHtml(review.productName)}</div>
+                    <div class="vr-modal-review__customer">${escapeHtml(review.customerName)} \u00b7 ${escapeHtml(review.verifiedLabel || 'cliente verificada')}</div>
+                  </div>
+                </article>
+              `).join('')}
+            </div>
           </div>
+          ${visibleReviews.length > 1 ? `
+            <div class="vr-modal-reviews__controls" aria-label="Controle do carrossel de avalia\u00e7\u00f5es">
+              <button class="vr-modal-reviews__nav" type="button" data-vr-modal-prev aria-label="Avalia\u00e7\u00e3o anterior">\u2039</button>
+              <div class="vr-modal-reviews__dots" data-vr-modal-dots></div>
+              <button class="vr-modal-reviews__nav" type="button" data-vr-modal-next aria-label="Pr\u00f3xima avalia\u00e7\u00e3o">\u203a</button>
+            </div>
+          ` : ''}
         </section>
       </div>
     `;
     lightbox.hidden = false;
     document.body.classList.add('vr-reviews-modal-open');
+    const track = lightbox.querySelector('[data-vr-modal-track]');
+    const dots = lightbox.querySelector('[data-vr-modal-dots]');
+    const prev = lightbox.querySelector('[data-vr-modal-prev]');
+    const next = lightbox.querySelector('[data-vr-modal-next]');
+    let currentPage = 0;
+    let scrollTimer = null;
+
+    const perPage = () => window.matchMedia('(max-width: 640px)').matches ? 1 : 2;
+    const pageCount = () => Math.max(1, Math.ceil(visibleReviews.length / perPage()));
+    const pageWidth = () => track ? track.clientWidth + 16 : 0;
+    const goToPage = (page) => {
+      if (!track) return;
+      currentPage = Math.max(0, Math.min(page, pageCount() - 1));
+      track.scrollTo({ left: currentPage * pageWidth(), behavior: 'smooth' });
+      renderDots();
+    };
+    const renderDots = () => {
+      if (!dots) return;
+      const total = pageCount();
+      currentPage = Math.min(currentPage, total - 1);
+      dots.innerHTML = Array.from({ length: total }).map((_, index) => `
+        <button class="vr-modal-reviews__dot${index === currentPage ? ' is-active' : ''}" type="button" data-vr-modal-page="${index}" aria-label="Ir para avalia\u00e7\u00f5es ${index + 1}"></button>
+      `).join('');
+      dots.querySelectorAll('[data-vr-modal-page]').forEach((button) => {
+        button.addEventListener('click', () => goToPage(Number(button.dataset.vrModalPage)));
+      });
+    };
+    const onResize = () => {
+      renderDots();
+      goToPage(currentPage);
+    };
+
+    renderDots();
+    prev?.addEventListener('click', () => goToPage(currentPage - 1));
+    next?.addEventListener('click', () => goToPage(currentPage + 1));
+    track?.addEventListener('scroll', () => {
+      if (scrollTimer) window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        const nextPage = Math.round(track.scrollLeft / Math.max(1, pageWidth()));
+        if (nextPage !== currentPage) {
+          currentPage = Math.max(0, Math.min(nextPage, pageCount() - 1));
+          renderDots();
+        }
+      }, 80);
+    });
+    window.addEventListener('resize', onResize, { passive: true });
+
     const closeModal = () => {
       lightbox.hidden = true;
       document.body.classList.remove('vr-reviews-modal-open');
+      window.removeEventListener('resize', onResize);
       hiddenHeads.forEach((head) => {
         head.style.display = head.dataset.vrPreviousDisplay || '';
         delete head.dataset.vrPreviousDisplay;
