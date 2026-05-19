@@ -2142,38 +2142,30 @@
 
     const prev = mount.querySelector('[data-vr-prev]');
     const next = mount.querySelector('[data-vr-next]');
-    const carouselStep = () => {
-      const card = track?.querySelector('.vr-card');
-      if (!track || !card) return 0;
+    let carouselIndex = 0;
+    const visibleCardCount = () => {
+      if (!track) return 1;
+      const cards = Array.from(track.querySelectorAll('.vr-card'));
+      const firstCard = cards[0];
+      if (!firstCard) return 1;
       const style = window.getComputedStyle(track);
       const gap = parseFloat(style.columnGap || style.gap || '16') || 16;
-      return card.getBoundingClientRect().width + gap;
+      const cardWidth = firstCard.getBoundingClientRect().width + gap;
+      return Math.max(1, Math.floor((track.clientWidth + gap) / cardWidth));
     };
-    let carouselBusy = false;
     const rotateCarousel = (direction) => {
-      if (!track || carouselBusy) return;
-      const amount = carouselStep();
+      if (!track) return;
       const cards = Array.from(track.querySelectorAll('.vr-card'));
-      if (!amount || cards.length < 2) return;
+      const maxIndex = Math.max(0, cards.length - visibleCardCount());
+      if (!cards.length || maxIndex < 1) return;
 
-      carouselBusy = true;
-      if (direction > 0) {
-        track.scrollBy({ left: amount, behavior: 'smooth' });
-        window.setTimeout(() => {
-          track.appendChild(track.firstElementChild);
-          track.scrollLeft = Math.max(0, track.scrollLeft - amount);
-          carouselBusy = false;
-        }, 460);
-        return;
-      }
+      carouselIndex += direction;
+      if (carouselIndex > maxIndex) carouselIndex = 0;
+      if (carouselIndex < 0) carouselIndex = maxIndex;
 
-      track.insertBefore(track.lastElementChild, track.firstElementChild);
-      track.scrollLeft += amount;
-      window.requestAnimationFrame(() => {
-        track.scrollBy({ left: -amount, behavior: 'smooth' });
-        window.setTimeout(() => {
-          carouselBusy = false;
-        }, 460);
+      track.scrollTo({
+        left: cards[carouselIndex].offsetLeft - track.offsetLeft,
+        behavior: 'smooth'
       });
     };
     prev?.addEventListener('click', () => rotateCarousel(-1));
