@@ -1379,6 +1379,12 @@
       document.body.appendChild(lightbox);
     }
 
+    const hiddenHeads = Array.from(document.querySelectorAll('.vr-widget__head'));
+    hiddenHeads.forEach((head) => {
+      head.dataset.vrPreviousDisplay = head.style.display || '';
+      head.style.setProperty('display', 'none', 'important');
+    });
+
     const score = averageRating(visibleReviews).toFixed(1);
     const countLabel = visibleReviews.length === 1 ? '1 avalia\u00e7\u00e3o aprovada' : `${visibleReviews.length} avalia\u00e7\u00f5es aprovadas`;
     lightbox.innerHTML = `
@@ -1411,6 +1417,10 @@
     const closeModal = () => {
       lightbox.hidden = true;
       document.body.classList.remove('vr-reviews-modal-open');
+      hiddenHeads.forEach((head) => {
+        head.style.display = head.dataset.vrPreviousDisplay || '';
+        delete head.dataset.vrPreviousDisplay;
+      });
     };
     lightbox.querySelector('.vr-lightbox__close')?.addEventListener('click', closeModal);
     lightbox.addEventListener('click', (event) => {
