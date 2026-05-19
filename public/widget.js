@@ -432,9 +432,12 @@
 
       .vr-widget__button {
         background: var(--vr-brand);
+        border: 0;
         border-radius: 999px;
         color: #fff !important;
+        cursor: pointer;
         display: block;
+        font-family: inherit;
         font-size: 14px;
         font-weight: 800;
         margin: 26px auto 0;
@@ -526,10 +529,15 @@
       }
 
       .vr-product-proof__link {
+        background: none;
+        border: 0;
         color: var(--vr-brand, #b0565b) !important;
         cursor: pointer;
+        font-family: inherit;
         font-size: 12px;
         font-weight: 800;
+        padding: 0;
+        text-align: left;
         text-decoration: none !important;
       }
 
@@ -874,6 +882,11 @@
         width: 100%;
       }
 
+      .vr-lightbox__dialog--reviews {
+        max-height: min(760px, calc(100vh - 36px));
+        overflow: auto;
+      }
+
       .vr-lightbox__close {
         background: #fff;
         border: 0;
@@ -926,6 +939,94 @@
         font-size: 15px;
         line-height: 1.55;
         margin: 0;
+      }
+
+      .vr-modal-reviews {
+        padding: 28px;
+      }
+
+      .vr-modal-reviews__head {
+        margin: 0 auto 18px;
+        max-width: 720px;
+        text-align: center;
+      }
+
+      .vr-modal-reviews__kicker {
+        color: var(--vr-brand, #b0565b);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .04em;
+        margin: 0 0 8px;
+        text-transform: uppercase;
+      }
+
+      .vr-modal-reviews__head h3 {
+        color: #222;
+        font-size: 28px;
+        line-height: 1.15;
+        margin: 0;
+      }
+
+      .vr-modal-reviews__summary {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.45;
+        margin: 10px 0 0;
+      }
+
+      .vr-modal-reviews__grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .vr-modal-review {
+        border: 1px solid #f0dddd;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .vr-modal-review img {
+        aspect-ratio: 1 / 1.1;
+        background: #f6eeee;
+        display: block;
+        object-fit: cover;
+        width: 100%;
+      }
+
+      .vr-modal-review__body {
+        padding: 13px;
+      }
+
+      .vr-modal-review__stars {
+        color: #ffc400;
+        font-size: 15px;
+        letter-spacing: .5px;
+        margin-bottom: 8px;
+      }
+
+      .vr-modal-review__text {
+        color: #333;
+        display: -webkit-box;
+        font-size: 13px;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        line-height: 1.45;
+        margin: 0 0 10px;
+        overflow: hidden;
+      }
+
+      .vr-modal-review__product {
+        color: var(--vr-brand, #b0565b);
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.35;
+        margin-bottom: 5px;
+      }
+
+      .vr-modal-review__customer {
+        color: #777;
+        font-size: 11px;
       }
 
       @media (max-width: 900px) {
@@ -1100,6 +1201,18 @@
           height: 24px;
           width: 24px;
         }
+
+        .vr-modal-reviews {
+          padding: 20px 14px;
+        }
+
+        .vr-modal-reviews__head h3 {
+          font-size: 23px;
+        }
+
+        .vr-modal-reviews__grid {
+          grid-template-columns: 1fr;
+        }
       }
     `;
     document.head.appendChild(style);
@@ -1225,7 +1338,7 @@
       <div class="vr-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Avalia\u00e7\u00e3o de cliente">
         <button class="vr-lightbox__close" type="button" aria-label="Fechar">×</button>
         <div class="vr-lightbox__body">
-          <img class="vr-lightbox__image" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+          <img class="vr-lightbox__image" loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
           <div class="vr-lightbox__copy">
             <div class="vr-lightbox__stars">${stars(review.rating)}</div>
             <div class="vr-lightbox__product">${escapeHtml(review.productName)}</div>
@@ -1233,6 +1346,54 @@
             <div class="vr-card__customer">${escapeHtml(review.customerName)} \u00b7 ${escapeHtml(review.verifiedLabel || 'cliente verificada')}</div>
           </div>
         </div>
+      </div>
+    `;
+    lightbox.hidden = false;
+    lightbox.querySelector('.vr-lightbox__close')?.addEventListener('click', () => {
+      lightbox.hidden = true;
+    });
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox) lightbox.hidden = true;
+    }, { once: true });
+  }
+
+  function openAllReviewsModal(reviews, settings) {
+    const visibleReviews = (reviews || []).filter((review) => review.imageUrl);
+    if (!visibleReviews.length) return;
+
+    let lightbox = document.querySelector('.vr-lightbox');
+    if (!lightbox) {
+      lightbox = document.createElement('div');
+      lightbox.className = 'vr-lightbox';
+      lightbox.hidden = true;
+      document.body.appendChild(lightbox);
+    }
+
+    const score = averageRating(visibleReviews).toFixed(1);
+    const countLabel = visibleReviews.length === 1 ? '1 avalia\u00e7\u00e3o aprovada' : `${visibleReviews.length} avalia\u00e7\u00f5es aprovadas`;
+    lightbox.innerHTML = `
+      <div class="vr-lightbox__dialog vr-lightbox__dialog--reviews" role="dialog" aria-modal="true" aria-label="Todas as avalia\u00e7\u00f5es com foto">
+        <button class="vr-lightbox__close" type="button" aria-label="Fechar">×</button>
+        <section class="vr-modal-reviews" style="--vr-brand: ${escapeHtml(settings.brandColor || defaultSettings.brandColor)};">
+          <header class="vr-modal-reviews__head">
+            <p class="vr-modal-reviews__kicker">${escapeHtml(settings.kicker || defaultSettings.kicker)}</p>
+            <h3>${escapeHtml(settings.title || defaultSettings.title)}</h3>
+            <p class="vr-modal-reviews__summary">${score}/5 com ${countLabel} com fotos reais de clientes.</p>
+          </header>
+          <div class="vr-modal-reviews__grid">
+            ${visibleReviews.map((review) => `
+              <article class="vr-modal-review">
+                <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+                <div class="vr-modal-review__body">
+                  <div class="vr-modal-review__stars">${stars(review.rating)}</div>
+                  <p class="vr-modal-review__text">${escapeHtml(review.comment)}</p>
+                  <div class="vr-modal-review__product">${escapeHtml(review.productName)}</div>
+                  <div class="vr-modal-review__customer">${escapeHtml(review.customerName)} \u00b7 ${escapeHtml(review.verifiedLabel || 'cliente verificada')}</div>
+                </div>
+              </article>
+            `).join('')}
+          </div>
+        </section>
       </div>
     `;
     lightbox.hidden = false;
@@ -1266,11 +1427,11 @@
       <div class="vr-product-proof__photos">
         ${reviews.slice(0, 5).map((review, index) => `
           <button type="button" data-vr-proof-photo="${index}" aria-label="Abrir foto de cliente">
-            <img src="${escapeHtml(review.imageUrl)}" alt="">
+            <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="">
           </button>
         `).join('')}
       </div>
-      <a class="vr-product-proof__link" href="#${safeMountId}">Ver todas as fotos e avalia\u00e7\u00f5es</a>
+      <button class="vr-product-proof__link" type="button" data-vr-proof-all>Ver todas as fotos e avalia\u00e7\u00f5es</button>
     `;
 
     if (window.matchMedia('(max-width: 640px)').matches) {
@@ -1286,6 +1447,7 @@
     badge.querySelectorAll('[data-vr-proof-photo]').forEach((button) => {
       button.addEventListener('click', () => openReviewLightbox(reviews[Number(button.dataset.vrProofPhoto)]));
     });
+    badge.querySelector('[data-vr-proof-all]')?.addEventListener('click', () => openAllReviewsModal(reviews, settings));
   }
 
   function conversionBenefits(settings) {
@@ -1430,7 +1592,7 @@
         ${visibleReviews.map((review) => `
           <article class="vr-checkout-review">
             <div class="vr-checkout-review__top">
-              <img src="${escapeHtml(review.imageUrl)}" alt="">
+              <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="">
               <div>
                 <div class="vr-checkout-review__stars">${stars(review.rating)}</div>
                 <div class="vr-checkout-review__product">${escapeHtml(review.productName)}</div>
@@ -1532,7 +1694,7 @@
       const review = reviews[socialProofIndex % reviews.length];
       socialProofIndex += 1;
       toast.innerHTML = `
-        <img src="${escapeHtml(review.imageUrl)}" alt="">
+        <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="">
         <div>
           <p class="vr-social-proof__kicker">${escapeHtml(settings.socialProofLabel || defaultSettings.socialProofLabel)}</p>
           <p class="vr-social-proof__title">${escapeHtml(review.customerName)} avaliou ${escapeHtml(review.productName)}</p>
@@ -1568,7 +1730,7 @@
 
     const cards = reviews.slice(0, settings.maxReviews).map((review) => `
       <article class="vr-card">
-        <img class="vr-card__image" data-vr-card-photo="${escapeHtml(review.id)}" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+        <img class="vr-card__image" data-vr-card-photo="${escapeHtml(review.id)}" loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
         <div class="vr-card__body">
           <div class="vr-card__stars">${stars(review.rating)}</div>
           <p class="vr-card__comment">${escapeHtml(review.comment)}</p>
@@ -1583,11 +1745,6 @@
       ? `${baseUrl}/avaliar.html?productName=${encodeURIComponent(productContext.name)}&productUrl=${encodeURIComponent(productContext.url)}&productSlug=${encodeURIComponent(productContext.slug)}`
       : '';
 
-    const legacyButtonUrl = '/m/clientes-usando-verao-em-cores/';
-    const buttonUrl = !settings.buttonUrl || settings.buttonUrl === legacyButtonUrl
-      ? `${baseUrl}/avaliacoes.html`
-      : settings.buttonUrl;
-
     mount.innerHTML = `
       <section class="vr-widget" style="--vr-brand: ${escapeHtml(settings.brandColor)};" aria-label="Avalia\u00e7\u00f5es com fotos de clientes">
         <div class="vr-widget__inner">
@@ -1599,7 +1756,7 @@
           ${cards ? `<div class="vr-widget__grid">${cards}</div>` : '<p class="vr-widget__empty">Este produto ainda n\u00e3o tem avalia\u00e7\u00f5es com foto.</p>'}
           <div class="vr-widget__actions">
             ${productContext ? `<a class="vr-widget__button vr-widget__button--ghost" href="${escapeHtml(submitUrl)}">Avaliar este produto</a>` : ''}
-            <a class="vr-widget__button" href="${escapeHtml(buttonUrl)}">${escapeHtml(settings.buttonText)}</a>
+            <button class="vr-widget__button" type="button" data-vr-all-reviews>${escapeHtml(settings.buttonText)}</button>
           </div>
         </div>
       </section>
@@ -1619,6 +1776,8 @@
     widget?.style.setProperty('--vr-font', fontStack(settings.fontFamily));
     widget?.style.setProperty('--vr-title-size', `${Math.max(20, Math.min(44, Number(settings.titleFontSize || defaultSettings.titleFontSize)))}px`);
     widget?.style.setProperty('--vr-text-size', `${Math.max(12, Math.min(22, Number(settings.textFontSize || defaultSettings.textFontSize)))}px`);
+
+    mount.querySelector('[data-vr-all-reviews]')?.addEventListener('click', () => openAllReviewsModal(reviews, settings));
 
     mount.querySelectorAll('[data-vr-card-photo]').forEach((image) => {
       image.addEventListener('click', () => {

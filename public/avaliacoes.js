@@ -29,7 +29,7 @@ async function loadReviews() {
 
   grid.innerHTML = reviews.map((review) => `
     <article class="review-card">
-      <img src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
+      <img loading="lazy" src="${escapeHtml(review.imageUrl)}" alt="Cliente usando ${escapeHtml(review.productName)}">
       <div class="review-card__body">
         <div class="review-card__stars">${stars(review.rating)}</div>
         <p class="review-card__comment">${escapeHtml(review.comment)}</p>
