@@ -12,10 +12,17 @@ const metricPending = document.querySelector('#metricPending');
 const metricActive = document.querySelector('#metricActive');
 const metricRating = document.querySelector('#metricRating');
 const conversionPreview = document.querySelector('#conversionPreview');
+const groupForm = document.querySelector('#groupForm');
+const groupMessage = document.querySelector('#groupMessage');
+const groupsList = document.querySelector('#groupsList');
+const questionsList = document.querySelector('#questionsList');
+const refreshQuestionsButton = document.querySelector('#refreshQuestionsButton');
 const panels = document.querySelectorAll('[data-panel]');
 const panelButtons = document.querySelectorAll('[data-open-panel]');
 
 let allReviews = [];
+let allGroups = [];
+let allQuestions = [];
 let previewTimer = null;
 
 function openPanel(panelName, updateHash = true) {
@@ -99,6 +106,9 @@ function settingsPayloadFromForm() {
   payload.conversionHome = settingsForm.conversionHome.checked;
   payload.conversionProduct = settingsForm.conversionProduct.checked;
   payload.conversionCheckout = settingsForm.conversionCheckout.checked;
+  payload.rewardEnabled = settingsForm.rewardEnabled.checked;
+  payload.qnaEnabled = settingsForm.qnaEnabled.checked;
+  payload.lookbookEnabled = settingsForm.lookbookEnabled.checked;
   payload.conversionBenefits = String(payload.conversionBenefits || '')
     .split(/\n|\|/)
     .map((item) => item.trim())
@@ -245,6 +255,65 @@ function renderReviews() {
   `).join('') || '<p class="message">Nenhuma avaliacao encontrada.</p>';
 }
 
+function renderGroups() {
+  groupsList.innerHTML = allGroups.map((group) => `
+    <article class="simple-item">
+      <div>
+        <h3>${escapeHtml(group.name || group.mainSlug)}</h3>
+        <p><strong>Principal:</strong> ${escapeHtml(group.mainSlug)}</p>
+        <p><strong>Relacionados:</strong> ${escapeHtml((group.relatedSlugs || []).join(', '))}</p>
+      </div>
+      <div class="actions">
+        <button class="ghost danger" type="button" data-delete-group="${escapeHtml(group.id)}">Excluir</button>
+      </div>
+    </article>
+  `).join('') || '<p class="message">Nenhum grupo criado ainda.</p>';
+}
+
+async function loadGroups() {
+  const response = await fetchAdmin('/api/admin/groups');
+  const data = await response.json();
+  allGroups = data.groups || [];
+  renderGroups();
+}
+
+function questionStatus(question) {
+  if (question.status === 'answered') return 'respondida';
+  if (question.status === 'rejected') return 'oculta';
+  return 'pendente';
+}
+
+function renderQuestions() {
+  questionsList.innerHTML = allQuestions.map((question) => `
+    <article class="simple-item simple-item--stack">
+      <div>
+        <h3>${escapeHtml(question.productName || question.productSlug)}</h3>
+        <p><strong>${escapeHtml(question.customerName || 'Cliente')}</strong> perguntou:</p>
+        <p>${escapeHtml(question.question)}</p>
+        <span class="status-pill ${question.status === 'answered' ? 'status-active' : question.status === 'rejected' ? 'status-rejected' : 'status-pending'}">${questionStatus(question)}</span>
+      </div>
+      <form class="answer-form" data-question-form="${escapeHtml(question.id)}">
+        <label class="wide">
+          Resposta
+          <textarea name="answer" rows="3">${escapeHtml(question.answer || '')}</textarea>
+        </label>
+        <div class="actions">
+          <button class="button" type="button" data-answer-question="${escapeHtml(question.id)}">Salvar resposta</button>
+          <button class="ghost" type="button" data-hide-question="${escapeHtml(question.id)}">${question.active ? 'Ocultar' : 'Mostrar'}</button>
+          <button class="ghost danger" type="button" data-delete-question="${escapeHtml(question.id)}">Excluir</button>
+        </div>
+      </form>
+    </article>
+  `).join('') || '<p class="message">Nenhuma pergunta recebida ainda.</p>';
+}
+
+async function loadQuestions() {
+  const response = await fetchAdmin('/api/admin/questions');
+  const data = await response.json();
+  allQuestions = data.questions || [];
+  renderQuestions();
+}
+
 async function loadReviews() {
   const response = await fetchAdmin('/api/admin/reviews');
   const data = await response.json();
@@ -289,6 +358,11 @@ async function loadSettings() {
   settingsForm.conversionText.value = settings.conversionText || 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.';
   settingsForm.conversionBenefits.value = String(settings.conversionBenefits || 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp').split('|').join('\n');
   settingsForm.conversionUrgency.value = settings.conversionUrgency || 'Oferta por tempo limitado';
+  settingsForm.rewardEnabled.checked = settings.rewardEnabled !== false;
+  settingsForm.rewardCoupon.value = settings.rewardCoupon || 'VERAO10';
+  settingsForm.rewardText.value = settings.rewardText || 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.';
+  settingsForm.qnaEnabled.checked = settings.qnaEnabled !== false;
+  settingsForm.lookbookEnabled.checked = settings.lookbookEnabled !== false;
   updateConversionPreview();
   updatePreviewFromForm();
 }
@@ -335,6 +409,68 @@ settingsForm.addEventListener('submit', async (event) => {
 
   settingsMessage.textContent = 'Configuracao salva.';
   updatePreviewFromForm();
+});
+
+groupForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  groupMessage.textContent = 'Salvando grupo...';
+  const payload = Object.fromEntries(new FormData(groupForm).entries());
+  const response = await fetchAdmin('/api/admin/groups', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    groupMessage.textContent = data.error || 'Nao foi possivel salvar o grupo.';
+    return;
+  }
+
+  groupForm.reset();
+  groupMessage.textContent = 'Grupo salvo.';
+  await loadGroups();
+  window.dispatchEvent(new Event('veraoReviewsRefresh'));
+});
+
+groupsList?.addEventListener('click', async (event) => {
+  const deleteId = event.target.dataset.deleteGroup;
+  if (deleteId && confirm('Excluir este grupo de produtos?')) {
+    await fetchAdmin(`/api/admin/groups/${deleteId}`, { method: 'DELETE' });
+    await loadGroups();
+    window.dispatchEvent(new Event('veraoReviewsRefresh'));
+  }
+});
+
+questionsList?.addEventListener('click', async (event) => {
+  const answerId = event.target.dataset.answerQuestion;
+  const hideId = event.target.dataset.hideQuestion;
+  const deleteId = event.target.dataset.deleteQuestion;
+
+  if (answerId) {
+    const answer = questionsList.querySelector(`[data-question-form="${answerId}"] textarea`)?.value || '';
+    await fetchAdmin(`/api/admin/questions/${answerId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer })
+    });
+    await loadQuestions();
+  }
+
+  if (hideId) {
+    const question = allQuestions.find((item) => item.id === hideId);
+    await fetchAdmin(`/api/admin/questions/${hideId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !question?.active, status: question?.active ? 'rejected' : (question?.answer ? 'answered' : 'pending') })
+    });
+    await loadQuestions();
+  }
+
+  if (deleteId && confirm('Excluir esta pergunta?')) {
+    await fetchAdmin(`/api/admin/questions/${deleteId}`, { method: 'DELETE' });
+    await loadQuestions();
+  }
 });
 
 reviewsList.addEventListener('click', async (event) => {
@@ -413,6 +549,7 @@ logoutButton.addEventListener('click', async () => {
 reviewSearch?.addEventListener('input', renderReviews);
 reviewFilter?.addEventListener('change', renderReviews);
 refreshButton.addEventListener('click', loadReviews);
+refreshQuestionsButton?.addEventListener('click', loadQuestions);
 settingsForm.addEventListener('input', updatePreviewFromForm);
 settingsForm.addEventListener('change', updatePreviewFromForm);
 panelButtons.forEach((button) => {
@@ -421,4 +558,6 @@ panelButtons.forEach((button) => {
 
 await loadSettings();
 await loadReviews();
+await loadGroups();
+await loadQuestions();
 openPanel(window.location.hash.replace('#', '') || 'overview', false);

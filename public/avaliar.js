@@ -22,5 +22,8 @@ form.addEventListener('submit', async (event) => {
   }
 
   form.reset();
-  message.textContent = data.message || 'Avaliação enviada para aprovação.';
+  const reward = data.reward?.text
+    ? ` ${data.reward.text}${data.reward.coupon ? ` Cupom: ${data.reward.coupon}` : ''}`
+    : '';
+  message.textContent = `${data.message || 'Avaliação enviada para aprovação.'}${reward}`;
 });

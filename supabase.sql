@@ -107,6 +107,21 @@ alter table public.review_settings
 alter table public.review_settings
   add column if not exists conversion_urgency text not null default 'Oferta por tempo limitado';
 
+alter table public.review_settings
+  add column if not exists reward_enabled boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists reward_coupon text not null default 'VERAO10';
+
+alter table public.review_settings
+  add column if not exists reward_text text not null default 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.';
+
+alter table public.review_settings
+  add column if not exists qna_enabled boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists lookbook_enabled boolean not null default true;
+
 create table if not exists public.reviews (
   id uuid primary key,
   customer_name text not null,
@@ -131,6 +146,28 @@ alter table public.reviews
 alter table public.reviews
   add column if not exists status text not null default 'approved';
 
+create table if not exists public.product_groups (
+  id uuid primary key,
+  name text not null default '',
+  main_slug text not null default '',
+  related_slugs text[] not null default '{}',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.questions (
+  id uuid primary key,
+  product_name text not null default '',
+  product_url text not null default '',
+  product_slug text not null default '',
+  customer_name text not null default '',
+  question text not null,
+  answer text not null default '',
+  status text not null default 'pending' check (status in ('pending', 'answered', 'rejected')),
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  answered_at timestamptz
+);
+
 insert into public.review_settings (id)
 values (1)
 on conflict (id) do nothing;
@@ -140,8 +177,8 @@ values (
   'review-photos',
   'review-photos',
   true,
-  5242880,
-  array['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  36700160,
+  array['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime']
 )
 on conflict (id) do update
 set

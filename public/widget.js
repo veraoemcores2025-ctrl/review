@@ -43,7 +43,9 @@
     conversionTitle: 'Compra segura na Verao em Cores',
     conversionText: 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.',
     conversionBenefits: 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
-    conversionUrgency: 'Oferta por tempo limitado'
+    conversionUrgency: 'Oferta por tempo limitado',
+    qnaEnabled: true,
+    lookbookEnabled: true
   };
 
   function escapeHtml(value) {
@@ -556,6 +558,110 @@
         padding: 0;
         text-align: left;
         text-decoration: none !important;
+      }
+
+      .vr-qna {
+        --vr-brand: #b0565b;
+        --vr-title: #111827;
+        --vr-subtitle: #4b5563;
+        --vr-font: inherit;
+        background: #fff;
+        border: 1px solid #f0dddd;
+        border-radius: 14px;
+        box-sizing: border-box;
+        clear: both;
+        color: var(--vr-title);
+        font-family: var(--vr-font);
+        margin: 20px 0;
+        max-width: 760px;
+        padding: 16px;
+      }
+
+      .vr-qna,
+      .vr-qna * {
+        box-sizing: border-box;
+      }
+
+      .vr-qna h3 {
+        color: var(--vr-title);
+        font-size: 18px;
+        margin: 0 0 6px;
+      }
+
+      .vr-qna__intro {
+        color: var(--vr-subtitle);
+        font-size: 13px;
+        line-height: 1.45;
+        margin: 0 0 14px;
+      }
+
+      .vr-qna__list {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .vr-qna__item {
+        background: #fffafa;
+        border: 1px solid #f3e1e3;
+        border-radius: 10px;
+        padding: 12px;
+      }
+
+      .vr-qna__question,
+      .vr-qna__answer {
+        font-size: 13px;
+        line-height: 1.45;
+        margin: 0;
+      }
+
+      .vr-qna__question {
+        color: var(--vr-title);
+        font-weight: 800;
+      }
+
+      .vr-qna__answer {
+        color: var(--vr-subtitle);
+        margin-top: 6px;
+      }
+
+      .vr-qna form {
+        display: grid;
+        gap: 8px;
+      }
+
+      .vr-qna input,
+      .vr-qna textarea {
+        border: 1px solid #ead5d8;
+        border-radius: 8px;
+        font: inherit;
+        min-height: 40px;
+        padding: 9px 10px;
+        width: 100%;
+      }
+
+      .vr-qna textarea {
+        resize: vertical;
+      }
+
+      .vr-qna button {
+        background: var(--vr-brand);
+        border: 0;
+        border-radius: 999px;
+        color: #fff;
+        cursor: pointer;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        justify-self: start;
+        padding: 10px 16px;
+      }
+
+      .vr-qna__message {
+        color: var(--vr-brand);
+        font-size: 12px;
+        font-weight: 800;
+        margin: 0;
       }
 
       .vr-conversion {
@@ -1447,7 +1553,7 @@
     });
     lightbox.addEventListener('click', (event) => {
       if (event.target === lightbox) lightbox.hidden = true;
-    }, { once: true });
+    });
   }
 
   function openAllReviewsModal(reviews, settings) {
@@ -1771,6 +1877,84 @@
     }
   }
 
+  async function renderProductQuestions(settings) {
+    const existing = document.querySelector('.vr-qna');
+    const productContext = settings.productContext;
+    if (!productContext || settings.qnaEnabled === false || isCheckoutLikePage()) {
+      existing?.remove();
+      return;
+    }
+
+    const anchor = document.querySelector('.vr-product-proof') || productTrustAnchor();
+    if (!anchor) return;
+
+    const block = existing || document.createElement('section');
+    block.className = 'vr-qna';
+    block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
+    block.style.setProperty('--vr-title', settings.titleColor || defaultSettings.titleColor);
+    block.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
+    block.style.setProperty('--vr-font', fontStack(settings.fontFamily));
+    block.innerHTML = `
+      <h3>Perguntas sobre este produto</h3>
+      <p class="vr-qna__intro">Tire suas duvidas antes de comprar. A resposta aparece aqui depois da loja responder.</p>
+      <div class="vr-qna__list"></div>
+      <form class="vr-qna__form">
+        <input name="customerName" maxlength="80" placeholder="Seu nome">
+        <textarea name="question" rows="3" maxlength="500" required placeholder="Digite sua pergunta"></textarea>
+        <button type="submit">Enviar pergunta</button>
+        <p class="vr-qna__message" aria-live="polite"></p>
+      </form>
+    `;
+
+    if (anchor.nextElementSibling !== block) {
+      anchor.insertAdjacentElement('afterend', block);
+    }
+
+    try {
+      const response = await fetch(`${baseUrl}/api/questions?productSlug=${encodeURIComponent(productContext.slug)}`, { cache: 'no-store' });
+      const data = await response.json();
+      const questions = data.questions || [];
+      const list = block.querySelector('.vr-qna__list');
+      list.innerHTML = questions.slice(0, 6).map((question) => `
+        <article class="vr-qna__item">
+          <p class="vr-qna__question">P: ${escapeHtml(question.question)}</p>
+          <p class="vr-qna__answer">R: ${escapeHtml(question.answer)}</p>
+        </article>
+      `).join('');
+    } catch (error) {
+      console.warn('[Ver\u00e3o Reviews] Nao foi possivel carregar perguntas.', error);
+    }
+
+    const questionForm = block.querySelector('.vr-qna__form');
+    if (questionForm?.dataset.bound === 'true') return;
+    if (questionForm) questionForm.dataset.bound = 'true';
+    questionForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const message = form.querySelector('.vr-qna__message');
+      message.textContent = 'Enviando pergunta...';
+      const payload = {
+        customerName: form.customerName.value,
+        question: form.question.value,
+        productName: productContext.name,
+        productUrl: productContext.url,
+        productSlug: productContext.slug
+      };
+      const response = await fetch(`${baseUrl}/api/questions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        message.textContent = data.error || 'Nao foi possivel enviar.';
+        return;
+      }
+      form.reset();
+      message.textContent = data.message || 'Pergunta enviada.';
+    }, { once: true });
+  }
+
   function fontStack(fontFamily) {
     const family = String(fontFamily || 'inherit');
     if (family === 'Poppins') return "'Poppins', Arial, sans-serif";
@@ -1880,6 +2064,7 @@
     placeMount(mount, settings);
     renderConversionBlock(reviews, settings, mount);
     renderProductTrustBadge(reviews, settings);
+    renderProductQuestions(settings);
     renderSocialProofToast(reviews, settings);
 
     const productContext = settings.productContext || null;

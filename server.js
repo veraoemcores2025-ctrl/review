@@ -55,7 +55,12 @@ const DEFAULT_SETTINGS = {
   conversionTitle: 'Compra segura na Verao em Cores',
   conversionText: 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.',
   conversionBenefits: 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
-  conversionUrgency: 'Oferta por tempo limitado'
+  conversionUrgency: 'Oferta por tempo limitado',
+  rewardEnabled: true,
+  rewardCoupon: 'VERAO10',
+  rewardText: 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.',
+  qnaEnabled: true,
+  lookbookEnabled: true
 };
 const supabase = SUPABASE_URL && SUPABASE_KEY
   ? createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -124,15 +129,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 async function readDb() {
   if (supabase) {
-    const [{ data: reviews, error: reviewsError }, { data: settings, error: settingsError }] = await Promise.all([
+    const [
+      { data: reviews, error: reviewsError },
+      { data: settings, error: settingsError },
+      productGroupsResult,
+      questionsResult
+    ] = await Promise.all([
       supabase.from('reviews').select('*').order('created_at', { ascending: false }),
-      supabase.from('review_settings').select('*').eq('id', 1).maybeSingle()
+      supabase.from('review_settings').select('*').eq('id', 1).maybeSingle(),
+      readOptionalTable('product_groups', 'created_at'),
+      readOptionalTable('questions', 'created_at')
     ]);
 
     if (!reviewsError && !settingsError) {
       return {
         reviews: (reviews || []).map(dbReviewToApp),
-        settings: { ...DEFAULT_SETTINGS, ...dbSettingsToApp(settings) }
+        settings: { ...DEFAULT_SETTINGS, ...dbSettingsToApp(settings) },
+        productGroups: (productGroupsResult.data || []).map(dbGroupToApp),
+        questions: (questionsResult.data || []).map(dbQuestionToApp)
       };
     }
 
@@ -148,6 +162,8 @@ async function readDb() {
     }
   }
   db.reviews ||= [];
+  db.productGroups ||= [];
+  db.questions ||= [];
   db.settings = { ...DEFAULT_SETTINGS, ...(db.settings || {}) };
   return db;
 }
@@ -155,9 +171,18 @@ async function readDb() {
 async function writeDb(db) {
   if (supabase) {
     const settings = db.settings || DEFAULT_SETTINGS;
-    const { error: settingsError } = await supabase
+    let settingsRow = appSettingsToDb(settings);
+    let { error: settingsError } = await supabase
       .from('review_settings')
-      .upsert(appSettingsToDb(settings), { onConflict: 'id' });
+      .upsert(settingsRow, { onConflict: 'id' });
+
+    if (settingsError && /reward_|qna_|lookbook_/i.test(settingsError.message || '')) {
+      settingsRow = appSettingsToDb(settings, { includeOptional: false });
+      const retry = await supabase
+        .from('review_settings')
+        .upsert(settingsRow, { onConflict: 'id' });
+      settingsError = retry.error;
+    }
 
     if (settingsError) {
       if (process.env.VERCEL) {
@@ -165,6 +190,9 @@ async function writeDb(db) {
       }
       console.warn('[Verão Reviews] Falha ao salvar configurações no Supabase, usando arquivo local.', settingsError);
     } else {
+      await saveOptionalCollection('product_groups', db.productGroups || [], appGroupToDb);
+      await saveOptionalCollection('questions', db.questions || [], appQuestionToDb);
+
       const rows = (db.reviews || []).map(appReviewToDb);
       if (rows.length) {
         const { error: deleteError } = await supabase.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000');
@@ -188,6 +216,47 @@ async function writeDb(db) {
   const tmp = `${DB_FILE}.tmp`;
   await writeFile(tmp, JSON.stringify(db, null, 2));
   await rename(tmp, DB_FILE);
+}
+
+async function readOptionalTable(table, orderColumn) {
+  if (!supabase) return { data: [], error: null };
+  const query = supabase.from(table).select('*');
+  const { data, error } = orderColumn
+    ? await query.order(orderColumn, { ascending: false })
+    : await query;
+
+  if (error) {
+    console.warn(`[Verao Reviews] Tabela opcional ${table} indisponivel.`, error.message);
+    return { data: [], error };
+  }
+
+  return { data: data || [], error: null };
+}
+
+async function saveOptionalCollection(table, items, mapper) {
+  if (!supabase) return;
+  const rows = (items || []).map(mapper);
+  const { error: deleteError } = await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  if (deleteError) {
+    if (/does not exist|schema cache|relation/i.test(deleteError.message || '')) {
+      console.warn(`[Verao Reviews] Execute a migracao do Supabase para ativar ${table}.`);
+      return;
+    }
+    if (process.env.VERCEL) {
+      throw new Error(`Falha ao salvar ${table} no Supabase: ${deleteError.message}`);
+    }
+    console.warn(`[Verao Reviews] Falha ao limpar ${table}.`, deleteError.message);
+    return;
+  }
+
+  if (!rows.length) return;
+  const { error: insertError } = await supabase.from(table).insert(rows);
+  if (insertError) {
+    if (process.env.VERCEL) {
+      throw new Error(`Falha ao salvar ${table} no Supabase: ${insertError.message}`);
+    }
+    console.warn(`[Verao Reviews] Falha ao inserir ${table}.`, insertError.message);
+  }
 }
 
 function dbReviewToApp(review) {
@@ -225,6 +294,58 @@ function appReviewToDb(review) {
   };
 }
 
+function dbGroupToApp(group) {
+  return {
+    id: group.id,
+    name: group.name || '',
+    mainSlug: group.main_slug || '',
+    relatedSlugs: Array.isArray(group.related_slugs) ? group.related_slugs : [],
+    createdAt: group.created_at
+  };
+}
+
+function appGroupToDb(group) {
+  return {
+    id: group.id,
+    name: group.name || '',
+    main_slug: makeProductSlug(group.mainSlug || group.name),
+    related_slugs: (group.relatedSlugs || []).map(makeProductSlug).filter(Boolean),
+    created_at: group.createdAt || new Date().toISOString()
+  };
+}
+
+function dbQuestionToApp(question) {
+  return {
+    id: question.id,
+    productName: question.product_name || '',
+    productUrl: question.product_url || '',
+    productSlug: question.product_slug || makeProductSlug(question.product_url || question.product_name),
+    customerName: question.customer_name || '',
+    question: question.question || '',
+    answer: question.answer || '',
+    status: question.status || 'pending',
+    active: question.active !== false,
+    createdAt: question.created_at,
+    answeredAt: question.answered_at || ''
+  };
+}
+
+function appQuestionToDb(question) {
+  return {
+    id: question.id,
+    product_name: question.productName || '',
+    product_url: question.productUrl || '',
+    product_slug: makeProductSlug(question.productSlug || question.productUrl || question.productName),
+    customer_name: question.customerName || '',
+    question: question.question || '',
+    answer: question.answer || '',
+    status: question.status || 'pending',
+    active: question.active !== false,
+    created_at: question.createdAt || new Date().toISOString(),
+    answered_at: question.answeredAt || null
+  };
+}
+
 function dbSettingsToApp(settings) {
   if (!settings) return {};
   return {
@@ -259,12 +380,18 @@ function dbSettingsToApp(settings) {
     conversionTitle: settings.conversion_title ?? DEFAULT_SETTINGS.conversionTitle,
     conversionText: settings.conversion_text ?? DEFAULT_SETTINGS.conversionText,
     conversionBenefits: settings.conversion_benefits ?? DEFAULT_SETTINGS.conversionBenefits,
-    conversionUrgency: settings.conversion_urgency ?? DEFAULT_SETTINGS.conversionUrgency
+    conversionUrgency: settings.conversion_urgency ?? DEFAULT_SETTINGS.conversionUrgency,
+    rewardEnabled: settings.reward_enabled ?? DEFAULT_SETTINGS.rewardEnabled,
+    rewardCoupon: settings.reward_coupon ?? DEFAULT_SETTINGS.rewardCoupon,
+    rewardText: settings.reward_text ?? DEFAULT_SETTINGS.rewardText,
+    qnaEnabled: settings.qna_enabled ?? DEFAULT_SETTINGS.qnaEnabled,
+    lookbookEnabled: settings.lookbook_enabled ?? DEFAULT_SETTINGS.lookbookEnabled
   };
 }
 
-function appSettingsToDb(settings) {
-  return {
+function appSettingsToDb(settings, options = {}) {
+  const includeOptional = options.includeOptional !== false;
+  const row = {
     id: 1,
     title: settings.title,
     kicker: settings.kicker,
@@ -299,6 +426,16 @@ function appSettingsToDb(settings) {
     conversion_benefits: settings.conversionBenefits,
     conversion_urgency: settings.conversionUrgency
   };
+
+  if (includeOptional) {
+    row.reward_enabled = settings.rewardEnabled;
+    row.reward_coupon = settings.rewardCoupon;
+    row.reward_text = settings.rewardText;
+    row.qna_enabled = settings.qnaEnabled;
+    row.lookbook_enabled = settings.lookbookEnabled;
+  }
+
+  return row;
 }
 
 function publicReview(review, req) {
@@ -369,6 +506,38 @@ function makeProductSlug(value) {
     ?.replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     || '';
+}
+
+function groupedProductSlugs(db, productSlug) {
+  const target = makeProductSlug(productSlug);
+  const groups = db.productGroups || [];
+  const group = groups.find((item) => {
+    const slugs = [item.mainSlug, ...(item.relatedSlugs || [])].map(makeProductSlug).filter(Boolean);
+    return slugs.includes(target);
+  });
+
+  if (!group) return new Set([target]);
+  return new Set([group.mainSlug, ...(group.relatedSlugs || [])].map(makeProductSlug).filter(Boolean));
+}
+
+function parseSlugList(value) {
+  return String(value || '')
+    .split(/\n|,|\|/)
+    .map(makeProductSlug)
+    .filter(Boolean);
+}
+
+function publicQuestion(question) {
+  return {
+    id: question.id,
+    productName: question.productName,
+    productSlug: question.productSlug,
+    customerName: question.customerName,
+    question: question.question,
+    answer: question.answer,
+    createdAt: question.createdAt,
+    answeredAt: question.answeredAt
+  };
 }
 
 function parseCookies(req) {
@@ -443,7 +612,12 @@ function publicSettings(settings) {
     conversionTitle: settings.conversionTitle,
     conversionText: settings.conversionText,
     conversionBenefits: settings.conversionBenefits,
-    conversionUrgency: settings.conversionUrgency
+    conversionUrgency: settings.conversionUrgency,
+    rewardEnabled: settings.rewardEnabled,
+    rewardCoupon: settings.rewardCoupon,
+    rewardText: settings.rewardText,
+    qnaEnabled: settings.qnaEnabled,
+    lookbookEnabled: settings.lookbookEnabled
   };
 }
 
@@ -473,9 +647,10 @@ app.post('/api/admin/logout', (_req, res) => {
 app.get('/api/reviews', async (req, res) => {
   const db = await readDb();
   const productSlug = makeProductSlug(req.query.productSlug || req.query.productUrl || '');
+  const allowedSlugs = productSlug ? groupedProductSlugs(db, productSlug) : null;
   const reviews = db.reviews
     .filter((review) => review.active && (review.status || 'approved') === 'approved')
-    .filter((review) => !productSlug || makeProductSlug(review.productSlug || review.productUrl || review.productName) === productSlug)
+    .filter((review) => !allowedSlugs || allowedSlugs.has(makeProductSlug(review.productSlug || review.productUrl || review.productName)))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((review) => publicReview(review, req));
   res.json({ reviews, settings: publicSettings(db.settings) });
@@ -493,6 +668,138 @@ app.get('/api/admin/reviews', requireAdmin, async (req, res) => {
 app.get('/api/admin/settings', requireAdmin, async (_req, res) => {
   const db = await readDb();
   res.json({ settings: db.settings });
+});
+
+app.get('/api/lookbook', async (req, res) => {
+  const db = await readDb();
+  if (db.settings.lookbookEnabled === false) return res.json({ reviews: [], settings: publicSettings(db.settings) });
+  const reviews = db.reviews
+    .filter((review) => review.active && (review.status || 'approved') === 'approved' && review.imagePath)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map((review) => publicReview(review, req));
+  res.json({ reviews, settings: publicSettings(db.settings) });
+});
+
+app.get('/api/questions', async (req, res) => {
+  const db = await readDb();
+  if (db.settings.qnaEnabled === false) return res.json({ questions: [] });
+  const productSlug = makeProductSlug(req.query.productSlug || req.query.productUrl || '');
+  const allowedSlugs = productSlug ? groupedProductSlugs(db, productSlug) : null;
+  const questions = (db.questions || [])
+    .filter((question) => question.active && question.status === 'answered' && question.answer)
+    .filter((question) => !allowedSlugs || allowedSlugs.has(makeProductSlug(question.productSlug || question.productUrl || question.productName)))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(publicQuestion);
+  res.json({ questions });
+});
+
+app.post('/api/questions', async (req, res) => {
+  const db = await readDb();
+  if (db.settings.qnaEnabled === false) return res.status(403).json({ error: 'Perguntas estao desativadas.' });
+  const productUrl = limitText(req.body.productUrl, 500);
+  const question = {
+    id: randomUUID(),
+    productName: limitText(req.body.productName, 120),
+    productUrl,
+    productSlug: makeProductSlug(req.body.productSlug || productUrl || req.body.productName),
+    customerName: limitText(req.body.customerName || 'Cliente', 80),
+    question: limitText(req.body.question, 500),
+    answer: '',
+    status: 'pending',
+    active: true,
+    createdAt: new Date().toISOString(),
+    answeredAt: ''
+  };
+
+  if (!question.productSlug || !question.question) {
+    return res.status(400).json({ error: 'Informe produto e pergunta.' });
+  }
+
+  db.questions.push(question);
+  await writeDb(db);
+  res.status(201).json({ ok: true, message: 'Pergunta enviada. Ela aparece na loja depois da resposta.' });
+});
+
+app.get('/api/admin/groups', requireAdmin, async (_req, res) => {
+  const db = await readDb();
+  res.json({ groups: db.productGroups || [] });
+});
+
+app.post('/api/admin/groups', requireAdmin, async (req, res) => {
+  const db = await readDb();
+  const mainSlug = makeProductSlug(req.body.mainSlug || req.body.mainUrl || req.body.name);
+  const relatedSlugs = parseSlugList(req.body.relatedSlugs || req.body.relatedUrls)
+    .filter((slug) => slug && slug !== mainSlug);
+  const group = {
+    id: randomUUID(),
+    name: limitText(req.body.name || mainSlug, 120),
+    mainSlug,
+    relatedSlugs: [...new Set(relatedSlugs)],
+    createdAt: new Date().toISOString()
+  };
+
+  if (!group.mainSlug || !group.relatedSlugs.length) {
+    return res.status(400).json({ error: 'Informe o produto principal e pelo menos um produto relacionado.' });
+  }
+
+  db.productGroups = (db.productGroups || []).filter((item) => item.id !== group.id);
+  db.productGroups.push(group);
+  await writeDb(db);
+  res.status(201).json({ group });
+});
+
+app.patch('/api/admin/groups/:id', requireAdmin, async (req, res) => {
+  const db = await readDb();
+  const group = (db.productGroups || []).find((item) => item.id === req.params.id);
+  if (!group) return res.status(404).json({ error: 'Grupo nao encontrado.' });
+  if ('name' in req.body) group.name = limitText(req.body.name, 120);
+  if ('mainSlug' in req.body || 'mainUrl' in req.body) group.mainSlug = makeProductSlug(req.body.mainSlug || req.body.mainUrl);
+  if ('relatedSlugs' in req.body || 'relatedUrls' in req.body) {
+    group.relatedSlugs = [...new Set(parseSlugList(req.body.relatedSlugs || req.body.relatedUrls).filter((slug) => slug !== group.mainSlug))];
+  }
+  await writeDb(db);
+  res.json({ group });
+});
+
+app.delete('/api/admin/groups/:id', requireAdmin, async (req, res) => {
+  const db = await readDb();
+  const before = (db.productGroups || []).length;
+  db.productGroups = (db.productGroups || []).filter((item) => item.id !== req.params.id);
+  if (db.productGroups.length === before) return res.status(404).json({ error: 'Grupo nao encontrado.' });
+  await writeDb(db);
+  res.status(204).end();
+});
+
+app.get('/api/admin/questions', requireAdmin, async (_req, res) => {
+  const db = await readDb();
+  res.json({ questions: db.questions || [] });
+});
+
+app.patch('/api/admin/questions/:id', requireAdmin, async (req, res) => {
+  const db = await readDb();
+  const question = (db.questions || []).find((item) => item.id === req.params.id);
+  if (!question) return res.status(404).json({ error: 'Pergunta nao encontrada.' });
+  if ('answer' in req.body) {
+    question.answer = limitText(req.body.answer, 700);
+    question.status = question.answer ? 'answered' : 'pending';
+    question.answeredAt = question.answer ? new Date().toISOString() : '';
+  }
+  if ('status' in req.body && ['pending', 'answered', 'rejected'].includes(String(req.body.status))) {
+    question.status = String(req.body.status);
+    question.active = question.status !== 'rejected';
+  }
+  if ('active' in req.body) question.active = Boolean(req.body.active);
+  await writeDb(db);
+  res.json({ question });
+});
+
+app.delete('/api/admin/questions/:id', requireAdmin, async (req, res) => {
+  const db = await readDb();
+  const before = (db.questions || []).length;
+  db.questions = (db.questions || []).filter((item) => item.id !== req.params.id);
+  if (db.questions.length === before) return res.status(404).json({ error: 'Pergunta nao encontrada.' });
+  await writeDb(db);
+  res.status(204).end();
 });
 
 app.put('/api/admin/settings', requireAdmin, async (req, res) => {
@@ -530,7 +837,12 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     conversionTitle: limitText(req.body.conversionTitle || DEFAULT_SETTINGS.conversionTitle, 90),
     conversionText: limitText(req.body.conversionText || DEFAULT_SETTINGS.conversionText, 180),
     conversionBenefits: limitText(req.body.conversionBenefits || DEFAULT_SETTINGS.conversionBenefits, 320),
-    conversionUrgency: limitText(req.body.conversionUrgency || DEFAULT_SETTINGS.conversionUrgency, 80)
+    conversionUrgency: limitText(req.body.conversionUrgency || DEFAULT_SETTINGS.conversionUrgency, 80),
+    rewardEnabled: Boolean(req.body.rewardEnabled),
+    rewardCoupon: limitText(req.body.rewardCoupon || DEFAULT_SETTINGS.rewardCoupon, 40),
+    rewardText: limitText(req.body.rewardText || DEFAULT_SETTINGS.rewardText, 220),
+    qnaEnabled: Boolean(req.body.qnaEnabled),
+    lookbookEnabled: Boolean(req.body.lookbookEnabled)
   };
   await writeDb(db);
   res.json({ settings: db.settings });
@@ -591,7 +903,13 @@ app.post('/api/reviews/submit', upload.single('photo'), async (req, res) => {
 
   db.reviews.push(review);
   await writeDb(db);
-  res.status(201).json({ ok: true, message: 'Avaliação enviada para aprovação.' });
+  const reward = db.settings.rewardEnabled !== false
+    ? {
+      coupon: db.settings.rewardCoupon || DEFAULT_SETTINGS.rewardCoupon,
+      text: db.settings.rewardText || DEFAULT_SETTINGS.rewardText
+    }
+    : null;
+  res.status(201).json({ ok: true, message: 'Avaliação enviada para aprovação.', reward });
 });
 
 app.patch('/api/admin/reviews/:id', requireAdmin, async (req, res) => {

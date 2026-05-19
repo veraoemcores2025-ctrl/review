@@ -32,6 +32,10 @@
           <button class="nav-item" type="button" data-open-panel="widget">Widget</button>
           <button class="nav-item" type="button" data-open-panel="popup">Popup</button>
           <button class="nav-item" type="button" data-open-panel="conversion">Convers&atilde;o</button>
+          <button class="nav-item" type="button" data-open-panel="groups">Produtos relacionados</button>
+          <button class="nav-item" type="button" data-open-panel="qna">Perguntas</button>
+          <button class="nav-item" type="button" data-open-panel="rewards">Recompensas</button>
+          <button class="nav-item" type="button" data-open-panel="lookbook">Lookbook</button>
           <button class="nav-item" type="button" data-open-panel="new-review">Nova avalia&ccedil;&atilde;o</button>
           <button class="nav-item" type="button" data-open-panel="reviews">Avalia&ccedil;&otilde;es</button>
           <button class="nav-item" type="button" data-open-panel="preview">Preview</button>
@@ -86,6 +90,10 @@
               <button class="quick-card" type="button" data-open-panel="conversion">
                 <strong>Melhorar convers&atilde;o</strong>
                 <span>Configure mensagens de confian&ccedil;a, urg&ecirc;ncia e seguran&ccedil;a.</span>
+              </button>
+              <button class="quick-card" type="button" data-open-panel="groups">
+                <strong>Agrupar produtos</strong>
+                <span>Use as mesmas fotos reais em varia&ccedil;&otilde;es parecidas.</span>
               </button>
             </div>
           </section>
@@ -302,6 +310,14 @@
                           <small>Use com cuidado; hoje mostramos avalia&ccedil;&otilde;es compactas.</small>
                         </span>
                       </label>
+
+                      <label class="check conversion-switch">
+                        <input name="qnaEnabled" type="checkbox">
+                        <span>
+                          Perguntas no produto
+                          <small>Permite que clientes enviem d&uacute;vidas reais.</small>
+                        </span>
+                      </label>
                     </div>
                   </div>
 
@@ -365,7 +381,89 @@
                 </aside>
               </div>
             </section>
+
+            <section class="panel panel-page" data-panel="rewards" hidden>
+              <div class="section-head">
+                <div>
+                  <p class="section-kicker">P&oacute;s-avalia&ccedil;&atilde;o</p>
+                  <h2>Recompensa para cliente</h2>
+                  <p class="section-subtitle">Mostre um cupom ou mensagem de agradecimento depois que a cliente enviar foto ou v&iacute;deo real.</p>
+                </div>
+                <button class="ghost" type="submit">Salvar recompensa</button>
+              </div>
+              <div class="form">
+                <label class="check wide">
+                  <input name="rewardEnabled" type="checkbox">
+                  Ativar recompensa depois do envio
+                </label>
+                <label>
+                  Cupom
+                  <input name="rewardCoupon" maxlength="40" placeholder="VERAO10">
+                </label>
+                <label class="wide">
+                  Mensagem para cliente
+                  <textarea name="rewardText" rows="4" maxlength="220" placeholder="Obrigado por enviar sua foto. Use o cupom VERAO10 na proxima compra."></textarea>
+                </label>
+              </div>
+            </section>
+
+            <section class="panel panel-page" data-panel="lookbook" hidden>
+              <div class="section-head">
+                <div>
+                  <p class="section-kicker">Mural</p>
+                  <h2>Lookbook das clientes</h2>
+                  <p class="section-subtitle">Uma p&aacute;gina com fotos e v&iacute;deos reais aprovados para usar como vitrine social.</p>
+                </div>
+                <button class="ghost" type="submit">Salvar lookbook</button>
+              </div>
+              <div class="form">
+                <label class="check wide">
+                  <input name="lookbookEnabled" type="checkbox">
+                  Ativar p&aacute;gina de lookbook
+                </label>
+                <p class="message wide">Link para divulgar: <a href="/lookbook.html" target="_blank" rel="noopener">/lookbook.html</a></p>
+              </div>
+            </section>
           </form>
+
+          <section class="panel panel-page" data-panel="groups" hidden>
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Produtos relacionados</p>
+                <h2>Agrupamento de avalia&ccedil;&otilde;es</h2>
+                <p class="section-subtitle">Quando um produto tem varia&ccedil;&otilde;es de cor ou modelos muito parecidos, voc&ecirc; pode reaproveitar as mesmas avalia&ccedil;&otilde;es reais.</p>
+              </div>
+            </div>
+            <form id="groupForm" class="form">
+              <label>
+                Nome do grupo
+                <input name="name" placeholder="Ex: Macacao Fitness">
+              </label>
+              <label>
+                Produto principal
+                <input name="mainSlug" required placeholder="Cole o link ou slug do produto principal">
+              </label>
+              <label class="wide">
+                Produtos relacionados
+                <textarea name="relatedSlugs" required rows="5" placeholder="Cole um link/slug por linha"></textarea>
+              </label>
+              <button class="button" type="submit">Criar grupo</button>
+              <p id="groupMessage" class="message" aria-live="polite"></p>
+            </form>
+            <div id="groupsList" class="simple-list"></div>
+          </section>
+
+          <section class="panel panel-page" data-panel="qna" hidden>
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Perguntas e respostas</p>
+                <h2>D&uacute;vidas das clientes</h2>
+                <p class="section-subtitle">Responda perguntas recebidas na p&aacute;gina do produto. S&oacute; respostas aprovadas aparecem na loja.</p>
+              </div>
+              <button class="ghost" id="refreshQuestionsButton" type="button">Atualizar</button>
+            </div>
+            <div id="questionsList" class="simple-list"></div>
+          </section>
 
           <section class="panel panel-page" data-panel="new-review" hidden>
             <div class="section-head">
