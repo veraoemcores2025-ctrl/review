@@ -46,7 +46,13 @@
     conversionBenefits: 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
     conversionUrgency: 'Oferta por tempo limitado',
     qnaEnabled: true,
-    lookbookEnabled: true
+    lookbookEnabled: true,
+    videoShowcaseEnabled: true,
+    videoShowcaseHome: true,
+    videoShowcaseProduct: true,
+    videoShowcaseTitle: 'Clientes usando em video',
+    videoShowcaseSubtitle: 'Veja detalhes reais do caimento antes de comprar.',
+    videoShowcaseMax: 6
   };
 
   function escapeHtml(value) {
@@ -663,6 +669,135 @@
         font-size: 12px;
         font-weight: 800;
         margin: 0;
+      }
+
+      .vr-video-showcase {
+        --vr-brand: #b0565b;
+        --vr-title: #111827;
+        --vr-subtitle: #4b5563;
+        --vr-font: inherit;
+        background: #fff;
+        border: 1px solid #f0dddd;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(17, 24, 39, .07);
+        box-sizing: border-box;
+        clear: both;
+        color: var(--vr-title);
+        font-family: var(--vr-font);
+        margin: 20px auto;
+        max-width: 1180px;
+        padding: 16px;
+        width: calc(100% - 28px);
+      }
+
+      .vr-video-showcase,
+      .vr-video-showcase * {
+        box-sizing: border-box;
+      }
+
+      .vr-video-showcase__head {
+        align-items: end;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .vr-video-showcase__head h3 {
+        color: var(--vr-title);
+        font-size: 18px;
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      .vr-video-showcase__head p {
+        color: var(--vr-subtitle);
+        font-size: 13px;
+        line-height: 1.4;
+        margin: 5px 0 0;
+      }
+
+      .vr-video-showcase__tag {
+        background: #fff7f7;
+        border: 1px solid #f0dddd;
+        border-radius: 999px;
+        color: var(--vr-brand);
+        flex: 0 0 auto;
+        font-size: 11px;
+        font-weight: 900;
+        padding: 7px 10px;
+        text-transform: uppercase;
+      }
+
+      .vr-video-showcase__track {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding: 2px 2px 8px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+      }
+
+      .vr-video-card {
+        background: #fffafa;
+        border: 1px solid #f0dddd;
+        border-radius: 14px;
+        cursor: pointer;
+        flex: 0 0 142px;
+        overflow: hidden;
+        padding: 0;
+        position: relative;
+        scroll-snap-align: start;
+        text-align: left;
+      }
+
+      .vr-video-card video {
+        aspect-ratio: 9 / 14;
+        background: #f4eeee;
+        display: block;
+        object-fit: cover;
+        width: 100%;
+      }
+
+      .vr-video-card__play {
+        align-items: center;
+        background: rgba(17, 24, 39, .68);
+        border-radius: 999px;
+        color: #fff;
+        display: inline-flex;
+        font-size: 13px;
+        font-weight: 900;
+        height: 36px;
+        justify-content: center;
+        left: 50%;
+        padding-left: 2px;
+        position: absolute;
+        top: 42%;
+        transform: translate(-50%, -50%);
+        width: 36px;
+      }
+
+      .vr-video-card__body {
+        padding: 10px;
+      }
+
+      .vr-video-card strong {
+        color: var(--vr-title);
+        display: -webkit-box;
+        font-size: 12px;
+        line-height: 1.25;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .vr-video-card span {
+        color: var(--vr-brand);
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        margin-top: 5px;
       }
 
       .vr-conversion {
@@ -1288,6 +1423,22 @@
           font-size: 12px;
           line-height: 1.35;
           margin-top: 4px;
+        }
+
+        .vr-video-showcase {
+          border-radius: 12px;
+          margin: 16px auto;
+          padding: 14px;
+          width: calc(100% - 20px);
+        }
+
+        .vr-video-showcase__head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .vr-video-card {
+          flex-basis: 126px;
         }
 
         .vr-product-proof {
@@ -1956,6 +2107,78 @@
     }, { once: true });
   }
 
+  function videoShowcaseShouldShow(settings, videos) {
+    if (settings.videoShowcaseEnabled === false || isCheckoutLikePage()) return false;
+    if (!videos.length) return false;
+    if (settings.productContext) return settings.videoShowcaseProduct !== false;
+    return settings.videoShowcaseHome !== false;
+  }
+
+  function placeVideoShowcase(block, mount, settings) {
+    if (settings.productContext) {
+      const proof = document.querySelector('.vr-product-proof');
+      if (proof && proof.nextElementSibling !== block) {
+        proof.insertAdjacentElement('afterend', block);
+        return;
+      }
+
+      const anchor = productTrustAnchor();
+      if (anchor && anchor.nextElementSibling !== block) {
+        anchor.insertAdjacentElement('afterend', block);
+        return;
+      }
+    }
+
+    if (mount && mount.previousElementSibling !== block) {
+      mount.insertAdjacentElement('beforebegin', block);
+    } else if (!block.parentElement) {
+      document.body.appendChild(block);
+    }
+  }
+
+  function renderVideoShowcase(reviews, settings, mount) {
+    const existing = document.querySelector('.vr-video-showcase');
+    const maxVideos = Math.max(2, Math.min(12, Number(settings.videoShowcaseMax || defaultSettings.videoShowcaseMax)));
+    const videos = (reviews || []).filter(isVideoReview).slice(0, maxVideos);
+    if (!videoShowcaseShouldShow(settings, videos)) {
+      existing?.remove();
+      return;
+    }
+
+    const block = existing || document.createElement('section');
+    block.className = 'vr-video-showcase';
+    block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
+    block.style.setProperty('--vr-title', settings.titleColor || defaultSettings.titleColor);
+    block.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
+    block.style.setProperty('--vr-font', fontStack(settings.fontFamily));
+    block.innerHTML = `
+      <header class="vr-video-showcase__head">
+        <div>
+          <h3>${escapeHtml(settings.videoShowcaseTitle || defaultSettings.videoShowcaseTitle)}</h3>
+          <p>${escapeHtml(settings.videoShowcaseSubtitle || defaultSettings.videoShowcaseSubtitle)}</p>
+        </div>
+        <span class="vr-video-showcase__tag">${videos.length} video${videos.length > 1 ? 's' : ''} real${videos.length > 1 ? 's' : ''}</span>
+      </header>
+      <div class="vr-video-showcase__track">
+        ${videos.map((review, index) => `
+          <button class="vr-video-card" type="button" data-vr-video="${index}" aria-label="Abrir video de ${escapeHtml(review.customerName)}">
+            ${reviewMedia(review, 'vr-video-card__media', { autoplay: true })}
+            <span class="vr-video-card__play">▶</span>
+            <span class="vr-video-card__body">
+              <strong>${escapeHtml(review.productName)}</strong>
+              <span>${escapeHtml(review.customerName || 'Cliente')}</span>
+            </span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    placeVideoShowcase(block, mount, settings);
+    block.querySelectorAll('[data-vr-video]').forEach((button) => {
+      button.addEventListener('click', () => openReviewLightbox(videos[Number(button.dataset.vrVideo)]));
+    });
+  }
+
   function fontStack(fontFamily) {
     const family = String(fontFamily || 'inherit');
     if (family === 'Poppins') return "'Poppins', Arial, sans-serif";
@@ -2065,6 +2288,7 @@
     placeMount(mount, settings);
     renderConversionBlock(reviews, settings, mount);
     renderProductTrustBadge(reviews, settings);
+    renderVideoShowcase(reviews, settings, mount);
     renderProductQuestions(settings);
     renderSocialProofToast(reviews, settings);
 

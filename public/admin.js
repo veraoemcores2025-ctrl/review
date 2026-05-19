@@ -109,6 +109,9 @@ function settingsPayloadFromForm() {
   payload.rewardEnabled = settingsForm.rewardEnabled.checked;
   payload.qnaEnabled = settingsForm.qnaEnabled.checked;
   payload.lookbookEnabled = settingsForm.lookbookEnabled.checked;
+  payload.videoShowcaseEnabled = settingsForm.videoShowcaseEnabled.checked;
+  payload.videoShowcaseHome = settingsForm.videoShowcaseHome.checked;
+  payload.videoShowcaseProduct = settingsForm.videoShowcaseProduct.checked;
   payload.conversionBenefits = String(payload.conversionBenefits || '')
     .split(/\n|\|/)
     .map((item) => item.trim())
@@ -120,6 +123,7 @@ function settingsPayloadFromForm() {
   payload.textFontSize = Number(payload.textFontSize);
   payload.socialProofDelaySeconds = Number(payload.socialProofDelaySeconds);
   payload.socialProofIntervalSeconds = Number(payload.socialProofIntervalSeconds);
+  payload.videoShowcaseMax = Number(payload.videoShowcaseMax);
   return payload;
 }
 
@@ -363,6 +367,12 @@ async function loadSettings() {
   settingsForm.rewardText.value = settings.rewardText || 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.';
   settingsForm.qnaEnabled.checked = settings.qnaEnabled !== false;
   settingsForm.lookbookEnabled.checked = settings.lookbookEnabled !== false;
+  settingsForm.videoShowcaseEnabled.checked = settings.videoShowcaseEnabled !== false;
+  settingsForm.videoShowcaseHome.checked = settings.videoShowcaseHome !== false;
+  settingsForm.videoShowcaseProduct.checked = settings.videoShowcaseProduct !== false;
+  settingsForm.videoShowcaseTitle.value = settings.videoShowcaseTitle || 'Clientes usando em video';
+  settingsForm.videoShowcaseSubtitle.value = settings.videoShowcaseSubtitle || 'Veja detalhes reais do caimento antes de comprar.';
+  settingsForm.videoShowcaseMax.value = settings.videoShowcaseMax || 6;
   updateConversionPreview();
   updatePreviewFromForm();
 }

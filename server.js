@@ -60,7 +60,13 @@ const DEFAULT_SETTINGS = {
   rewardCoupon: 'VERAO10',
   rewardText: 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.',
   qnaEnabled: true,
-  lookbookEnabled: true
+  lookbookEnabled: true,
+  videoShowcaseEnabled: true,
+  videoShowcaseHome: true,
+  videoShowcaseProduct: true,
+  videoShowcaseTitle: 'Clientes usando em video',
+  videoShowcaseSubtitle: 'Veja detalhes reais do caimento antes de comprar.',
+  videoShowcaseMax: 6
 };
 const supabase = SUPABASE_URL && SUPABASE_KEY
   ? createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -176,7 +182,7 @@ async function writeDb(db) {
       .from('review_settings')
       .upsert(settingsRow, { onConflict: 'id' });
 
-    if (settingsError && /reward_|qna_|lookbook_/i.test(settingsError.message || '')) {
+    if (settingsError && /reward_|qna_|lookbook_|video_showcase_/i.test(settingsError.message || '')) {
       settingsRow = appSettingsToDb(settings, { includeOptional: false });
       const retry = await supabase
         .from('review_settings')
@@ -385,7 +391,13 @@ function dbSettingsToApp(settings) {
     rewardCoupon: settings.reward_coupon ?? DEFAULT_SETTINGS.rewardCoupon,
     rewardText: settings.reward_text ?? DEFAULT_SETTINGS.rewardText,
     qnaEnabled: settings.qna_enabled ?? DEFAULT_SETTINGS.qnaEnabled,
-    lookbookEnabled: settings.lookbook_enabled ?? DEFAULT_SETTINGS.lookbookEnabled
+    lookbookEnabled: settings.lookbook_enabled ?? DEFAULT_SETTINGS.lookbookEnabled,
+    videoShowcaseEnabled: settings.video_showcase_enabled ?? DEFAULT_SETTINGS.videoShowcaseEnabled,
+    videoShowcaseHome: settings.video_showcase_home ?? DEFAULT_SETTINGS.videoShowcaseHome,
+    videoShowcaseProduct: settings.video_showcase_product ?? DEFAULT_SETTINGS.videoShowcaseProduct,
+    videoShowcaseTitle: settings.video_showcase_title ?? DEFAULT_SETTINGS.videoShowcaseTitle,
+    videoShowcaseSubtitle: settings.video_showcase_subtitle ?? DEFAULT_SETTINGS.videoShowcaseSubtitle,
+    videoShowcaseMax: settings.video_showcase_max ?? DEFAULT_SETTINGS.videoShowcaseMax
   };
 }
 
@@ -433,6 +445,12 @@ function appSettingsToDb(settings, options = {}) {
     row.reward_text = settings.rewardText;
     row.qna_enabled = settings.qnaEnabled;
     row.lookbook_enabled = settings.lookbookEnabled;
+    row.video_showcase_enabled = settings.videoShowcaseEnabled;
+    row.video_showcase_home = settings.videoShowcaseHome;
+    row.video_showcase_product = settings.videoShowcaseProduct;
+    row.video_showcase_title = settings.videoShowcaseTitle;
+    row.video_showcase_subtitle = settings.videoShowcaseSubtitle;
+    row.video_showcase_max = settings.videoShowcaseMax;
   }
 
   return row;
@@ -617,7 +635,13 @@ function publicSettings(settings) {
     rewardCoupon: settings.rewardCoupon,
     rewardText: settings.rewardText,
     qnaEnabled: settings.qnaEnabled,
-    lookbookEnabled: settings.lookbookEnabled
+    lookbookEnabled: settings.lookbookEnabled,
+    videoShowcaseEnabled: settings.videoShowcaseEnabled,
+    videoShowcaseHome: settings.videoShowcaseHome,
+    videoShowcaseProduct: settings.videoShowcaseProduct,
+    videoShowcaseTitle: settings.videoShowcaseTitle,
+    videoShowcaseSubtitle: settings.videoShowcaseSubtitle,
+    videoShowcaseMax: settings.videoShowcaseMax
   };
 }
 
@@ -842,7 +866,13 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     rewardCoupon: limitText(req.body.rewardCoupon || DEFAULT_SETTINGS.rewardCoupon, 40),
     rewardText: limitText(req.body.rewardText || DEFAULT_SETTINGS.rewardText, 220),
     qnaEnabled: Boolean(req.body.qnaEnabled),
-    lookbookEnabled: Boolean(req.body.lookbookEnabled)
+    lookbookEnabled: Boolean(req.body.lookbookEnabled),
+    videoShowcaseEnabled: Boolean(req.body.videoShowcaseEnabled),
+    videoShowcaseHome: Boolean(req.body.videoShowcaseHome),
+    videoShowcaseProduct: Boolean(req.body.videoShowcaseProduct),
+    videoShowcaseTitle: limitText(req.body.videoShowcaseTitle || DEFAULT_SETTINGS.videoShowcaseTitle, 80),
+    videoShowcaseSubtitle: limitText(req.body.videoShowcaseSubtitle || DEFAULT_SETTINGS.videoShowcaseSubtitle, 140),
+    videoShowcaseMax: Math.max(2, Math.min(12, Number(req.body.videoShowcaseMax || DEFAULT_SETTINGS.videoShowcaseMax)))
   };
   await writeDb(db);
   res.json({ settings: db.settings });

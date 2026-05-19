@@ -122,6 +122,24 @@ alter table public.review_settings
 alter table public.review_settings
   add column if not exists lookbook_enabled boolean not null default true;
 
+alter table public.review_settings
+  add column if not exists video_showcase_enabled boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists video_showcase_home boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists video_showcase_product boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists video_showcase_title text not null default 'Clientes usando em video';
+
+alter table public.review_settings
+  add column if not exists video_showcase_subtitle text not null default 'Veja detalhes reais do caimento antes de comprar.';
+
+alter table public.review_settings
+  add column if not exists video_showcase_max integer not null default 6;
+
 create table if not exists public.reviews (
   id uuid primary key,
   customer_name text not null,

@@ -36,6 +36,7 @@
           <button class="nav-item" type="button" data-open-panel="qna">Perguntas</button>
           <button class="nav-item" type="button" data-open-panel="rewards">Recompensas</button>
           <button class="nav-item" type="button" data-open-panel="lookbook">Lookbook</button>
+          <button class="nav-item" type="button" data-open-panel="videos">Vídeos</button>
           <button class="nav-item" type="button" data-open-panel="new-review">Nova avalia&ccedil;&atilde;o</button>
           <button class="nav-item" type="button" data-open-panel="reviews">Avalia&ccedil;&otilde;es</button>
           <button class="nav-item" type="button" data-open-panel="preview">Preview</button>
@@ -422,6 +423,44 @@
                   Ativar p&aacute;gina de lookbook
                 </label>
                 <p class="message wide">Link para divulgar: <a href="/lookbook.html" target="_blank" rel="noopener">/lookbook.html</a></p>
+              </div>
+            </section>
+
+            <section class="panel panel-page" data-panel="videos" hidden>
+              <div class="section-head">
+                <div>
+                  <p class="section-kicker">Vitrine em v&iacute;deo</p>
+                  <h2>V&iacute;deos de clientes</h2>
+                  <p class="section-subtitle">Mostre v&iacute;deos reais em um carrossel compacto, com miniaturas discretas e modal ao clicar.</p>
+                </div>
+                <button class="ghost" type="submit">Salvar v&iacute;deos</button>
+              </div>
+              <div class="form">
+                <label class="check">
+                  <input name="videoShowcaseEnabled" type="checkbox">
+                  Ativar vitrine de v&iacute;deos
+                </label>
+                <label class="check">
+                  <input name="videoShowcaseHome" type="checkbox">
+                  Mostrar na home
+                </label>
+                <label class="check">
+                  <input name="videoShowcaseProduct" type="checkbox">
+                  Mostrar no produto
+                </label>
+                <label>
+                  Quantidade m&aacute;xima
+                  <input name="videoShowcaseMax" type="number" min="2" max="12" value="6">
+                </label>
+                <label>
+                  T&iacute;tulo
+                  <input name="videoShowcaseTitle" maxlength="80" placeholder="Clientes usando em video">
+                </label>
+                <label class="wide">
+                  Subt&iacute;tulo
+                  <input name="videoShowcaseSubtitle" maxlength="140" placeholder="Veja detalhes reais do caimento antes de comprar.">
+                </label>
+                <p class="message wide">Dica: cadastre avalia&ccedil;&otilde;es com v&iacute;deo e aprove. A vitrine usa apenas v&iacute;deos aprovados.</p>
               </div>
             </section>
           </form>
