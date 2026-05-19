@@ -11,6 +11,7 @@
   let socialProofTimer = null;
   let socialProofTimeout = null;
   let socialProofIndex = 0;
+  let carouselTimer = null;
   const defaultSettings = {
     title: 'Clientes usando Ver\u00e3o em Cores',
     kicker: 'Avalia\u00e7\u00f5es com foto',
@@ -2141,16 +2142,42 @@
 
     const prev = mount.querySelector('[data-vr-prev]');
     const next = mount.querySelector('[data-vr-next]');
-    const scrollByCard = (direction) => {
+    const carouselStep = () => {
       const card = track?.querySelector('.vr-card');
-      if (!track || !card) return;
-      const amount = card.getBoundingClientRect().width + 16;
-      const nextLeft = track.scrollLeft + (direction * amount);
-      const maxLeft = track.scrollWidth - track.clientWidth - 4;
-      track.scrollTo({ left: nextLeft > maxLeft ? 0 : Math.max(0, nextLeft), behavior: 'smooth' });
+      if (!track || !card) return 0;
+      const style = window.getComputedStyle(track);
+      const gap = parseFloat(style.columnGap || style.gap || '16') || 16;
+      return card.getBoundingClientRect().width + gap;
     };
-    prev?.addEventListener('click', () => scrollByCard(-1));
-    next?.addEventListener('click', () => scrollByCard(1));
+    let carouselBusy = false;
+    const rotateCarousel = (direction) => {
+      if (!track || carouselBusy) return;
+      const amount = carouselStep();
+      const cards = Array.from(track.querySelectorAll('.vr-card'));
+      if (!amount || cards.length < 2) return;
+
+      carouselBusy = true;
+      if (direction > 0) {
+        track.scrollBy({ left: amount, behavior: 'smooth' });
+        window.setTimeout(() => {
+          track.appendChild(track.firstElementChild);
+          track.scrollLeft = Math.max(0, track.scrollLeft - amount);
+          carouselBusy = false;
+        }, 460);
+        return;
+      }
+
+      track.insertBefore(track.lastElementChild, track.firstElementChild);
+      track.scrollLeft += amount;
+      window.requestAnimationFrame(() => {
+        track.scrollBy({ left: -amount, behavior: 'smooth' });
+        window.setTimeout(() => {
+          carouselBusy = false;
+        }, 460);
+      });
+    };
+    prev?.addEventListener('click', () => rotateCarousel(-1));
+    next?.addEventListener('click', () => rotateCarousel(1));
 
     if (mode === 'carousel' && track && track.scrollWidth > track.clientWidth) {
       let paused = false;
@@ -2162,8 +2189,9 @@
       track.addEventListener('mouseleave', () => setPaused(false));
       track.addEventListener('touchstart', () => setPaused(true), { passive: true });
       track.addEventListener('touchend', () => setPaused(false), { passive: true });
-      setInterval(() => {
-        if (!paused && document.visibilityState === 'visible') scrollByCard(1);
+      if (carouselTimer) window.clearInterval(carouselTimer);
+      carouselTimer = window.setInterval(() => {
+        if (!paused && document.visibilityState === 'visible') rotateCarousel(1);
       }, 4500);
     }
   }
