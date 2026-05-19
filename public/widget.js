@@ -874,6 +874,11 @@
         display: none;
       }
 
+      body.vr-reviews-modal-open .vr-widget__head {
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
       .vr-lightbox__dialog {
         background: #fff;
         border-radius: 14px;
@@ -1402,11 +1407,14 @@
       </div>
     `;
     lightbox.hidden = false;
-    lightbox.querySelector('.vr-lightbox__close')?.addEventListener('click', () => {
+    document.body.classList.add('vr-reviews-modal-open');
+    const closeModal = () => {
       lightbox.hidden = true;
-    });
+      document.body.classList.remove('vr-reviews-modal-open');
+    };
+    lightbox.querySelector('.vr-lightbox__close')?.addEventListener('click', closeModal);
     lightbox.addEventListener('click', (event) => {
-      if (event.target === lightbox) lightbox.hidden = true;
+      if (event.target === lightbox) closeModal();
     }, { once: true });
   }
 
