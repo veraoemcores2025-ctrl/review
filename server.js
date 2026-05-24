@@ -482,6 +482,9 @@ async function uploadReviewMedia(file) {
   if (!file) return '';
 
   if (!supabase) {
+    if (process.env.VERCEL) {
+      throw new Error('Configure o Supabase Storage para salvar fotos e videos na Vercel.');
+    }
     return `/uploads/${file.filename}`;
   }
 
@@ -496,6 +499,10 @@ async function uploadReviewMedia(file) {
     });
 
   if (error) {
+    if (process.env.VERCEL) {
+      await unlink(file.path).catch(() => {});
+      throw new Error('Nao foi possivel salvar a midia no Supabase Storage. Verifique o bucket e as variaveis da Vercel.');
+    }
     console.warn('[Verão Reviews] Falha ao enviar midia ao Supabase Storage, usando arquivo local.', error);
     return `/uploads/${file.filename}`;
   }
@@ -880,7 +887,12 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
 
 app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req, res) => {
   const db = await readDb();
-  const imagePath = await uploadReviewMedia(req.file);
+  let imagePath = '';
+  try {
+    imagePath = await uploadReviewMedia(req.file);
+  } catch (error) {
+    return res.status(500).json({ error: error.message || 'Nao foi possivel salvar a midia.' });
+  }
   const productUrl = limitText(req.body.productUrl, 500);
   const review = {
     id: randomUUID(),
@@ -909,7 +921,12 @@ app.post('/api/admin/reviews', requireAdmin, upload.single('photo'), async (req,
 
 app.post('/api/reviews/submit', upload.single('photo'), async (req, res) => {
   const db = await readDb();
-  const imagePath = await uploadReviewMedia(req.file);
+  let imagePath = '';
+  try {
+    imagePath = await uploadReviewMedia(req.file);
+  } catch (error) {
+    return res.status(500).json({ error: error.message || 'Nao foi possivel salvar a midia.' });
+  }
   const productUrl = limitText(req.body.productUrl, 500);
   const review = {
     id: randomUUID(),

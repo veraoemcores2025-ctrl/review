@@ -750,6 +750,10 @@
         text-align: center;
       }
 
+      .vr-video-card.is-hidden {
+        display: none !important;
+      }
+
       .vr-video-card video {
         aspect-ratio: 9 / 16;
         background: #f4eeee;
@@ -2184,9 +2188,18 @@
 
   function hydrateVideoShowcase(block) {
     block.querySelectorAll('video').forEach((video) => {
+      const card = video.closest('.vr-video-card');
+      const hideBrokenVideo = () => {
+        card?.classList.add('is-hidden');
+        setTimeout(() => {
+          if (!block.querySelector('.vr-video-card:not(.is-hidden)')) block.remove();
+        }, 0);
+      };
+
       video.muted = true;
       video.playsInline = true;
       video.preload = 'auto';
+      video.addEventListener('error', hideBrokenVideo, { once: true });
       video.load();
 
       const playPreview = () => {
@@ -2199,6 +2212,10 @@
         video.addEventListener('loadeddata', playPreview, { once: true });
         playPreview();
       }
+
+      setTimeout(() => {
+        if (video.readyState === 0 && video.networkState === 3) hideBrokenVideo();
+      }, 2500);
     });
   }
 
