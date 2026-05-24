@@ -79,7 +79,8 @@
     if (isVideoReview(review)) {
       const controls = options.controls ? ' controls' : '';
       const autoplay = options.autoplay ? ' autoplay loop' : '';
-      return `<video class="${className}"${attrs} src="${url}" muted playsinline preload="metadata"${controls}${autoplay}></video>`;
+      const preload = options.autoplay ? 'auto' : 'metadata';
+      return `<video class="${className}"${attrs} src="${url}" muted playsinline preload="${preload}"${controls}${autoplay}></video>`;
     }
 
     return `<img class="${className}"${attrs} loading="lazy" src="${url}" alt="Cliente usando ${escapeHtml(review.productName)}">`;
@@ -759,6 +760,10 @@
         object-fit: cover;
         object-position: center top;
         width: 112px;
+      }
+
+      .vr-video-card video::-webkit-media-controls {
+        display: none !important;
       }
 
       .vr-video-card__play {
@@ -1447,22 +1452,22 @@
         }
 
         .vr-video-card {
-          flex: 0 0 94px;
-          max-width: 94px;
-          min-width: 94px;
+          flex: 0 0 84px;
+          max-width: 84px;
+          min-width: 84px;
         }
 
         .vr-video-card video {
           border-width: 2px;
           border-radius: 14px;
-          width: 90px;
+          width: 80px;
         }
 
         .vr-video-card__play {
           font-size: 8px;
           height: 20px;
           left: 50%;
-          top: 72px;
+          top: 64px;
           width: 20px;
         }
 
@@ -1471,7 +1476,7 @@
         }
 
         .vr-video-card strong {
-          display: none;
+          display: none !important;
         }
 
         .vr-video-card__customer {
@@ -2177,6 +2182,26 @@
     }
   }
 
+  function hydrateVideoShowcase(block) {
+    block.querySelectorAll('video').forEach((video) => {
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      video.load();
+
+      const playPreview = () => {
+        video.play().catch(() => {});
+      };
+
+      if (video.readyState >= 2) {
+        playPreview();
+      } else {
+        video.addEventListener('loadeddata', playPreview, { once: true });
+        playPreview();
+      }
+    });
+  }
+
   function renderVideoShowcase(reviews, settings, mount) {
     const existing = document.querySelector('.vr-video-showcase');
     const maxVideos = Math.max(2, Math.min(12, Number(settings.videoShowcaseMax || defaultSettings.videoShowcaseMax)));
@@ -2188,6 +2213,7 @@
 
     const block = existing || document.createElement('section');
     block.className = 'vr-video-showcase';
+    block.dataset.count = String(videos.length);
     block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
     block.style.setProperty('--vr-title', settings.titleColor || defaultSettings.titleColor);
     block.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
@@ -2208,6 +2234,7 @@
     `;
 
     placeVideoShowcase(block, mount, settings);
+    hydrateVideoShowcase(block);
     block.querySelectorAll('[data-vr-video]').forEach((button) => {
       button.addEventListener('click', () => openReviewLightbox(videos[Number(button.dataset.vrVideo)]));
     });
