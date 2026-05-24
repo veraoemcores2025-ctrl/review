@@ -771,21 +771,7 @@
       }
 
       .vr-video-card__play {
-        align-items: center;
-        background: rgba(17, 24, 39, .72);
-        border-radius: 999px;
-        color: #fff;
-        display: inline-flex;
-        font-size: 10px;
-        font-weight: 900;
-        height: 24px;
-        justify-content: center;
-        left: 50%;
-        padding-left: 2px;
-        position: absolute;
-        top: 88px;
-        transform: translate(-50%, -50%);
-        width: 24px;
+        display: none !important;
       }
 
       .vr-video-card__body {
@@ -2239,7 +2225,6 @@
         ${videos.map((review, index) => `
           <button class="vr-video-card" type="button" data-vr-video="${index}" aria-label="Abrir video de ${escapeHtml(review.customerName)}">
             ${reviewMedia(review, 'vr-video-card__media', { autoplay: true })}
-            <span class="vr-video-card__play">▶</span>
             <span class="vr-video-card__body">
               <strong>${escapeHtml(review.productName)}</strong>
               <span class="vr-video-card__customer">${escapeHtml(review.customerName || 'Cliente')}</span>
