@@ -684,7 +684,7 @@
         clear: both;
         color: var(--vr-title);
         font-family: var(--vr-font);
-        margin: 18px auto;
+        margin: 12px auto 18px;
         max-width: 1180px;
         padding: 0 14px;
         width: calc(100% - 28px);
@@ -696,12 +696,7 @@
       }
 
       .vr-video-showcase__head {
-        align-items: center;
-        display: flex;
-        gap: 12px;
-        justify-content: space-between;
-        margin: 0 auto 12px;
-        max-width: 960px;
+        display: none !important;
       }
 
       .vr-video-showcase__head h3 {
@@ -762,6 +757,7 @@
         box-shadow: 0 0 0 2px var(--vr-brand), 0 8px 18px rgba(17, 24, 39, .13);
         display: block;
         object-fit: cover;
+        object-position: center top;
         width: 112px;
       }
 
@@ -1432,26 +1428,14 @@
         }
 
         .vr-video-showcase {
-          margin: 14px 0;
+          margin: 8px 0 18px;
           overflow: hidden;
           padding: 0;
           width: 100%;
         }
 
         .vr-video-showcase__head {
-          align-items: center;
-          flex-direction: row;
-          margin: 0 0 8px;
-          padding: 0 14px;
-        }
-
-        .vr-video-showcase__head h3 {
-          font-size: 15px;
-        }
-
-        .vr-video-showcase__head p,
-        .vr-video-showcase__tag {
-          display: none;
+          display: none !important;
         }
 
         .vr-video-showcase__track {
@@ -1463,22 +1447,22 @@
         }
 
         .vr-video-card {
-          flex: 0 0 86px;
-          max-width: 86px;
-          min-width: 86px;
+          flex: 0 0 94px;
+          max-width: 94px;
+          min-width: 94px;
         }
 
         .vr-video-card video {
           border-width: 2px;
           border-radius: 14px;
-          width: 82px;
+          width: 90px;
         }
 
         .vr-video-card__play {
           font-size: 8px;
           height: 20px;
           left: 50%;
-          top: 65px;
+          top: 72px;
           width: 20px;
         }
 
@@ -1487,8 +1471,7 @@
         }
 
         .vr-video-card strong {
-          display: -webkit-box;
-          font-size: 10px;
+          display: none;
         }
 
         .vr-video-card__customer {
@@ -2210,13 +2193,6 @@
     block.style.setProperty('--vr-subtitle', settings.subtitleColor || defaultSettings.subtitleColor);
     block.style.setProperty('--vr-font', fontStack(settings.fontFamily));
     block.innerHTML = `
-      <header class="vr-video-showcase__head">
-        <div>
-          <h3>${escapeHtml(settings.videoShowcaseTitle || defaultSettings.videoShowcaseTitle)}</h3>
-          <p>${escapeHtml(settings.videoShowcaseSubtitle || defaultSettings.videoShowcaseSubtitle)}</p>
-        </div>
-        <span class="vr-video-showcase__tag">${videos.length} video${videos.length > 1 ? 's' : ''} real${videos.length > 1 ? 's' : ''}</span>
-      </header>
       <div class="vr-video-showcase__track">
         ${videos.map((review, index) => `
           <button class="vr-video-card" type="button" data-vr-video="${index}" aria-label="Abrir video de ${escapeHtml(review.customerName)}">
