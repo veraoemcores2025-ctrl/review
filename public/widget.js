@@ -745,9 +745,9 @@
         background: transparent;
         border: 0;
         cursor: pointer;
-        flex: 0 0 82px;
-        max-width: 82px;
-        min-width: 82px;
+        flex: 0 0 118px;
+        max-width: 118px;
+        min-width: 118px;
         padding: 0;
         position: relative;
         scroll-snap-align: start;
@@ -755,14 +755,14 @@
       }
 
       .vr-video-card video {
-        aspect-ratio: 1;
+        aspect-ratio: 9 / 16;
         background: #f4eeee;
         border: 3px solid #fff;
-        border-radius: 999px;
+        border-radius: 18px;
         box-shadow: 0 0 0 2px var(--vr-brand), 0 8px 18px rgba(17, 24, 39, .13);
         display: block;
         object-fit: cover;
-        width: 74px;
+        width: 112px;
       }
 
       .vr-video-card__play {
@@ -778,7 +778,7 @@
         left: 50%;
         padding-left: 2px;
         position: absolute;
-        top: 37px;
+        top: 88px;
         transform: translate(-50%, -50%);
         width: 24px;
       }
@@ -1463,21 +1463,22 @@
         }
 
         .vr-video-card {
-          flex: 0 0 68px;
-          max-width: 68px;
-          min-width: 68px;
+          flex: 0 0 86px;
+          max-width: 86px;
+          min-width: 86px;
         }
 
         .vr-video-card video {
           border-width: 2px;
-          width: 64px;
+          border-radius: 14px;
+          width: 82px;
         }
 
         .vr-video-card__play {
           font-size: 8px;
           height: 20px;
           left: 50%;
-          top: 32px;
+          top: 65px;
           width: 20px;
         }
 
@@ -1486,7 +1487,8 @@
         }
 
         .vr-video-card strong {
-          display: none;
+          display: -webkit-box;
+          font-size: 10px;
         }
 
         .vr-video-card__customer {
@@ -2085,7 +2087,7 @@
     }
   }
 
-  async function renderProductQuestions(settings) {
+  async function renderProductQuestions(settings, mount) {
     const existing = document.querySelector('.vr-qna');
     const productContext = settings.productContext;
     if (!productContext || settings.qnaEnabled === false || isCheckoutLikePage()) {
@@ -2093,7 +2095,7 @@
       return;
     }
 
-    const anchor = document.querySelector('.vr-product-proof') || productTrustAnchor();
+    const anchor = mount?.querySelector('.vr-widget') || document.querySelector('.vr-widget') || document.querySelector('.vr-product-proof') || productTrustAnchor();
     if (!anchor) return;
 
     const block = existing || document.createElement('section');
@@ -2345,7 +2347,6 @@
     renderConversionBlock(reviews, settings, mount);
     renderProductTrustBadge(reviews, settings);
     renderVideoShowcase(reviews, settings, mount);
-    renderProductQuestions(settings);
     renderSocialProofToast(reviews, settings);
 
     const productContext = settings.productContext || null;
@@ -2466,6 +2467,8 @@
         if (!paused && document.visibilityState === 'visible') rotateCarousel(1);
       }, 4500);
     }
+
+    renderProductQuestions(settings, mount);
   }
 
   async function load(overrideSettings = null) {
