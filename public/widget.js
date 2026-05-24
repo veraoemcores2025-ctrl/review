@@ -757,9 +757,9 @@
       .vr-video-card video {
         aspect-ratio: 9 / 16;
         background: #f4eeee;
-        border: 3px solid #fff;
+        border: 2px solid var(--vr-brand);
         border-radius: 18px;
-        box-shadow: 0 0 0 2px var(--vr-brand), 0 8px 18px rgba(17, 24, 39, .13);
+        box-shadow: 0 8px 18px rgba(17, 24, 39, .13);
         display: block;
         object-fit: cover;
         object-position: center top;
@@ -1462,7 +1462,6 @@
         }
 
         .vr-video-card video {
-          border-width: 2px;
           border-radius: 14px;
           width: 80px;
         }
