@@ -1,6 +1,8 @@
 const form = document.querySelector('#reviewForm');
+const videoForm = document.querySelector('#videoForm');
 const settingsForm = document.querySelector('#settingsForm');
 const message = document.querySelector('#formMessage');
+const videoFormMessage = document.querySelector('#videoFormMessage');
 const settingsMessage = document.querySelector('#settingsMessage');
 const reviewsList = document.querySelector('#reviewsList');
 const refreshButton = document.querySelector('#refreshButton');
@@ -397,6 +399,28 @@ form.addEventListener('submit', async (event) => {
   form.active.checked = true;
   form.verifiedLabel.value = 'cliente verificada';
   message.textContent = 'Avaliacao salva.';
+  await loadReviews();
+  window.dispatchEvent(new Event('veraoReviewsRefresh'));
+});
+
+videoForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  videoFormMessage.textContent = 'Salvando video...';
+
+  const formData = new FormData(videoForm);
+  const response = await fetchAdmin('/api/admin/reviews', {
+    method: 'POST',
+    body: formData
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    videoFormMessage.textContent = data.error || 'Nao foi possivel salvar o video.';
+    return;
+  }
+
+  videoForm.reset();
+  videoFormMessage.textContent = 'Video salvo e aprovado.';
   await loadReviews();
   window.dispatchEvent(new Event('veraoReviewsRefresh'));
 });

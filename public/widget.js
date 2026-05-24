@@ -676,17 +676,17 @@
         --vr-title: #111827;
         --vr-subtitle: #4b5563;
         --vr-font: inherit;
-        background: #fff;
-        border: 1px solid #f0dddd;
-        border-radius: 16px;
-        box-shadow: 0 12px 30px rgba(17, 24, 39, .07);
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
         box-sizing: border-box;
         clear: both;
         color: var(--vr-title);
         font-family: var(--vr-font);
-        margin: 20px auto;
+        margin: 18px auto;
         max-width: 1180px;
-        padding: 16px;
+        padding: 0 14px;
         width: calc(100% - 28px);
       }
 
@@ -696,11 +696,12 @@
       }
 
       .vr-video-showcase__head {
-        align-items: end;
+        align-items: center;
         display: flex;
         gap: 12px;
         justify-content: space-between;
-        margin-bottom: 12px;
+        margin: 0 auto 12px;
+        max-width: 960px;
       }
 
       .vr-video-showcase__head h3 {
@@ -731,68 +732,71 @@
 
       .vr-video-showcase__track {
         display: flex;
-        gap: 10px;
+        gap: 14px;
+        justify-content: center;
         overflow-x: auto;
         overscroll-behavior-x: contain;
-        padding: 2px 2px 8px;
+        padding: 4px 2px 10px;
         scroll-snap-type: x mandatory;
-        scrollbar-width: thin;
+        scrollbar-width: none;
       }
 
       .vr-video-card {
-        background: #fffafa;
-        border: 1px solid #f0dddd;
-        border-radius: 14px;
+        background: transparent;
+        border: 0;
         cursor: pointer;
-        flex: 0 0 142px;
-        overflow: hidden;
+        flex: 0 0 82px;
         padding: 0;
         position: relative;
         scroll-snap-align: start;
-        text-align: left;
+        text-align: center;
       }
 
       .vr-video-card video {
-        aspect-ratio: 9 / 14;
+        aspect-ratio: 1;
         background: #f4eeee;
+        border: 3px solid #fff;
+        border-radius: 999px;
+        box-shadow: 0 0 0 2px var(--vr-brand), 0 8px 18px rgba(17, 24, 39, .13);
         display: block;
         object-fit: cover;
-        width: 100%;
+        width: 74px;
       }
 
       .vr-video-card__play {
         align-items: center;
-        background: rgba(17, 24, 39, .68);
+        background: rgba(17, 24, 39, .72);
         border-radius: 999px;
         color: #fff;
         display: inline-flex;
-        font-size: 13px;
+        font-size: 10px;
         font-weight: 900;
-        height: 36px;
+        height: 24px;
         justify-content: center;
         left: 50%;
         padding-left: 2px;
         position: absolute;
-        top: 42%;
+        top: 37px;
         transform: translate(-50%, -50%);
-        width: 36px;
+        width: 24px;
       }
 
       .vr-video-card__body {
-        padding: 10px;
+        display: block;
+        padding: 8px 0 0;
       }
 
       .vr-video-card strong {
         color: var(--vr-title);
         display: -webkit-box;
-        font-size: 12px;
+        font-size: 11px;
         line-height: 1.25;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
 
-      .vr-video-card span {
+      .vr-video-card__customer {
         color: var(--vr-brand);
         display: block;
         font-size: 11px;
@@ -1426,9 +1430,8 @@
         }
 
         .vr-video-showcase {
-          border-radius: 12px;
           margin: 16px auto;
-          padding: 14px;
+          padding: 0 10px;
           width: calc(100% - 20px);
         }
 
@@ -1438,7 +1441,7 @@
         }
 
         .vr-video-card {
-          flex-basis: 126px;
+          flex-basis: 76px;
         }
 
         .vr-product-proof {
@@ -2166,7 +2169,7 @@
             <span class="vr-video-card__play">▶</span>
             <span class="vr-video-card__body">
               <strong>${escapeHtml(review.productName)}</strong>
-              <span>${escapeHtml(review.customerName || 'Cliente')}</span>
+              <span class="vr-video-card__customer">${escapeHtml(review.customerName || 'Cliente')}</span>
             </span>
           </button>
         `).join('')}

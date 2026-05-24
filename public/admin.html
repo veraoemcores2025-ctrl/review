@@ -37,6 +37,7 @@
           <button class="nav-item" type="button" data-open-panel="rewards">Recompensas</button>
           <button class="nav-item" type="button" data-open-panel="lookbook">Lookbook</button>
           <button class="nav-item" type="button" data-open-panel="videos">Vídeos</button>
+          <button class="nav-item" type="button" data-open-panel="videos-upload">Subir vídeo</button>
           <button class="nav-item" type="button" data-open-panel="new-review">Nova avalia&ccedil;&atilde;o</button>
           <button class="nav-item" type="button" data-open-panel="reviews">Avalia&ccedil;&otilde;es</button>
           <button class="nav-item" type="button" data-open-panel="preview">Preview</button>
@@ -464,6 +465,50 @@
               </div>
             </section>
           </form>
+
+          <section class="panel panel-page" data-panel="videos-upload" hidden>
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Upload r&aacute;pido</p>
+                <h2>Subir v&iacute;deo de cliente</h2>
+                <p class="section-subtitle">Cadastre um v&iacute;deo real para aparecer nos mini stories e tamb&eacute;m como avalia&ccedil;&atilde;o aprovada.</p>
+              </div>
+            </div>
+            <form id="videoForm" class="form">
+              <label>
+                Nome da cliente
+                <input name="customerName" required placeholder="Ex: Ana Martins">
+              </label>
+              <label>
+                Produto
+                <input name="productName" required placeholder="Ex: Macac&atilde;o Fitness">
+              </label>
+              <label class="wide">
+                Link do produto
+                <input name="productUrl" placeholder="Cole o link do produto">
+              </label>
+              <label class="wide">
+                Coment&aacute;rio curto
+                <textarea name="comment" required rows="3" placeholder="Ex: Ficou lindo no corpo e o tecido n&atilde;o fica transparente."></textarea>
+              </label>
+              <label>
+                Nota
+                <select name="rating">
+                  <option value="5">5 estrelas</option>
+                  <option value="4">4 estrelas</option>
+                </select>
+              </label>
+              <label class="wide">
+                V&iacute;deo
+                <input name="photo" type="file" accept="video/mp4,video/webm,video/quicktime" required>
+                <small>Prefira v&iacute;deos curtos em p&eacute;, como stories.</small>
+              </label>
+              <input name="verifiedLabel" type="hidden" value="compra verificada">
+              <input name="active" type="hidden" value="on">
+              <button class="button" type="submit">Salvar v&iacute;deo</button>
+              <p id="videoFormMessage" class="message" aria-live="polite"></p>
+            </form>
+          </section>
 
           <section class="panel panel-page" data-panel="groups" hidden>
             <div class="section-head">
