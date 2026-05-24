@@ -733,7 +733,7 @@
       .vr-video-showcase__track {
         display: flex;
         gap: 14px;
-        justify-content: center;
+        justify-content: flex-start;
         overflow-x: auto;
         overscroll-behavior-x: contain;
         padding: 4px 2px 10px;
@@ -746,6 +746,8 @@
         border: 0;
         cursor: pointer;
         flex: 0 0 82px;
+        max-width: 82px;
+        min-width: 82px;
         padding: 0;
         position: relative;
         scroll-snap-align: start;
@@ -1430,18 +1432,69 @@
         }
 
         .vr-video-showcase {
-          margin: 16px auto;
-          padding: 0 10px;
-          width: calc(100% - 20px);
+          margin: 14px 0;
+          overflow: hidden;
+          padding: 0;
+          width: 100%;
         }
 
         .vr-video-showcase__head {
-          align-items: flex-start;
-          flex-direction: column;
+          align-items: center;
+          flex-direction: row;
+          margin: 0 0 8px;
+          padding: 0 14px;
+        }
+
+        .vr-video-showcase__head h3 {
+          font-size: 15px;
+        }
+
+        .vr-video-showcase__head p,
+        .vr-video-showcase__tag {
+          display: none;
+        }
+
+        .vr-video-showcase__track {
+          gap: 12px;
+          justify-content: flex-start;
+          margin: 0;
+          padding: 3px 14px 8px;
+          scroll-padding-left: 14px;
         }
 
         .vr-video-card {
-          flex-basis: 76px;
+          flex: 0 0 68px;
+          max-width: 68px;
+          min-width: 68px;
+        }
+
+        .vr-video-card video {
+          border-width: 2px;
+          width: 64px;
+        }
+
+        .vr-video-card__play {
+          font-size: 8px;
+          height: 20px;
+          left: 50%;
+          top: 32px;
+          width: 20px;
+        }
+
+        .vr-video-card__body {
+          padding-top: 6px;
+        }
+
+        .vr-video-card strong {
+          display: none;
+        }
+
+        .vr-video-card__customer {
+          font-size: 10px;
+          margin-top: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .vr-product-proof {
