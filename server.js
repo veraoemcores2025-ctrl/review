@@ -110,6 +110,7 @@ const upload = multer({
     cb(null, true);
   }
 });
+let storageBucketReady = false;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -488,6 +489,8 @@ async function uploadReviewMedia(file) {
     return `/uploads/${file.filename}`;
   }
 
+  await ensureStorageBucket();
+
   const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
   const storagePath = `reviews/${Date.now()}-${randomUUID()}${ext}`;
   const buffer = await readFile(file.path);
@@ -511,6 +514,32 @@ async function uploadReviewMedia(file) {
 
   const { data } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(storagePath);
   return data.publicUrl;
+}
+
+async function ensureStorageBucket() {
+  if (storageBucketReady || !supabase) return;
+
+  const bucketOptions = {
+    public: true,
+    fileSizeLimit: 35 * 1024 * 1024,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime']
+  };
+
+  const { data, error } = await supabase.storage.getBucket(SUPABASE_BUCKET);
+  if (!error && data) {
+    if (data.public !== true) {
+      await supabase.storage.updateBucket(SUPABASE_BUCKET, bucketOptions);
+    }
+    storageBucketReady = true;
+    return;
+  }
+
+  const { error: createError } = await supabase.storage.createBucket(SUPABASE_BUCKET, bucketOptions);
+  if (createError && !/already exists/i.test(createError.message || '')) {
+    throw new Error(`Nao foi possivel preparar o bucket "${SUPABASE_BUCKET}" no Supabase Storage. Use a SUPABASE_SERVICE_ROLE_KEY e confirme se o bucket existe e esta publico.`);
+  }
+
+  storageBucketReady = true;
 }
 
 function limitText(value, max) {
