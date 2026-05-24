@@ -459,7 +459,7 @@ function appSettingsToDb(settings, options = {}) {
 
 function publicReview(review, req) {
   const mediaType = review.mediaType || mediaTypeFromPath(review.imagePath);
-  if (/^https?:\/\//i.test(String(review.imagePath || ''))) {
+  if (/^(https?:|data:)\/?/i.test(String(review.imagePath || ''))) {
     return { ...review, imageUrl: review.imagePath, mediaUrl: review.imagePath, mediaType };
   }
 
@@ -484,7 +484,7 @@ async function uploadReviewMedia(file) {
 
   if (!supabase) {
     if (process.env.VERCEL) {
-      throw new Error('Configure o Supabase Storage para salvar fotos e videos na Vercel.');
+      return fileToDataUrl(file);
     }
     return `/uploads/${file.filename}`;
   }
@@ -503,8 +503,7 @@ async function uploadReviewMedia(file) {
 
   if (error) {
     if (process.env.VERCEL) {
-      await unlink(file.path).catch(() => {});
-      throw new Error('Nao foi possivel salvar a midia no Supabase Storage. Verifique o bucket e as variaveis da Vercel.');
+      return fileToDataUrl(file, buffer);
     }
     console.warn('[Verão Reviews] Falha ao enviar midia ao Supabase Storage, usando arquivo local.', error);
     return `/uploads/${file.filename}`;
@@ -514,6 +513,18 @@ async function uploadReviewMedia(file) {
 
   const { data } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(storagePath);
   return data.publicUrl;
+}
+
+async function fileToDataUrl(file, existingBuffer) {
+  const buffer = existingBuffer || await readFile(file.path);
+  const maxInlineBytes = 15 * 1024 * 1024;
+  if (buffer.length > maxInlineBytes) {
+    throw new Error('Video muito grande para salvar sem Supabase Storage. Envie um video menor que 15MB ou configure o bucket review-photos.');
+  }
+
+  const mimeType = file.mimetype || mimeTypeFromPath(file.originalname);
+  await unlink(file.path).catch(() => {});
+  return `data:${mimeType};base64,${buffer.toString('base64')}`;
 }
 
 async function ensureStorageBucket() {
