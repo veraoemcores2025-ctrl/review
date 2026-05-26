@@ -8,6 +8,7 @@
   const conversionId = 'verao-conversion-block';
   const checkoutReviewsId = 'verao-checkout-reviews';
   const orderBumpId = 'verao-order-bump';
+  const expressShippingId = 'verao-express-shipping';
   const socialProofDismissKey = 'veraoSocialProofDismissed';
   let socialProofTimer = null;
   let socialProofTimeout = null;
@@ -55,6 +56,11 @@
     orderBumpImageUrl: '',
     orderBumpProductUrl: '',
     orderBumpButtonText: 'Adicionar ao pedido',
+    expressShippingEnabled: false,
+    expressShippingTitle: 'Frete expresso',
+    expressShippingText: 'Seu pedido entra em prioridade para separacao e envio imediato.',
+    expressShippingBadge: 'Envio imediato',
+    expressShippingDeadline: 'Postagem em ate 24h uteis',
     qnaEnabled: true,
     lookbookEnabled: true,
     videoShowcaseEnabled: true,
@@ -1136,6 +1142,83 @@
         white-space: nowrap;
       }
 
+      .vr-express-shipping {
+        --vr-brand: #b0565b;
+        --vr-font: inherit;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #ead5d8;
+        border-radius: 12px;
+        box-shadow: 0 12px 28px rgba(17, 24, 39, .06);
+        box-sizing: border-box;
+        color: #222;
+        display: grid;
+        font-family: var(--vr-font);
+        gap: 12px;
+        grid-template-columns: 42px minmax(0, 1fr);
+        margin: 14px 0;
+        max-width: 100%;
+        padding: 13px 14px;
+        width: 100%;
+      }
+
+      .vr-express-shipping,
+      .vr-express-shipping * {
+        box-sizing: border-box;
+      }
+
+      .vr-express-shipping__icon {
+        align-items: center;
+        background: #fff5f2;
+        border: 1px solid #f0d6d8;
+        border-radius: 999px;
+        color: var(--vr-brand);
+        display: inline-flex;
+        font-size: 20px;
+        height: 42px;
+        justify-content: center;
+        width: 42px;
+      }
+
+      .vr-express-shipping__top {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .vr-express-shipping h3 {
+        color: #222;
+        font-size: 15px;
+        line-height: 1.25;
+        margin: 0;
+      }
+
+      .vr-express-shipping__badge {
+        background: var(--vr-brand);
+        border-radius: 999px;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1;
+        padding: 6px 8px;
+        text-transform: uppercase;
+      }
+
+      .vr-express-shipping__text {
+        color: #555;
+        font-size: 12px;
+        line-height: 1.35;
+        margin: 5px 0 0;
+      }
+
+      .vr-express-shipping__deadline {
+        color: var(--vr-brand);
+        font-size: 12px;
+        font-weight: 900;
+        margin-top: 6px;
+      }
+
       .vr-social-proof {
         align-items: center;
         background: rgba(255, 255, 255, .98);
@@ -1557,6 +1640,28 @@
           grid-column: 1 / -1;
           width: 100%;
           white-space: normal;
+        }
+
+        .vr-express-shipping {
+          box-shadow: none;
+          grid-template-columns: 36px minmax(0, 1fr);
+          margin: 12px 0;
+          padding: 11px;
+        }
+
+        .vr-express-shipping__icon {
+          font-size: 17px;
+          height: 36px;
+          width: 36px;
+        }
+
+        .vr-express-shipping h3 {
+          font-size: 14px;
+        }
+
+        .vr-express-shipping__badge {
+          font-size: 9px;
+          padding: 5px 7px;
         }
 
         .vr-video-showcase {
@@ -2267,6 +2372,56 @@
     }
   }
 
+  function expressShippingShouldShow(settings) {
+    return isCheckoutLikePage() && settings.expressShippingEnabled !== false;
+  }
+
+  function renderExpressShipping(settings) {
+    const existing = document.getElementById(expressShippingId);
+    if (!expressShippingShouldShow(settings)) {
+      existing?.remove();
+      return;
+    }
+
+    const anchor = findCheckoutTotalAnchor();
+    if (!anchor) {
+      existing?.remove();
+      return;
+    }
+
+    const block = existing || document.createElement('aside');
+    block.id = expressShippingId;
+    block.className = 'vr-express-shipping';
+    block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
+    block.style.setProperty('--vr-font', fontStack(settings.fontFamily));
+    block.innerHTML = `
+      <div class="vr-express-shipping__icon" aria-hidden="true">↗</div>
+      <div>
+        <div class="vr-express-shipping__top">
+          <h3>${escapeHtml(settings.expressShippingTitle || defaultSettings.expressShippingTitle)}</h3>
+          <span class="vr-express-shipping__badge">${escapeHtml(settings.expressShippingBadge || defaultSettings.expressShippingBadge)}</span>
+        </div>
+        <p class="vr-express-shipping__text">${escapeHtml(settings.expressShippingText || defaultSettings.expressShippingText)}</p>
+        <div class="vr-express-shipping__deadline">${escapeHtml(settings.expressShippingDeadline || defaultSettings.expressShippingDeadline)}</div>
+      </div>
+    `;
+
+    loadWidgetFont(settings.fontFamily);
+    const orderBump = document.getElementById(orderBumpId);
+    const checkoutReviews = document.getElementById(checkoutReviewsId);
+    if (orderBump && orderBump.nextElementSibling !== block) {
+      orderBump.insertAdjacentElement('afterend', block);
+      return;
+    }
+    if (checkoutReviews && checkoutReviews.previousElementSibling !== block) {
+      checkoutReviews.insertAdjacentElement('beforebegin', block);
+      return;
+    }
+    if (anchor.nextElementSibling !== block) {
+      anchor.insertAdjacentElement('afterend', block);
+    }
+  }
+
   async function renderProductQuestions(settings, mount) {
     const existing = document.querySelector('.vr-qna');
     const productContext = settings.productContext;
@@ -2698,12 +2853,15 @@
         document.body.classList.remove('vr-checkout-enhanced');
         document.getElementById(conversionId)?.remove();
         document.getElementById(orderBumpId)?.remove();
+        document.getElementById(expressShippingId)?.remove();
         renderCheckoutReviews(data.reviews || [], settings);
         renderOrderBump(settings);
+        renderExpressShipping(settings);
         renderSocialProofToast(data.reviews || [], settings);
         setTimeout(() => {
           renderCheckoutReviews(data.reviews || [], settings);
           renderOrderBump(settings);
+          renderExpressShipping(settings);
         }, 1200);
         return;
       }

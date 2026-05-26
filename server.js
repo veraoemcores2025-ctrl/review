@@ -65,6 +65,11 @@ const DEFAULT_SETTINGS = {
   orderBumpImageUrl: '',
   orderBumpProductUrl: '',
   orderBumpButtonText: 'Adicionar ao pedido',
+  expressShippingEnabled: false,
+  expressShippingTitle: 'Frete expresso',
+  expressShippingText: 'Seu pedido entra em prioridade para separacao e envio imediato.',
+  expressShippingBadge: 'Envio imediato',
+  expressShippingDeadline: 'Postagem em ate 24h uteis',
   rewardEnabled: true,
   rewardCoupon: 'VERAO10',
   rewardText: 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.',
@@ -192,7 +197,7 @@ async function writeDb(db) {
       .from('review_settings')
       .upsert(settingsRow, { onConflict: 'id' });
 
-    if (settingsError && /reward_|qna_|lookbook_|video_showcase_|order_bump_/i.test(settingsError.message || '')) {
+    if (settingsError && /reward_|qna_|lookbook_|video_showcase_|order_bump_|express_shipping_/i.test(settingsError.message || '')) {
       settingsRow = appSettingsToDb(settings, { includeOptional: false });
       const retry = await supabase
         .from('review_settings')
@@ -406,6 +411,11 @@ function dbSettingsToApp(settings) {
     orderBumpImageUrl: settings.order_bump_image_url ?? DEFAULT_SETTINGS.orderBumpImageUrl,
     orderBumpProductUrl: settings.order_bump_product_url ?? DEFAULT_SETTINGS.orderBumpProductUrl,
     orderBumpButtonText: settings.order_bump_button_text ?? DEFAULT_SETTINGS.orderBumpButtonText,
+    expressShippingEnabled: settings.express_shipping_enabled ?? DEFAULT_SETTINGS.expressShippingEnabled,
+    expressShippingTitle: settings.express_shipping_title ?? DEFAULT_SETTINGS.expressShippingTitle,
+    expressShippingText: settings.express_shipping_text ?? DEFAULT_SETTINGS.expressShippingText,
+    expressShippingBadge: settings.express_shipping_badge ?? DEFAULT_SETTINGS.expressShippingBadge,
+    expressShippingDeadline: settings.express_shipping_deadline ?? DEFAULT_SETTINGS.expressShippingDeadline,
     rewardEnabled: settings.reward_enabled ?? DEFAULT_SETTINGS.rewardEnabled,
     rewardCoupon: settings.reward_coupon ?? DEFAULT_SETTINGS.rewardCoupon,
     rewardText: settings.reward_text ?? DEFAULT_SETTINGS.rewardText,
@@ -464,7 +474,12 @@ function appSettingsToDb(settings, options = {}) {
     order_bump_compare_price: settings.orderBumpComparePrice,
     order_bump_image_url: settings.orderBumpImageUrl,
     order_bump_product_url: settings.orderBumpProductUrl,
-    order_bump_button_text: settings.orderBumpButtonText
+    order_bump_button_text: settings.orderBumpButtonText,
+    express_shipping_enabled: settings.expressShippingEnabled,
+    express_shipping_title: settings.expressShippingTitle,
+    express_shipping_text: settings.expressShippingText,
+    express_shipping_badge: settings.expressShippingBadge,
+    express_shipping_deadline: settings.expressShippingDeadline
   };
 
   if (includeOptional) {
@@ -714,6 +729,11 @@ function publicSettings(settings) {
     orderBumpImageUrl: settings.orderBumpImageUrl,
     orderBumpProductUrl: settings.orderBumpProductUrl,
     orderBumpButtonText: settings.orderBumpButtonText,
+    expressShippingEnabled: settings.expressShippingEnabled,
+    expressShippingTitle: settings.expressShippingTitle,
+    expressShippingText: settings.expressShippingText,
+    expressShippingBadge: settings.expressShippingBadge,
+    expressShippingDeadline: settings.expressShippingDeadline,
     rewardEnabled: settings.rewardEnabled,
     rewardCoupon: settings.rewardCoupon,
     rewardText: settings.rewardText,
@@ -954,6 +974,11 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     orderBumpImageUrl: limitText(req.body.orderBumpImageUrl || '', 600),
     orderBumpProductUrl: limitText(req.body.orderBumpProductUrl || '', 600),
     orderBumpButtonText: limitText(req.body.orderBumpButtonText || DEFAULT_SETTINGS.orderBumpButtonText, 60),
+    expressShippingEnabled: Boolean(req.body.expressShippingEnabled),
+    expressShippingTitle: limitText(req.body.expressShippingTitle || DEFAULT_SETTINGS.expressShippingTitle, 80),
+    expressShippingText: limitText(req.body.expressShippingText || DEFAULT_SETTINGS.expressShippingText, 180),
+    expressShippingBadge: limitText(req.body.expressShippingBadge || DEFAULT_SETTINGS.expressShippingBadge, 40),
+    expressShippingDeadline: limitText(req.body.expressShippingDeadline || DEFAULT_SETTINGS.expressShippingDeadline, 80),
     rewardEnabled: Boolean(req.body.rewardEnabled),
     rewardCoupon: limitText(req.body.rewardCoupon || DEFAULT_SETTINGS.rewardCoupon, 40),
     rewardText: limitText(req.body.rewardText || DEFAULT_SETTINGS.rewardText, 220),

@@ -41,6 +41,11 @@ create table if not exists public.review_settings (
   order_bump_image_url text not null default '',
   order_bump_product_url text not null default '',
   order_bump_button_text text not null default 'Adicionar ao pedido',
+  express_shipping_enabled boolean not null default false,
+  express_shipping_title text not null default 'Frete expresso',
+  express_shipping_text text not null default 'Seu pedido entra em prioridade para separacao e envio imediato.',
+  express_shipping_badge text not null default 'Envio imediato',
+  express_shipping_deadline text not null default 'Postagem em ate 24h uteis',
   updated_at timestamptz not null default now()
 );
 
@@ -142,6 +147,21 @@ alter table public.review_settings
 
 alter table public.review_settings
   add column if not exists order_bump_button_text text not null default 'Adicionar ao pedido';
+
+alter table public.review_settings
+  add column if not exists express_shipping_enabled boolean not null default false;
+
+alter table public.review_settings
+  add column if not exists express_shipping_title text not null default 'Frete expresso';
+
+alter table public.review_settings
+  add column if not exists express_shipping_text text not null default 'Seu pedido entra em prioridade para separacao e envio imediato.';
+
+alter table public.review_settings
+  add column if not exists express_shipping_badge text not null default 'Envio imediato';
+
+alter table public.review_settings
+  add column if not exists express_shipping_deadline text not null default 'Postagem em ate 24h uteis';
 
 alter table public.review_settings
   add column if not exists reward_enabled boolean not null default true;

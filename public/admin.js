@@ -109,6 +109,7 @@ function settingsPayloadFromForm() {
   payload.conversionProduct = settingsForm.conversionProduct.checked;
   payload.conversionCheckout = settingsForm.conversionCheckout.checked;
   payload.orderBumpEnabled = settingsForm.orderBumpEnabled.checked;
+  payload.expressShippingEnabled = settingsForm.expressShippingEnabled.checked;
   payload.rewardEnabled = settingsForm.rewardEnabled.checked;
   payload.qnaEnabled = settingsForm.qnaEnabled.checked;
   payload.lookbookEnabled = settingsForm.lookbookEnabled.checked;
@@ -374,6 +375,11 @@ async function loadSettings() {
   settingsForm.orderBumpImageUrl.value = settings.orderBumpImageUrl || '';
   settingsForm.orderBumpProductUrl.value = settings.orderBumpProductUrl || '';
   settingsForm.orderBumpButtonText.value = settings.orderBumpButtonText || 'Adicionar ao pedido';
+  settingsForm.expressShippingEnabled.checked = Boolean(settings.expressShippingEnabled);
+  settingsForm.expressShippingTitle.value = settings.expressShippingTitle || 'Frete expresso';
+  settingsForm.expressShippingText.value = settings.expressShippingText || 'Seu pedido entra em prioridade para separacao e envio imediato.';
+  settingsForm.expressShippingBadge.value = settings.expressShippingBadge || 'Envio imediato';
+  settingsForm.expressShippingDeadline.value = settings.expressShippingDeadline || 'Postagem em ate 24h uteis';
   settingsForm.rewardEnabled.checked = settings.rewardEnabled !== false;
   settingsForm.rewardCoupon.value = settings.rewardCoupon || 'VERAO10';
   settingsForm.rewardText.value = settings.rewardText || 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.';
