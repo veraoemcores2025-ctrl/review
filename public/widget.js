@@ -73,6 +73,10 @@
     return review.mediaType === 'video' || /\.(mp4|mov|m4v|webm)(\?|$)/i.test(String(review.mediaUrl || review.imageUrl || ''));
   }
 
+  function isPhotoReview(review) {
+    return !isVideoReview(review);
+  }
+
   function reviewMedia(review, className, options = {}) {
     const url = escapeHtml(review.mediaUrl || review.imageUrl);
     const attrs = options.attributes ? ` ${options.attributes}` : '';
@@ -1743,8 +1747,10 @@
     });
   }
 
-  function openAllReviewsModal(reviews, settings) {
-    const visibleReviews = (reviews || []).filter((review) => review.imageUrl);
+  function openAllReviewsModal(reviews, settings, options = {}) {
+    const visibleReviews = (reviews || [])
+      .filter((review) => review.imageUrl)
+      .filter((review) => !options.photosOnly || isPhotoReview(review));
     if (!visibleReviews.length) return;
 
     if (window.location.hash === `#${safeMountId}`) {
@@ -2359,7 +2365,13 @@
       return;
     }
 
-    const cards = reviews.slice(0, settings.maxReviews).map((review) => `
+    const photoReviews = reviews.filter(isPhotoReview);
+    if (!photoReviews.length) {
+      mount.innerHTML = '';
+      return;
+    }
+
+    const cards = photoReviews.slice(0, settings.maxReviews).map((review) => `
       <article class="vr-card">
         ${reviewMedia(review, 'vr-card__image', { attributes: `data-vr-card-photo="${escapeHtml(review.id)}"` })}
         <div class="vr-card__body">
@@ -2396,7 +2408,7 @@
     const widget = mount.querySelector('.vr-widget');
     widget?.setAttribute('data-mode', mode);
     widget?.setAttribute('data-product', productContext ? 'true' : 'false');
-    widget?.setAttribute('data-count', String(reviews.length));
+    widget?.setAttribute('data-count', String(photoReviews.length));
     widget?.style.setProperty('--vr-bg', settings.backgroundColor || defaultSettings.backgroundColor);
     widget?.style.setProperty('--vr-head-bg', settings.headerBackgroundColor || defaultSettings.headerBackgroundColor);
     widget?.style.setProperty('--vr-text', settings.textColor || defaultSettings.textColor);
@@ -2408,11 +2420,11 @@
     widget?.style.setProperty('--vr-title-size', `${Math.max(20, Math.min(44, Number(settings.titleFontSize || defaultSettings.titleFontSize)))}px`);
     widget?.style.setProperty('--vr-text-size', `${Math.max(12, Math.min(22, Number(settings.textFontSize || defaultSettings.textFontSize)))}px`);
 
-    mount.querySelector('[data-vr-all-reviews]')?.addEventListener('click', () => openAllReviewsModal(reviews, settings));
+    mount.querySelector('[data-vr-all-reviews]')?.addEventListener('click', () => openAllReviewsModal(photoReviews, settings, { photosOnly: true }));
 
     mount.querySelectorAll('[data-vr-card-photo]').forEach((image) => {
       image.addEventListener('click', () => {
-        const review = reviews.find((item) => String(item.id) === image.dataset.vrCardPhoto);
+        const review = photoReviews.find((item) => String(item.id) === image.dataset.vrCardPhoto);
         if (review) openReviewLightbox(review);
       });
     });
