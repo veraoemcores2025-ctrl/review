@@ -7,6 +7,7 @@
   const socialProofId = 'verao-social-proof';
   const conversionId = 'verao-conversion-block';
   const checkoutReviewsId = 'verao-checkout-reviews';
+  const orderBumpId = 'verao-order-bump';
   const socialProofDismissKey = 'veraoSocialProofDismissed';
   let socialProofTimer = null;
   let socialProofTimeout = null;
@@ -45,6 +46,15 @@
     conversionText: 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.',
     conversionBenefits: 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
     conversionUrgency: 'Oferta por tempo limitado',
+    orderBumpEnabled: false,
+    orderBumpTitle: 'Complete seu look',
+    orderBumpText: 'Adicione uma peca queridinha com desconto antes de finalizar.',
+    orderBumpProductName: '',
+    orderBumpPrice: '',
+    orderBumpComparePrice: '',
+    orderBumpImageUrl: '',
+    orderBumpProductUrl: '',
+    orderBumpButtonText: 'Adicionar ao pedido',
     qnaEnabled: true,
     lookbookEnabled: true,
     videoShowcaseEnabled: true,
@@ -62,6 +72,10 @@
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
+  }
+
+  function escapeAttribute(value) {
+    return escapeHtml(value);
   }
 
   function stars(rating) {
@@ -1031,6 +1045,97 @@
         text-transform: uppercase;
       }
 
+      .vr-order-bump {
+        --vr-brand: #b0565b;
+        --vr-font: inherit;
+        align-items: center;
+        background: #fffaf8;
+        border: 1px solid #ead5d8;
+        border-radius: 12px;
+        box-shadow: 0 14px 30px rgba(17, 24, 39, .08);
+        box-sizing: border-box;
+        color: #222;
+        display: grid;
+        font-family: var(--vr-font);
+        gap: 12px;
+        grid-template-columns: 64px minmax(0, 1fr) auto;
+        margin: 16px 0;
+        max-width: 100%;
+        padding: 12px;
+        width: 100%;
+      }
+
+      .vr-order-bump,
+      .vr-order-bump * {
+        box-sizing: border-box;
+      }
+
+      .vr-order-bump__media {
+        aspect-ratio: 1;
+        background: #f6eeee;
+        border-radius: 10px;
+        object-fit: cover;
+        width: 64px;
+      }
+
+      .vr-order-bump__eyebrow {
+        color: var(--vr-brand);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .04em;
+        margin: 0 0 3px;
+        text-transform: uppercase;
+      }
+
+      .vr-order-bump h3 {
+        color: #222;
+        font-size: 15px;
+        line-height: 1.25;
+        margin: 0;
+      }
+
+      .vr-order-bump__text {
+        color: #555;
+        font-size: 12px;
+        line-height: 1.35;
+        margin: 4px 0 0;
+      }
+
+      .vr-order-bump__price {
+        align-items: baseline;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 7px;
+      }
+
+      .vr-order-bump__price strong {
+        color: var(--vr-brand);
+        font-size: 17px;
+        line-height: 1;
+      }
+
+      .vr-order-bump__price s {
+        color: #888;
+        font-size: 12px;
+      }
+
+      .vr-order-bump__button {
+        background: var(--vr-brand);
+        border: 0;
+        border-radius: 999px;
+        color: #fff !important;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 900;
+        justify-content: center;
+        line-height: 1.2;
+        padding: 11px 14px;
+        text-align: center;
+        text-decoration: none !important;
+        white-space: nowrap;
+      }
+
       .vr-social-proof {
         align-items: center;
         background: rgba(255, 255, 255, .98);
@@ -1424,6 +1529,34 @@
           font-size: 12px;
           line-height: 1.35;
           margin-top: 4px;
+        }
+
+        .vr-order-bump {
+          align-items: stretch;
+          box-shadow: none;
+          gap: 10px;
+          grid-template-columns: 56px minmax(0, 1fr);
+          margin: 12px 0;
+          padding: 10px;
+        }
+
+        .vr-order-bump__media {
+          border-radius: 9px;
+          width: 56px;
+        }
+
+        .vr-order-bump h3 {
+          font-size: 14px;
+        }
+
+        .vr-order-bump__text {
+          font-size: 12px;
+        }
+
+        .vr-order-bump__button {
+          grid-column: 1 / -1;
+          width: 100%;
+          white-space: normal;
         }
 
         .vr-video-showcase {
@@ -2070,6 +2203,70 @@
     }
   }
 
+  function orderBumpShouldShow(settings) {
+    return isCheckoutLikePage()
+      && settings.orderBumpEnabled !== false
+      && String(settings.orderBumpProductUrl || '').trim()
+      && (String(settings.orderBumpProductName || '').trim() || String(settings.orderBumpTitle || '').trim());
+  }
+
+  function renderOrderBump(settings) {
+    const existing = document.getElementById(orderBumpId);
+    if (!orderBumpShouldShow(settings)) {
+      existing?.remove();
+      return;
+    }
+
+    const anchor = findCheckoutTotalAnchor();
+    if (!anchor) {
+      existing?.remove();
+      return;
+    }
+
+    const block = existing || document.createElement('aside');
+    const title = settings.orderBumpTitle || defaultSettings.orderBumpTitle;
+    const productName = settings.orderBumpProductName || '';
+    const text = settings.orderBumpText || defaultSettings.orderBumpText;
+    const price = settings.orderBumpPrice || '';
+    const comparePrice = settings.orderBumpComparePrice || '';
+    const imageUrl = String(settings.orderBumpImageUrl || '').trim();
+    const productUrl = String(settings.orderBumpProductUrl || '').trim();
+    const buttonText = settings.orderBumpButtonText || defaultSettings.orderBumpButtonText;
+
+    block.id = orderBumpId;
+    block.className = 'vr-order-bump';
+    block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
+    block.style.setProperty('--vr-font', fontStack(settings.fontFamily));
+    block.innerHTML = `
+      ${imageUrl
+        ? `<img class="vr-order-bump__media" src="${escapeAttribute(imageUrl)}" alt="${escapeAttribute(productName || title)}" loading="lazy">`
+        : '<div class="vr-order-bump__media" aria-hidden="true"></div>'}
+      <div>
+        <p class="vr-order-bump__eyebrow">Oferta no checkout</p>
+        <h3>${escapeHtml(title)}</h3>
+        ${productName ? `<p class="vr-order-bump__text"><strong>${escapeHtml(productName)}</strong></p>` : ''}
+        <p class="vr-order-bump__text">${escapeHtml(text)}</p>
+        ${(price || comparePrice) ? `
+          <div class="vr-order-bump__price">
+            ${comparePrice ? `<s>${escapeHtml(comparePrice)}</s>` : ''}
+            ${price ? `<strong>${escapeHtml(price)}</strong>` : ''}
+          </div>
+        ` : ''}
+      </div>
+      <a class="vr-order-bump__button" href="${escapeAttribute(productUrl)}">${escapeHtml(buttonText)}</a>
+    `;
+
+    loadWidgetFont(settings.fontFamily);
+    const checkoutReviews = document.getElementById(checkoutReviewsId);
+    if (checkoutReviews && checkoutReviews.previousElementSibling !== block) {
+      checkoutReviews.insertAdjacentElement('beforebegin', block);
+      return;
+    }
+    if (anchor.nextElementSibling !== block) {
+      anchor.insertAdjacentElement('afterend', block);
+    }
+  }
+
   async function renderProductQuestions(settings, mount) {
     const existing = document.querySelector('.vr-qna');
     const productContext = settings.productContext;
@@ -2500,9 +2697,14 @@
         document.getElementById('verao-checkout-assist')?.remove();
         document.body.classList.remove('vr-checkout-enhanced');
         document.getElementById(conversionId)?.remove();
+        document.getElementById(orderBumpId)?.remove();
         renderCheckoutReviews(data.reviews || [], settings);
+        renderOrderBump(settings);
         renderSocialProofToast(data.reviews || [], settings);
-        setTimeout(() => renderCheckoutReviews(data.reviews || [], settings), 1200);
+        setTimeout(() => {
+          renderCheckoutReviews(data.reviews || [], settings);
+          renderOrderBump(settings);
+        }, 1200);
         return;
       }
       await waitForPageAnchor();

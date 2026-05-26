@@ -32,6 +32,15 @@ create table if not exists public.review_settings (
   conversion_text text not null default 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.',
   conversion_benefits text not null default 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
   conversion_urgency text not null default 'Oferta por tempo limitado',
+  order_bump_enabled boolean not null default false,
+  order_bump_title text not null default 'Complete seu look',
+  order_bump_text text not null default 'Adicione uma peca queridinha com desconto antes de finalizar.',
+  order_bump_product_name text not null default '',
+  order_bump_price text not null default '',
+  order_bump_compare_price text not null default '',
+  order_bump_image_url text not null default '',
+  order_bump_product_url text not null default '',
+  order_bump_button_text text not null default 'Adicionar ao pedido',
   updated_at timestamptz not null default now()
 );
 
@@ -106,6 +115,33 @@ alter table public.review_settings
 
 alter table public.review_settings
   add column if not exists conversion_urgency text not null default 'Oferta por tempo limitado';
+
+alter table public.review_settings
+  add column if not exists order_bump_enabled boolean not null default false;
+
+alter table public.review_settings
+  add column if not exists order_bump_title text not null default 'Complete seu look';
+
+alter table public.review_settings
+  add column if not exists order_bump_text text not null default 'Adicione uma peca queridinha com desconto antes de finalizar.';
+
+alter table public.review_settings
+  add column if not exists order_bump_product_name text not null default '';
+
+alter table public.review_settings
+  add column if not exists order_bump_price text not null default '';
+
+alter table public.review_settings
+  add column if not exists order_bump_compare_price text not null default '';
+
+alter table public.review_settings
+  add column if not exists order_bump_image_url text not null default '';
+
+alter table public.review_settings
+  add column if not exists order_bump_product_url text not null default '';
+
+alter table public.review_settings
+  add column if not exists order_bump_button_text text not null default 'Adicionar ao pedido';
 
 alter table public.review_settings
   add column if not exists reward_enabled boolean not null default true;

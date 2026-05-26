@@ -56,6 +56,15 @@ const DEFAULT_SETTINGS = {
   conversionText: 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.',
   conversionBenefits: 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp',
   conversionUrgency: 'Oferta por tempo limitado',
+  orderBumpEnabled: false,
+  orderBumpTitle: 'Complete seu look',
+  orderBumpText: 'Adicione uma peca queridinha com desconto antes de finalizar.',
+  orderBumpProductName: '',
+  orderBumpPrice: '',
+  orderBumpComparePrice: '',
+  orderBumpImageUrl: '',
+  orderBumpProductUrl: '',
+  orderBumpButtonText: 'Adicionar ao pedido',
   rewardEnabled: true,
   rewardCoupon: 'VERAO10',
   rewardText: 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.',
@@ -183,7 +192,7 @@ async function writeDb(db) {
       .from('review_settings')
       .upsert(settingsRow, { onConflict: 'id' });
 
-    if (settingsError && /reward_|qna_|lookbook_|video_showcase_/i.test(settingsError.message || '')) {
+    if (settingsError && /reward_|qna_|lookbook_|video_showcase_|order_bump_/i.test(settingsError.message || '')) {
       settingsRow = appSettingsToDb(settings, { includeOptional: false });
       const retry = await supabase
         .from('review_settings')
@@ -388,6 +397,15 @@ function dbSettingsToApp(settings) {
     conversionText: settings.conversion_text ?? DEFAULT_SETTINGS.conversionText,
     conversionBenefits: settings.conversion_benefits ?? DEFAULT_SETTINGS.conversionBenefits,
     conversionUrgency: settings.conversion_urgency ?? DEFAULT_SETTINGS.conversionUrgency,
+    orderBumpEnabled: settings.order_bump_enabled ?? DEFAULT_SETTINGS.orderBumpEnabled,
+    orderBumpTitle: settings.order_bump_title ?? DEFAULT_SETTINGS.orderBumpTitle,
+    orderBumpText: settings.order_bump_text ?? DEFAULT_SETTINGS.orderBumpText,
+    orderBumpProductName: settings.order_bump_product_name ?? DEFAULT_SETTINGS.orderBumpProductName,
+    orderBumpPrice: settings.order_bump_price ?? DEFAULT_SETTINGS.orderBumpPrice,
+    orderBumpComparePrice: settings.order_bump_compare_price ?? DEFAULT_SETTINGS.orderBumpComparePrice,
+    orderBumpImageUrl: settings.order_bump_image_url ?? DEFAULT_SETTINGS.orderBumpImageUrl,
+    orderBumpProductUrl: settings.order_bump_product_url ?? DEFAULT_SETTINGS.orderBumpProductUrl,
+    orderBumpButtonText: settings.order_bump_button_text ?? DEFAULT_SETTINGS.orderBumpButtonText,
     rewardEnabled: settings.reward_enabled ?? DEFAULT_SETTINGS.rewardEnabled,
     rewardCoupon: settings.reward_coupon ?? DEFAULT_SETTINGS.rewardCoupon,
     rewardText: settings.reward_text ?? DEFAULT_SETTINGS.rewardText,
@@ -437,7 +455,16 @@ function appSettingsToDb(settings, options = {}) {
     conversion_title: settings.conversionTitle,
     conversion_text: settings.conversionText,
     conversion_benefits: settings.conversionBenefits,
-    conversion_urgency: settings.conversionUrgency
+    conversion_urgency: settings.conversionUrgency,
+    order_bump_enabled: settings.orderBumpEnabled,
+    order_bump_title: settings.orderBumpTitle,
+    order_bump_text: settings.orderBumpText,
+    order_bump_product_name: settings.orderBumpProductName,
+    order_bump_price: settings.orderBumpPrice,
+    order_bump_compare_price: settings.orderBumpComparePrice,
+    order_bump_image_url: settings.orderBumpImageUrl,
+    order_bump_product_url: settings.orderBumpProductUrl,
+    order_bump_button_text: settings.orderBumpButtonText
   };
 
   if (includeOptional) {
@@ -678,6 +705,15 @@ function publicSettings(settings) {
     conversionText: settings.conversionText,
     conversionBenefits: settings.conversionBenefits,
     conversionUrgency: settings.conversionUrgency,
+    orderBumpEnabled: settings.orderBumpEnabled,
+    orderBumpTitle: settings.orderBumpTitle,
+    orderBumpText: settings.orderBumpText,
+    orderBumpProductName: settings.orderBumpProductName,
+    orderBumpPrice: settings.orderBumpPrice,
+    orderBumpComparePrice: settings.orderBumpComparePrice,
+    orderBumpImageUrl: settings.orderBumpImageUrl,
+    orderBumpProductUrl: settings.orderBumpProductUrl,
+    orderBumpButtonText: settings.orderBumpButtonText,
     rewardEnabled: settings.rewardEnabled,
     rewardCoupon: settings.rewardCoupon,
     rewardText: settings.rewardText,
@@ -909,6 +945,15 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     conversionText: limitText(req.body.conversionText || DEFAULT_SETTINGS.conversionText, 180),
     conversionBenefits: limitText(req.body.conversionBenefits || DEFAULT_SETTINGS.conversionBenefits, 320),
     conversionUrgency: limitText(req.body.conversionUrgency || DEFAULT_SETTINGS.conversionUrgency, 80),
+    orderBumpEnabled: Boolean(req.body.orderBumpEnabled),
+    orderBumpTitle: limitText(req.body.orderBumpTitle || DEFAULT_SETTINGS.orderBumpTitle, 80),
+    orderBumpText: limitText(req.body.orderBumpText || DEFAULT_SETTINGS.orderBumpText, 180),
+    orderBumpProductName: limitText(req.body.orderBumpProductName || '', 120),
+    orderBumpPrice: limitText(req.body.orderBumpPrice || '', 40),
+    orderBumpComparePrice: limitText(req.body.orderBumpComparePrice || '', 40),
+    orderBumpImageUrl: limitText(req.body.orderBumpImageUrl || '', 600),
+    orderBumpProductUrl: limitText(req.body.orderBumpProductUrl || '', 600),
+    orderBumpButtonText: limitText(req.body.orderBumpButtonText || DEFAULT_SETTINGS.orderBumpButtonText, 60),
     rewardEnabled: Boolean(req.body.rewardEnabled),
     rewardCoupon: limitText(req.body.rewardCoupon || DEFAULT_SETTINGS.rewardCoupon, 40),
     rewardText: limitText(req.body.rewardText || DEFAULT_SETTINGS.rewardText, 220),

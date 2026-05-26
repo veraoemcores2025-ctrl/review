@@ -108,6 +108,7 @@ function settingsPayloadFromForm() {
   payload.conversionHome = settingsForm.conversionHome.checked;
   payload.conversionProduct = settingsForm.conversionProduct.checked;
   payload.conversionCheckout = settingsForm.conversionCheckout.checked;
+  payload.orderBumpEnabled = settingsForm.orderBumpEnabled.checked;
   payload.rewardEnabled = settingsForm.rewardEnabled.checked;
   payload.qnaEnabled = settingsForm.qnaEnabled.checked;
   payload.lookbookEnabled = settingsForm.lookbookEnabled.checked;
@@ -364,6 +365,15 @@ async function loadSettings() {
   settingsForm.conversionText.value = settings.conversionText || 'Fotos reais, atendimento proximo e pagamento protegido para comprar com confianca.';
   settingsForm.conversionBenefits.value = String(settings.conversionBenefits || 'Compra segura|Fotos reais de clientes|Pagamento protegido|Atendimento no WhatsApp').split('|').join('\n');
   settingsForm.conversionUrgency.value = settings.conversionUrgency || 'Oferta por tempo limitado';
+  settingsForm.orderBumpEnabled.checked = Boolean(settings.orderBumpEnabled);
+  settingsForm.orderBumpTitle.value = settings.orderBumpTitle || 'Complete seu look';
+  settingsForm.orderBumpText.value = settings.orderBumpText || 'Adicione uma peca queridinha com desconto antes de finalizar.';
+  settingsForm.orderBumpProductName.value = settings.orderBumpProductName || '';
+  settingsForm.orderBumpPrice.value = settings.orderBumpPrice || '';
+  settingsForm.orderBumpComparePrice.value = settings.orderBumpComparePrice || '';
+  settingsForm.orderBumpImageUrl.value = settings.orderBumpImageUrl || '';
+  settingsForm.orderBumpProductUrl.value = settings.orderBumpProductUrl || '';
+  settingsForm.orderBumpButtonText.value = settings.orderBumpButtonText || 'Adicionar ao pedido';
   settingsForm.rewardEnabled.checked = settings.rewardEnabled !== false;
   settingsForm.rewardCoupon.value = settings.rewardCoupon || 'VERAO10';
   settingsForm.rewardText.value = settings.rewardText || 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.';

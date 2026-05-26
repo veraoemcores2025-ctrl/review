@@ -362,6 +362,65 @@
                       <textarea name="conversionBenefits" rows="5" maxlength="320" placeholder="Compra segura&#10;Fotos reais de clientes&#10;Pagamento protegido&#10;Atendimento no WhatsApp"></textarea>
                     </label>
                   </div>
+
+                  <div class="conversion-card">
+                    <div class="conversion-card__head">
+                      <span>04</span>
+                      <div>
+                        <strong>Order bump no checkout</strong>
+                        <small>Mostre uma oferta extra logo abaixo do valor total do pedido.</small>
+                      </div>
+                    </div>
+                    <div class="form conversion-form">
+                      <label class="check conversion-switch wide">
+                        <input name="orderBumpEnabled" type="checkbox">
+                        <span>
+                          Ativar order bump
+                          <small>Aparece somente no checkout quando houver link do produto.</small>
+                        </span>
+                      </label>
+
+                      <label>
+                        T&iacute;tulo
+                        <input name="orderBumpTitle" maxlength="80" placeholder="Complete seu look">
+                      </label>
+
+                      <label>
+                        Texto do bot&atilde;o
+                        <input name="orderBumpButtonText" maxlength="60" placeholder="Adicionar ao pedido">
+                      </label>
+
+                      <label class="wide">
+                        Texto de apoio
+                        <textarea name="orderBumpText" rows="3" maxlength="180" placeholder="Adicione uma peca queridinha com desconto antes de finalizar."></textarea>
+                      </label>
+
+                      <label>
+                        Produto
+                        <input name="orderBumpProductName" maxlength="120" placeholder="Top fitness avulso">
+                      </label>
+
+                      <label>
+                        Pre&ccedil;o
+                        <input name="orderBumpPrice" maxlength="40" placeholder="R$29,90">
+                      </label>
+
+                      <label>
+                        Pre&ccedil;o antigo
+                        <input name="orderBumpComparePrice" maxlength="40" placeholder="R$49,90">
+                      </label>
+
+                      <label class="wide">
+                        Link da imagem
+                        <input name="orderBumpImageUrl" maxlength="600" placeholder="https://...">
+                      </label>
+
+                      <label class="wide">
+                        Link do produto ou link de adicionar ao carrinho
+                        <input name="orderBumpProductUrl" maxlength="600" placeholder="https://veraoemcores.lojawbuy.com.br/...">
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <aside class="conversion-preview-shell" aria-label="Preview de convers&atilde;o">
