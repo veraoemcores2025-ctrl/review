@@ -9,6 +9,7 @@
   const checkoutReviewsId = 'verao-checkout-reviews';
   const orderBumpId = 'verao-order-bump';
   const expressShippingId = 'verao-express-shipping';
+  const cartConversionId = 'verao-cart-conversion';
   const socialProofDismissKey = 'veraoSocialProofDismissed';
   let socialProofTimer = null;
   let socialProofTimeout = null;
@@ -61,6 +62,13 @@
     expressShippingText: 'Seu pedido entra em prioridade para separacao e envio imediato.',
     expressShippingBadge: 'Envio imediato',
     expressShippingDeadline: 'Postagem em ate 24h uteis',
+    cartConversionEnabled: true,
+    cartConversionTitle: 'Seu look esta quase garantido',
+    cartConversionText: 'Finalize agora para reservar suas pecas e receber atendimento humanizado caso precise de ajuda.',
+    cartConversionBenefits: 'Compra segura|Fotos reais de clientes|Atendimento no WhatsApp|Troca facilitada',
+    cartConversionUrgency: 'Estoque separado por pouco tempo',
+    cartConversionButtonText: 'Finalizar compra',
+    cartConversionButtonUrl: '',
     qnaEnabled: true,
     lookbookEnabled: true,
     videoShowcaseEnabled: true,
@@ -1219,6 +1227,113 @@
         margin-top: 6px;
       }
 
+      .vr-cart-conversion {
+        --vr-brand: #b0565b;
+        --vr-font: inherit;
+        background: linear-gradient(135deg, #fffaf8 0%, #ffffff 100%);
+        border: 1px solid #ead5d8;
+        border-radius: 14px;
+        box-shadow: 0 16px 36px rgba(17, 24, 39, .08);
+        box-sizing: border-box;
+        color: #222;
+        display: grid;
+        font-family: var(--vr-font);
+        gap: 14px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        margin: 18px auto;
+        max-width: 980px;
+        padding: 16px;
+        width: calc(100% - 24px);
+      }
+
+      .vr-cart-conversion,
+      .vr-cart-conversion * {
+        box-sizing: border-box;
+      }
+
+      .vr-cart-conversion__eyebrow {
+        color: var(--vr-brand);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .05em;
+        margin: 0 0 5px;
+        text-transform: uppercase;
+      }
+
+      .vr-cart-conversion h3 {
+        color: #222;
+        font-size: 18px;
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      .vr-cart-conversion__text {
+        color: #555;
+        font-size: 13px;
+        line-height: 1.45;
+        margin: 7px 0 0;
+      }
+
+      .vr-cart-conversion__benefits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .vr-cart-conversion__pill {
+        align-items: center;
+        background: #fff;
+        border: 1px solid #efd9dc;
+        border-radius: 999px;
+        color: #5d2b31;
+        display: inline-flex;
+        font-size: 11px;
+        font-weight: 800;
+        gap: 6px;
+        line-height: 1;
+        padding: 8px 10px;
+      }
+
+      .vr-cart-conversion__pill::before {
+        background: var(--vr-brand);
+        border-radius: 999px;
+        content: "";
+        height: 6px;
+        width: 6px;
+      }
+
+      .vr-cart-conversion__side {
+        align-items: flex-end;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: center;
+        min-width: 190px;
+        text-align: right;
+      }
+
+      .vr-cart-conversion__urgency {
+        color: var(--vr-brand);
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.3;
+      }
+
+      .vr-cart-conversion__button {
+        background: var(--vr-brand);
+        border-radius: 999px;
+        color: #fff !important;
+        display: inline-flex;
+        font-size: 13px;
+        font-weight: 900;
+        justify-content: center;
+        line-height: 1.2;
+        padding: 12px 16px;
+        text-align: center;
+        text-decoration: none !important;
+      }
+
       .vr-social-proof {
         align-items: center;
         background: rgba(255, 255, 255, .98);
@@ -1662,6 +1777,33 @@
         .vr-express-shipping__badge {
           font-size: 9px;
           padding: 5px 7px;
+        }
+
+        .vr-cart-conversion {
+          box-shadow: none;
+          grid-template-columns: 1fr;
+          margin: 12px auto;
+          padding: 13px;
+          width: calc(100% - 20px);
+        }
+
+        .vr-cart-conversion h3 {
+          font-size: 16px;
+        }
+
+        .vr-cart-conversion__benefits {
+          gap: 6px;
+        }
+
+        .vr-cart-conversion__pill {
+          font-size: 10px;
+          padding: 7px 8px;
+        }
+
+        .vr-cart-conversion__side {
+          align-items: stretch;
+          min-width: 0;
+          text-align: left;
         }
 
         .vr-video-showcase {
@@ -2155,8 +2297,20 @@
       .slice(0, 5);
   }
 
+  function cartConversionBenefits(settings) {
+    return String(settings.cartConversionBenefits || defaultSettings.cartConversionBenefits)
+      .split(/\n|\|/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 5);
+  }
+
   function isCheckoutLikePage() {
     return /carrinho|checkout|finalizar|pagamento|pedido/i.test(window.location.pathname + window.location.search);
+  }
+
+  function isCartPage() {
+    return /carrinho/i.test(window.location.pathname + window.location.search);
   }
 
   function findElementByText(selector, text) {
@@ -2256,6 +2410,61 @@
     placeConversionBlock(block, mount, settings);
   }
 
+  function findCartAnchor() {
+    const checkoutButton = Array.from(document.querySelectorAll('a, button')).find((item) => /finalizar|checkout|continuar|comprar/i.test(item.textContent || ''));
+    if (checkoutButton) return checkoutButton.closest('section, aside, form, div') || checkoutButton;
+
+    const totalLabel = findElementByText('span, p, strong, div, td, th', 'total');
+    if (totalLabel) return totalLabel.closest('section, aside, div, table') || totalLabel;
+
+    return document.querySelector('main, #main, .carrinho, .cart, form') || document.body.firstElementChild;
+  }
+
+  function renderCartConversion(reviews, settings) {
+    const existing = document.getElementById(cartConversionId);
+    if (!isCartPage() || settings.cartConversionEnabled === false) {
+      existing?.remove();
+      return;
+    }
+
+    const anchor = findCartAnchor();
+    if (!anchor) {
+      existing?.remove();
+      return;
+    }
+
+    const block = existing || document.createElement('aside');
+    const benefits = cartConversionBenefits(settings);
+    const reviewedLabel = reviews.length
+      ? `${reviews.length} clientes aprovaram`
+      : 'Compra segura';
+    const buttonUrl = String(settings.cartConversionButtonUrl || '').trim();
+
+    block.id = cartConversionId;
+    block.className = 'vr-cart-conversion';
+    block.style.setProperty('--vr-brand', settings.brandColor || defaultSettings.brandColor);
+    block.style.setProperty('--vr-font', fontStack(settings.fontFamily));
+    block.innerHTML = `
+      <div>
+        <p class="vr-cart-conversion__eyebrow">${escapeHtml(reviewedLabel)}</p>
+        <h3>${escapeHtml(settings.cartConversionTitle || defaultSettings.cartConversionTitle)}</h3>
+        <p class="vr-cart-conversion__text">${escapeHtml(settings.cartConversionText || defaultSettings.cartConversionText)}</p>
+        <div class="vr-cart-conversion__benefits">
+          ${benefits.map((item) => `<span class="vr-cart-conversion__pill">${escapeHtml(item)}</span>`).join('')}
+        </div>
+      </div>
+      <div class="vr-cart-conversion__side">
+        <div class="vr-cart-conversion__urgency">${escapeHtml(settings.cartConversionUrgency || defaultSettings.cartConversionUrgency)}</div>
+        ${buttonUrl ? `<a class="vr-cart-conversion__button" href="${escapeAttribute(buttonUrl)}">${escapeHtml(settings.cartConversionButtonText || defaultSettings.cartConversionButtonText)}</a>` : ''}
+      </div>
+    `;
+
+    loadWidgetFont(settings.fontFamily);
+    if (anchor.nextElementSibling !== block) {
+      anchor.insertAdjacentElement('afterend', block);
+    }
+  }
+
   function findCheckoutTotalAnchor() {
     const totalLabel = findElementByText('span, p, strong, div, td, th', 'total');
     return totalLabel?.closest('section, aside, div, table') || totalLabel;
@@ -2310,6 +2519,7 @@
 
   function orderBumpShouldShow(settings) {
     return isCheckoutLikePage()
+      && !isCartPage()
       && settings.orderBumpEnabled !== false
       && String(settings.orderBumpProductUrl || '').trim()
       && (String(settings.orderBumpProductName || '').trim() || String(settings.orderBumpTitle || '').trim());
@@ -2373,7 +2583,7 @@
   }
 
   function expressShippingShouldShow(settings) {
-    return isCheckoutLikePage() && settings.expressShippingEnabled !== false;
+    return isCheckoutLikePage() && !isCartPage() && settings.expressShippingEnabled !== false;
   }
 
   function renderExpressShipping(settings) {
@@ -2854,11 +3064,14 @@
         document.getElementById(conversionId)?.remove();
         document.getElementById(orderBumpId)?.remove();
         document.getElementById(expressShippingId)?.remove();
+        document.getElementById(cartConversionId)?.remove();
+        renderCartConversion(data.reviews || [], settings);
         renderCheckoutReviews(data.reviews || [], settings);
         renderOrderBump(settings);
         renderExpressShipping(settings);
         renderSocialProofToast(data.reviews || [], settings);
         setTimeout(() => {
+          renderCartConversion(data.reviews || [], settings);
           renderCheckoutReviews(data.reviews || [], settings);
           renderOrderBump(settings);
           renderExpressShipping(settings);

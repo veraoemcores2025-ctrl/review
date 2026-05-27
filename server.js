@@ -70,6 +70,13 @@ const DEFAULT_SETTINGS = {
   expressShippingText: 'Seu pedido entra em prioridade para separacao e envio imediato.',
   expressShippingBadge: 'Envio imediato',
   expressShippingDeadline: 'Postagem em ate 24h uteis',
+  cartConversionEnabled: true,
+  cartConversionTitle: 'Seu look esta quase garantido',
+  cartConversionText: 'Finalize agora para reservar suas pecas e receber atendimento humanizado caso precise de ajuda.',
+  cartConversionBenefits: 'Compra segura|Fotos reais de clientes|Atendimento no WhatsApp|Troca facilitada',
+  cartConversionUrgency: 'Estoque separado por pouco tempo',
+  cartConversionButtonText: 'Finalizar compra',
+  cartConversionButtonUrl: '',
   rewardEnabled: true,
   rewardCoupon: 'VERAO10',
   rewardText: 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.',
@@ -197,7 +204,7 @@ async function writeDb(db) {
       .from('review_settings')
       .upsert(settingsRow, { onConflict: 'id' });
 
-    if (settingsError && /reward_|qna_|lookbook_|video_showcase_|order_bump_|express_shipping_/i.test(settingsError.message || '')) {
+    if (settingsError && /reward_|qna_|lookbook_|video_showcase_|order_bump_|express_shipping_|cart_conversion_/i.test(settingsError.message || '')) {
       settingsRow = appSettingsToDb(settings, { includeOptional: false });
       const retry = await supabase
         .from('review_settings')
@@ -416,6 +423,13 @@ function dbSettingsToApp(settings) {
     expressShippingText: settings.express_shipping_text ?? DEFAULT_SETTINGS.expressShippingText,
     expressShippingBadge: settings.express_shipping_badge ?? DEFAULT_SETTINGS.expressShippingBadge,
     expressShippingDeadline: settings.express_shipping_deadline ?? DEFAULT_SETTINGS.expressShippingDeadline,
+    cartConversionEnabled: settings.cart_conversion_enabled ?? DEFAULT_SETTINGS.cartConversionEnabled,
+    cartConversionTitle: settings.cart_conversion_title ?? DEFAULT_SETTINGS.cartConversionTitle,
+    cartConversionText: settings.cart_conversion_text ?? DEFAULT_SETTINGS.cartConversionText,
+    cartConversionBenefits: settings.cart_conversion_benefits ?? DEFAULT_SETTINGS.cartConversionBenefits,
+    cartConversionUrgency: settings.cart_conversion_urgency ?? DEFAULT_SETTINGS.cartConversionUrgency,
+    cartConversionButtonText: settings.cart_conversion_button_text ?? DEFAULT_SETTINGS.cartConversionButtonText,
+    cartConversionButtonUrl: settings.cart_conversion_button_url ?? DEFAULT_SETTINGS.cartConversionButtonUrl,
     rewardEnabled: settings.reward_enabled ?? DEFAULT_SETTINGS.rewardEnabled,
     rewardCoupon: settings.reward_coupon ?? DEFAULT_SETTINGS.rewardCoupon,
     rewardText: settings.reward_text ?? DEFAULT_SETTINGS.rewardText,
@@ -479,7 +493,14 @@ function appSettingsToDb(settings, options = {}) {
     express_shipping_title: settings.expressShippingTitle,
     express_shipping_text: settings.expressShippingText,
     express_shipping_badge: settings.expressShippingBadge,
-    express_shipping_deadline: settings.expressShippingDeadline
+    express_shipping_deadline: settings.expressShippingDeadline,
+    cart_conversion_enabled: settings.cartConversionEnabled,
+    cart_conversion_title: settings.cartConversionTitle,
+    cart_conversion_text: settings.cartConversionText,
+    cart_conversion_benefits: settings.cartConversionBenefits,
+    cart_conversion_urgency: settings.cartConversionUrgency,
+    cart_conversion_button_text: settings.cartConversionButtonText,
+    cart_conversion_button_url: settings.cartConversionButtonUrl
   };
 
   if (includeOptional) {
@@ -734,6 +755,13 @@ function publicSettings(settings) {
     expressShippingText: settings.expressShippingText,
     expressShippingBadge: settings.expressShippingBadge,
     expressShippingDeadline: settings.expressShippingDeadline,
+    cartConversionEnabled: settings.cartConversionEnabled,
+    cartConversionTitle: settings.cartConversionTitle,
+    cartConversionText: settings.cartConversionText,
+    cartConversionBenefits: settings.cartConversionBenefits,
+    cartConversionUrgency: settings.cartConversionUrgency,
+    cartConversionButtonText: settings.cartConversionButtonText,
+    cartConversionButtonUrl: settings.cartConversionButtonUrl,
     rewardEnabled: settings.rewardEnabled,
     rewardCoupon: settings.rewardCoupon,
     rewardText: settings.rewardText,
@@ -979,6 +1007,13 @@ app.put('/api/admin/settings', requireAdmin, async (req, res) => {
     expressShippingText: limitText(req.body.expressShippingText || DEFAULT_SETTINGS.expressShippingText, 180),
     expressShippingBadge: limitText(req.body.expressShippingBadge || DEFAULT_SETTINGS.expressShippingBadge, 40),
     expressShippingDeadline: limitText(req.body.expressShippingDeadline || DEFAULT_SETTINGS.expressShippingDeadline, 80),
+    cartConversionEnabled: Boolean(req.body.cartConversionEnabled),
+    cartConversionTitle: limitText(req.body.cartConversionTitle || DEFAULT_SETTINGS.cartConversionTitle, 90),
+    cartConversionText: limitText(req.body.cartConversionText || DEFAULT_SETTINGS.cartConversionText, 220),
+    cartConversionBenefits: limitText(req.body.cartConversionBenefits || DEFAULT_SETTINGS.cartConversionBenefits, 320),
+    cartConversionUrgency: limitText(req.body.cartConversionUrgency || DEFAULT_SETTINGS.cartConversionUrgency, 80),
+    cartConversionButtonText: limitText(req.body.cartConversionButtonText || DEFAULT_SETTINGS.cartConversionButtonText, 60),
+    cartConversionButtonUrl: limitText(req.body.cartConversionButtonUrl || '', 600),
     rewardEnabled: Boolean(req.body.rewardEnabled),
     rewardCoupon: limitText(req.body.rewardCoupon || DEFAULT_SETTINGS.rewardCoupon, 40),
     rewardText: limitText(req.body.rewardText || DEFAULT_SETTINGS.rewardText, 220),

@@ -110,6 +110,7 @@ function settingsPayloadFromForm() {
   payload.conversionCheckout = settingsForm.conversionCheckout.checked;
   payload.orderBumpEnabled = settingsForm.orderBumpEnabled.checked;
   payload.expressShippingEnabled = settingsForm.expressShippingEnabled.checked;
+  payload.cartConversionEnabled = settingsForm.cartConversionEnabled.checked;
   payload.rewardEnabled = settingsForm.rewardEnabled.checked;
   payload.qnaEnabled = settingsForm.qnaEnabled.checked;
   payload.lookbookEnabled = settingsForm.lookbookEnabled.checked;
@@ -117,6 +118,11 @@ function settingsPayloadFromForm() {
   payload.videoShowcaseHome = settingsForm.videoShowcaseHome.checked;
   payload.videoShowcaseProduct = settingsForm.videoShowcaseProduct.checked;
   payload.conversionBenefits = String(payload.conversionBenefits || '')
+    .split(/\n|\|/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join('|');
+  payload.cartConversionBenefits = String(payload.cartConversionBenefits || '')
     .split(/\n|\|/)
     .map((item) => item.trim())
     .filter(Boolean)
@@ -380,6 +386,13 @@ async function loadSettings() {
   settingsForm.expressShippingText.value = settings.expressShippingText || 'Seu pedido entra em prioridade para separacao e envio imediato.';
   settingsForm.expressShippingBadge.value = settings.expressShippingBadge || 'Envio imediato';
   settingsForm.expressShippingDeadline.value = settings.expressShippingDeadline || 'Postagem em ate 24h uteis';
+  settingsForm.cartConversionEnabled.checked = settings.cartConversionEnabled !== false;
+  settingsForm.cartConversionTitle.value = settings.cartConversionTitle || 'Seu look esta quase garantido';
+  settingsForm.cartConversionText.value = settings.cartConversionText || 'Finalize agora para reservar suas pecas e receber atendimento humanizado caso precise de ajuda.';
+  settingsForm.cartConversionBenefits.value = String(settings.cartConversionBenefits || 'Compra segura|Fotos reais de clientes|Atendimento no WhatsApp|Troca facilitada').split('|').join('\n');
+  settingsForm.cartConversionUrgency.value = settings.cartConversionUrgency || 'Estoque separado por pouco tempo';
+  settingsForm.cartConversionButtonText.value = settings.cartConversionButtonText || 'Finalizar compra';
+  settingsForm.cartConversionButtonUrl.value = settings.cartConversionButtonUrl || '';
   settingsForm.rewardEnabled.checked = settings.rewardEnabled !== false;
   settingsForm.rewardCoupon.value = settings.rewardCoupon || 'VERAO10';
   settingsForm.rewardText.value = settings.rewardText || 'Obrigado por enviar sua foto ou video. Use o cupom VERAO10 na proxima compra.';

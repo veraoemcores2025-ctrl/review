@@ -460,6 +460,55 @@
                       </label>
                     </div>
                   </div>
+
+                  <div class="conversion-card">
+                    <div class="conversion-card__head">
+                      <span>06</span>
+                      <div>
+                        <strong>Carrinho de alta convers&atilde;o</strong>
+                        <small>Mensagem de seguran&ccedil;a e urg&ecirc;ncia para quem j&aacute; colocou produto no carrinho.</small>
+                      </div>
+                    </div>
+                    <div class="form conversion-form">
+                      <label class="check conversion-switch wide">
+                        <input name="cartConversionEnabled" type="checkbox">
+                        <span>
+                          Ativar bloco no carrinho
+                          <small>Aparece somente na p&aacute;gina /carrinho/.</small>
+                        </span>
+                      </label>
+
+                      <label>
+                        T&iacute;tulo
+                        <input name="cartConversionTitle" maxlength="90" placeholder="Seu look esta quase garantido">
+                      </label>
+
+                      <label>
+                        Texto do bot&atilde;o
+                        <input name="cartConversionButtonText" maxlength="60" placeholder="Finalizar compra">
+                      </label>
+
+                      <label class="wide">
+                        Texto
+                        <textarea name="cartConversionText" rows="3" maxlength="220" placeholder="Finalize agora para reservar suas pecas e receber atendimento humanizado caso precise de ajuda."></textarea>
+                      </label>
+
+                      <label class="wide">
+                        Benef&iacute;cios
+                        <textarea name="cartConversionBenefits" rows="4" maxlength="320" placeholder="Compra segura&#10;Fotos reais de clientes&#10;Atendimento no WhatsApp&#10;Troca facilitada"></textarea>
+                      </label>
+
+                      <label>
+                        Urg&ecirc;ncia
+                        <input name="cartConversionUrgency" maxlength="80" placeholder="Estoque separado por pouco tempo">
+                      </label>
+
+                      <label>
+                        Link do bot&atilde;o
+                        <input name="cartConversionButtonUrl" maxlength="600" placeholder="/checkout/">
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <aside class="conversion-preview-shell" aria-label="Preview de convers&atilde;o">

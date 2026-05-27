@@ -46,6 +46,13 @@ create table if not exists public.review_settings (
   express_shipping_text text not null default 'Seu pedido entra em prioridade para separacao e envio imediato.',
   express_shipping_badge text not null default 'Envio imediato',
   express_shipping_deadline text not null default 'Postagem em ate 24h uteis',
+  cart_conversion_enabled boolean not null default true,
+  cart_conversion_title text not null default 'Seu look esta quase garantido',
+  cart_conversion_text text not null default 'Finalize agora para reservar suas pecas e receber atendimento humanizado caso precise de ajuda.',
+  cart_conversion_benefits text not null default 'Compra segura|Fotos reais de clientes|Atendimento no WhatsApp|Troca facilitada',
+  cart_conversion_urgency text not null default 'Estoque separado por pouco tempo',
+  cart_conversion_button_text text not null default 'Finalizar compra',
+  cart_conversion_button_url text not null default '',
   updated_at timestamptz not null default now()
 );
 
@@ -162,6 +169,27 @@ alter table public.review_settings
 
 alter table public.review_settings
   add column if not exists express_shipping_deadline text not null default 'Postagem em ate 24h uteis';
+
+alter table public.review_settings
+  add column if not exists cart_conversion_enabled boolean not null default true;
+
+alter table public.review_settings
+  add column if not exists cart_conversion_title text not null default 'Seu look esta quase garantido';
+
+alter table public.review_settings
+  add column if not exists cart_conversion_text text not null default 'Finalize agora para reservar suas pecas e receber atendimento humanizado caso precise de ajuda.';
+
+alter table public.review_settings
+  add column if not exists cart_conversion_benefits text not null default 'Compra segura|Fotos reais de clientes|Atendimento no WhatsApp|Troca facilitada';
+
+alter table public.review_settings
+  add column if not exists cart_conversion_urgency text not null default 'Estoque separado por pouco tempo';
+
+alter table public.review_settings
+  add column if not exists cart_conversion_button_text text not null default 'Finalizar compra';
+
+alter table public.review_settings
+  add column if not exists cart_conversion_button_url text not null default '';
 
 alter table public.review_settings
   add column if not exists reward_enabled boolean not null default true;
